@@ -69,7 +69,7 @@ Turn your phone sideways"
 	art["tohaku"] = load("res://art/tohaku.jpg")
 	for nm in ["sesshu", "hyakki"]:
 		art[nm] = [load("res://art/%s_0.jpg" % nm), load("res://art/%s_1.jpg" % nm)]
-	for nm in ["hero", "oni", "oni3", "tengu", "kitsune", "yurei", "tamamo", "chochin", "kasa", "kappa", "nurikabe", "yukionna", "gasha", "daruma", "tanuki", "shinigami"]:
+	for nm in ["hero", "oni", "oni3", "tengu", "kitsune", "yurei", "tamamo", "chochin", "kasa", "kappa", "nurikabe", "yukionna", "gasha", "daruma", "tanuki", "shinigami", "kamaitachi"]:
 		var t = load("res://art/pieces/%s.png" % nm)
 		if t:
 			var img = t.get_image()
@@ -94,7 +94,7 @@ func _setup_audio():
 		var p = AudioStreamPlayer.new()
 		add_child(p)
 		sfx_pool.append(p)
-	for nm in ["title", "battle", "boss", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose"]:
+	for nm in ["title", "battle", "boss", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell"]:
 		streams[nm] = load("res://audio/%s.wav" % nm)
 	streams["story"] = load("res://audio/story.ogg")
 	AudioServer.set_bus_mute(0, not data.sound)
@@ -143,7 +143,7 @@ func _unhandled_input(ev):
 # On the board it stands on its tile and may rise above it; flat = centred, for the legend.
 const PIECE_SCALE = {"hero": 1.3, "oni": 1.3, "oni3": 1.25, "tengu": 1.3, "kitsune": 1.12, "yurei": 1.2, "tamamo": 1.3, "chochin": 0.95,
 	"kasa": 1.25, "kappa": 1.0, "nurikabe": 1.1, "yukionna": 1.3, "gasha": 1.15,
-	"daruma": 1.05, "tanuki": 1.05, "shinigami": 1.25}
+	"daruma": 1.05, "tanuki": 1.05, "shinigami": 1.25, "kamaitachi": 1.3}
 
 func piece(ci, kind, c, s, t = 0.0, big = false, flat = false, grow = 1.0, mod = Color.WHITE):
 	var key = kind
@@ -181,7 +181,7 @@ func piece(ci, kind, c, s, t = 0.0, big = false, flat = false, grow = 1.0, mod =
 		return
 	var sz = Vector2(s, s) * k
 	var pos = c + off - sz * 0.5
-	if not flat and kind != "chochin" and kind != "kappa" and kind != "shinigami":
+	if not flat and kind != "chochin" and kind != "kappa" and kind != "shinigami" and kind != "kamaitachi":
 		pos.y = c.y + s * 0.47 - sz.y
 	ci.draw_texture_rect(art["p_" + key], Rect2(pos, sz), false, mod)
 
@@ -511,7 +511,7 @@ func board_from_code(code):
 	var parts = raw.split("|")
 	if parts.size() != 5 or parts[0].length() != 49:
 		return {}
-	var allowed = ".#~ifgH" + "".join(preload("res://scripts/sim.gd").DEF.keys())
+	var allowed = ".#~ifgmbwxH" + "".join(preload("res://scripts/sim.gd").DEF.keys())
 	for ch in parts[0]:
 		if not allowed.contains(ch):
 			return {}
@@ -521,11 +521,11 @@ func board_from_code(code):
 	out.rows = []
 	for y in range(7):
 		out.rows.append(parts[0].substr(y * 7, 7))
-	var names = {"l": "leap", "w": "ward", "k": "katsu"}
+	var names = {"l": "leap", "w": "ward", "k": "katsu", "b": "bell"}
 	for ch in parts[1]:
 		if names.has(ch) and not out.waza.has(names[ch]):
 			out.waza.append(names[ch])
-	var known = ["koan", "garden", "gate", "wet", "enso", "stone", "nocut", "shiki", "rain", "snow", "night", "wind:R", "wind:L", "wind:D", "wind:U"]
+	var known = ["koan", "garden", "gate", "wet", "enso", "stone", "nocut", "shiki", "rain", "snow", "night", "order", "write", "wind:R", "wind:L", "wind:D", "wind:U"]
 	for r in parts[2].split(",", false):
 		if known.has(r) and not out.rules.has(r):
 			out.rules.append(r)

@@ -21,6 +21,8 @@ func play(strokes, extra):
 			var tok = toks[t]
 			if tok == "KATSU":
 				b._katsu()
+			elif tok == "BELL":
+				b._bell()
 			elif tok.begins_with("leap") or tok.begins_with("ward") or tok.begins_with("shiki"):
 				b._mode(tok.left(tok.length() - 1))
 				b._dir(DIR[tok.right(1)])

@@ -20,8 +20,8 @@ Music: a 1920s shakuhachi recording of *Shika no Tōne* under the story, *Sakura
 koto for the title and road, and original koto, shamisen and taiko pieces in the miyako-bushi scale for
 the stages. Press `M` to mute.
 
-388 stations in twenty-six chapters. Ten chapters tell the story; sixteen more each explore one puzzle
-style, yokai or kind of weather in a rising ladder of eighteen boards. The story stages are hand-made;
+514 stations in thirty-three chapters. Ten chapters tell the story; twenty-three more each explore one
+puzzle style, yokai, kind of weather or piece of ground in a rising ladder of eighteen boards. The story stages are hand-made;
 the rest come from a generator (`tools/gen`, C#) that builds candidate boards, solves them exactly,
 scores their difficulty and keeps an evenly climbing run. `tools/verify.gd` replays every stored
 solution through the real rules, so each station is proven masterable at base stats, and
@@ -51,6 +51,14 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   lets kappa ashore, deep snow 雪 freezes all water, and at night 夜 you see only near yourself and near light.
 - **Shikigami 式神:** a yokai bound by your circle goes into your hand and can be set down as an ally that
   holds its tile and strikes what stands within its reach.
+- **The road beyond** (after the scroll ends): offerings 供 that walking yokai go to and stop to eat;
+  the temple bell 鐘, rung once, which stills every yokai for a turn; plank bridges 橋 that fall in behind
+  you with whatever followed; spider webs 巣 that end your stroke; the kamaitachi 鎌鼬, which runs three
+  tiles a turn; numbered seals 封, so that yokai can only be felled in order; and writing 書, where the
+  board is a character and you paint every tile of it.
+- **Other roads** 別 (from the map): a **daily kōan**, the same board for everyone, gentle on Monday and
+  hardest on Sunday; the **88 temples**, a pilgrimage with no undo, no hints and three staffs; and the
+  **workshop**, where you lay out a board, clear it, and get a short code anyone can paste to play it.
 - **Three seals a station:** 上手 mastery, 潔 no stroke taken back, 惜墨 sparing of ink. Seals earn the
   kyū and dan ranks, from 10th kyū to meijin.
 - **Ask the master** (`H`) shows the next stroke of a known solution. **Your scroll** 巻 keeps the strokes
@@ -60,7 +68,7 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
 - **上手 seal** — clear a station unharmed within the mastery stroke count. Always possible with no upgrades.
 - **Training 修練** — points from stations buy ink, ki and extra waza uses. Help for the road, never required.
 
-Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-click undo, `R` restart, `1 2 3` waza.
+Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-click undo, `R` restart, `1 2 3` waza, `4` shikigami, `5` bell, `H` ask the master.
 
 ## Files
 

@@ -276,6 +276,62 @@ static func leaf(ci, c, s):
 	blob(ci, PackedVector2Array([c + Vector2(-s * 0.12, 0), c + Vector2(0, -s * 0.07), c + Vector2(s * 0.13, -s * 0.01), c + Vector2(0, s * 0.06)]), Color(0.36, 0.52, 0.30), 1.5)
 	ci.draw_line(c + Vector2(-s * 0.12, 0), c + Vector2(s * 0.13, -s * 0.01), a(SUMI, 0.6), 1.0, true)
 
+# an offering: three dumplings on a little stand
+static func offering(ci, c, s):
+	blot(ci, c + Vector2(0, s * 0.06), s * 0.36, s * 0.26, KIN, 0.5)
+	ci.draw_line(c + Vector2(-s * 0.24, s * 0.20), c + Vector2(s * 0.24, s * 0.20), SUMI, 3.5, true)
+	ci.draw_line(c + Vector2(-s * 0.15, s * 0.20), c + Vector2(-s * 0.11, s * 0.33), SUMI, 2.5, true)
+	ci.draw_line(c + Vector2(s * 0.15, s * 0.20), c + Vector2(s * 0.11, s * 0.33), SUMI, 2.5, true)
+	var cols = [Color(0.93, 0.66, 0.68), GOFUN, Color(0.62, 0.74, 0.50)]
+	for k in range(3):
+		oval(ci, c + Vector2((k - 1) * s * 0.15, s * 0.10 - (s * 0.13 if k == 1 else 0.0)), s * 0.095, s * 0.088, cols[k], 1.6)
+
+# a plank bridge over water; worn = Suzu has crossed it and it will not hold much longer
+static func bridge(ci, r, worn):
+	var w = r.size.x
+	var wood = Color(0.60, 0.45, 0.28, 0.55 if worn else 0.96)
+	for k in range(4):
+		var pr = Rect2(r.position.x + w * 0.05, r.position.y + w * (0.10 + 0.205 * k), w * 0.90, w * 0.17)
+		ci.draw_rect(pr, wood)
+		ci.draw_rect(pr, a(SUMI, 0.75), false, 1.5)
+	for sx in [0.16, 0.84]:
+		ci.draw_line(r.position + Vector2(w * sx, w * 0.06), r.position + Vector2(w * sx, w * 0.94), a(SHU, 0.5 if worn else 0.95), 4.0, true)
+	if worn:
+		var z = PackedVector2Array()
+		for k in range(7):
+			z.append(r.position + Vector2(w * (0.14 + 0.12 * k), w * (0.5 + (0.1 if k % 2 == 0 else -0.1))))
+		ci.draw_polyline(z, SUMI, 2.5, true)
+
+# a spider's web
+static func web(ci, c, s):
+	var col = a(GOFUN, 0.95)
+	var dk = a(SUMI, 0.6)
+	for k in range(8):
+		var d = Vector2(cos(k * TAU / 8.0 + 0.2), sin(k * TAU / 8.0 + 0.2))
+		ci.draw_line(c, c + d * s * 0.46, dk, 2.2, true)
+		ci.draw_line(c, c + d * s * 0.46, col, 1.2, true)
+	for ring in [0.16, 0.29, 0.42]:
+		var pts = PackedVector2Array()
+		for k in range(9):
+			pts.append(c + Vector2(cos(k * TAU / 8.0 + 0.2), sin(k * TAU / 8.0 + 0.2)) * s * ring)
+		ci.draw_polyline(pts, dk, 2.2, true)
+		ci.draw_polyline(pts, col, 1.2, true)
+
+# one tile of the character to be written: pale until it is painted
+static func mark(ci, r, done):
+	if done:
+		ci.draw_rect(r.grow(-5), a(SUMI, 0.86))
+	else:
+		ci.draw_rect(r.grow(-7), a(SUMI, 0.13))
+		ci.draw_rect(r.grow(-7), a(SUMI, 0.3), false, 1.5)
+
+# the number on a sealed yokai
+static func tag(ci, font, c, s, kanji, open):
+	var r = Rect2(c + Vector2(s * 0.16, -s * 0.46), Vector2(s * 0.28, s * 0.34))
+	ci.draw_rect(r, GOFUN if not open else KIN)
+	ci.draw_rect(r, SUMI if not open else SHU, false, 2.0)
+	text(ci, font, Vector2(r.position.x, r.position.y + r.size.y * 0.78), kanji, s * (0.24 if kanji.length() == 1 else 0.14), SHU if not open else SUMI, HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
+
 # torii: two posts, two lintels, vermilion
 static func torii(ci, r):
 	var c = r.get_center()

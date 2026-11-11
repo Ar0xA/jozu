@@ -20,7 +20,7 @@ MAX_PER_STYLE = 18   # the most stages a style chapter may hold
 STYLE_FROM = 10      # chapters from here on are single-style ladders
 
 def n_yokai(g):
-    return sum(ch in 'coOStTkyQupPnWGdaAeX' for r in g['rows'] for ch in r)
+    return sum(ch in 'coOStTkyQupPnWGdaAeXK' for r in g['rows'] for ch in r)
 
 def difficulty(g):
     """How hard a board is to master. Strokes needed count most; then how much there is to search
@@ -69,10 +69,13 @@ CHAPTERS = [
     ('禅寺', 'Zen Temple'), ('石庭', 'Stone Garden'), ('鳥居', 'The Gate'), ('墨染', 'Wet Ink'), ('円相', 'Ensō'), ('硯', 'Ink Stone'), ('無刀', 'No Sword'),
     ('達磨', 'Daruma'), ('狸', 'Tanuki'), ('赤い糸', 'Red Thread'), ('風', 'Wind'), ('雨', 'Rain'), ('雪', 'Deep Snow'), ('夜', 'Night'),
     ('式神', 'Shikigami'), ('死神', 'Shinigami'),
+    ('供物', 'Offerings'), ('梵鐘', 'Temple Bell'), ('橋', 'The Bridge'), ('蜘蛛', 'The Spider'), ('鎌鼬', 'Kamaitachi'), ('封印', 'The Seals'), ('書', 'The Character'),
 ]
 
-# The order the chapters are played in (the shinigami comes before the shikigami, which ends the game).
-ORDER = list(range(24)) + [25, 24]
+# The order the chapters are played in. The shinigami comes before the shikigami, which ends the scroll;
+# the chapters after it are the road beyond, added later, and stay last so that saved progress keeps its place.
+ORDER = list(range(24)) + [25, 24] + list(range(26, 33))
+ENDINGS = (24, 32)   # chapters whose last board closes a story
 
 # H = a hand-made board; G = the next generated board of that segment
 LAYOUT = {
@@ -102,6 +105,7 @@ STORY_ON = {
     (7, 0): '鬼火', (7, 1): '関', (8, 0): '恐山', (9, 0): '行列', (9, 2): '百鬼', (9, 3): '餓者髑髏',
     (10, 0): '公案', (11, 0): '石庭', (12, 0): '鳥居', (13, 0): '墨染', (14, 0): '円相', (15, 0): '硯', (16, 0): '無刀',
     (17, 0): '達磨', (18, 0): '狸', (19, 0): '赤い糸', (20, 0): '風', (21, 0): '雨', (22, 0): '雪', (23, 0): '夜', (24, 0): '式神', (25, 0): '死神',
+    (26, 0): '供物', (27, 0): '梵鐘', (28, 0): '板橋', (29, 0): '蜘蛛', (30, 0): '鎌鼬', (31, 0): '封印', (32, 0): '書',
 }
 
 NAMES = {
@@ -121,6 +125,12 @@ NAMES = {
     12: [('参道', 'The Approach'), ('注連縄', 'The Sacred Rope'), ('狛犬', 'The Guardian Dogs'), ('千本鳥居', 'A Thousand Gates'), ('手水', 'Purification'), ('鎮守', 'The Village Shrine'), ('石段', 'The Stone Steps'), ('神域', 'Sacred Ground'), ('奥宮', 'The Inner Shrine')],
     15: [('磨墨', 'Grinding Ink'), ('墨池', 'The Ink Pool'), ('水滴', 'The Water Dropper'), ('濃淡', 'Dark and Pale'), ('墨色', 'The Colour of Ink'), ('筆洗', 'The Brush Washer'), ('硯海', 'The Sea of the Inkstone'), ('松煙', 'Pine Soot'), ('古墨', 'Old Ink')],
     16: [('空手', 'Empty Hands'), ('鞘', 'The Scabbard'), ('柔', 'Yielding'), ('受け', 'Receiving'), ('間', 'The Interval'), ('不動', 'Unmoving'), ('合気', 'Meeting'), ('捨て身', 'Letting Go'), ('収め', 'The Sheathing')],
+    26: [('団子', 'Dumplings'), ('御神酒', 'Sacred Sake'), ('赤飯', 'Red Rice'), ('盛り塩', 'A Cone of Salt'), ('鏡餅', 'Mirror Rice Cakes'), ('初穂', 'First Ears of Rice'), ('賽銭', 'Coins for the Box'), ('供花', 'Flowers for the Altar'), ('お下がり', 'What the Gods Leave')],
+    27: [('撞木', 'The Striking Beam'), ('余韻', 'The Lingering Note'), ('鐘楼', 'The Bell Tower'), ('百八', 'One Hundred and Eight'), ('暮れ六つ', 'The Evening Bell'), ('道成寺', 'Dōjō-ji'), ('無音', 'No Sound'), ('響き', 'Resonance')],
+    28: [('丸木橋', 'The Log Bridge'), ('欄干', 'The Railing'), ('渡し', 'The Crossing'), ('宇治橋', 'Uji Bridge'), ('五条', 'Gojō'), ('橋姫', 'The Bridge Princess'), ('吊り橋', 'The Rope Bridge'), ('八つ橋', 'Eight Planks')],
+    29: [('糸', 'Thread'), ('朝露', 'Morning Dew'), ('琵琶', 'The Biwa'), ('滝壺', 'The Plunge Pool'), ('絡新婦', 'Jorōgumo'), ('蜘蛛切', 'Kumokiri'), ('罠', 'The Snare'), ('銀糸', 'Silver Thread')],
+    30: [('旋風', 'Whirlwind'), ('切り傷', 'A Clean Cut'), ('膏薬', 'The Salve'), ('木枯らし', 'Withering Wind'), ('三匹', 'Three of Them'), ('間合い', 'The Distance'), ('疾風', 'Gale'), ('辻斬り', 'Crossroads Cut')],
+    31: [('御札', 'Paper Seals'), ('一二三', 'One, Two, Three'), ('順番', 'Taking Turns'), ('注連', 'The Rope'), ('封じ手', 'The Sealed Move'), ('結び', 'The Knot'), ('数え歌', 'A Counting Song'), ('解く', 'Undoing')],
     9: [('太鼓', 'The Drum'), ('提灯行列', 'The Lantern Parade'), ('付喪神', 'Tsukumogami'), ('朱雀大路', 'Suzaku Avenue'), ('丑三つ', 'The Hour of the Ox'), ('鉦', 'The Gong'), ('夜明け前', 'Before Dawn')],
 }
 
@@ -399,11 +409,71 @@ SAY = [
     ('一行三昧', 'Ichigyō zanmai', 'Whole absorption in a single act.', [], ['enso']),
     ('万法一に帰す', 'Manbō ichi ni kisu', 'The ten thousand things return to the one.', [], ['enso', 'crowd']),
     ('朝顔に釣瓶とられてもらい水', 'Asagao ni / tsurube torarete / morai mizu', 'A morning glory has taken my well-bucket. I go to borrow water. — Chiyo-ni', [], ['enso', 'water']),
+    # ---- offerings
+    ('花より団子', 'Hana yori dango', 'Dumplings over blossoms.', [], ['offer']),
+    ('棚から牡丹餅', 'Tana kara botamochi', 'A rice cake falls off the shelf: luck you did nothing to earn.', [], ['offer']),
+    ('海老で鯛を釣る', 'Ebi de tai o tsuru', 'Catch a sea bream with a shrimp.', [], ['offer']),
+    ('腹が減っては戦ができぬ', 'Hara ga hette wa ikusa ga dekinu', 'No one can fight on an empty stomach.', [], ['offer']),
+    ('鬼の居ぬ間に洗濯', 'Oni no inu ma ni sentaku', 'Do the washing while the oni is away.', [], ['offer', 'oni']),
+    ('損して得取れ', 'Son shite toku tore', 'Take a loss, and take the profit after.', [], ['offer']),
+    ('猫に鰹節', 'Neko ni katsuobushi', 'Dried bonito left with a cat: a temptation that will not be resisted.', [], ['offer']),
+    ('鬼は外、福は内', 'Oni wa soto, fuku wa uchi', 'Oni out, fortune in: shouted while throwing beans at Setsubun, the eve of spring.', [], ['offer', 'oni']),
+    # ---- the temple bell
+    ('打てば響く', 'Uteba hibiku', 'Strike, and it rings: an answer that comes at once.', [], ['bell']),
+    ('鐘も撞木の当たりがら', 'Kane mo shumoku no atarigara', 'How the bell sounds depends on how the beam strikes it.', [], ['bell']),
+    ('提灯に釣鐘', 'Chōchin ni tsurigane', 'A paper lantern and a temple bell: alike in shape, and no match at all.', [], ['bell', 'chochin']),
+    ('除夜の鐘', 'Joya no kane', "The bell of New Year's Eve: one hundred and eight strokes, one for each worldly desire.", [], ['bell']),
+    ('花の雲鐘は上野か浅草か', 'Hana no kumo / kane wa Ueno ka / Asakusa ka', 'A cloud of blossom. That bell: is it Ueno, or Asakusa? — Bashō', [], ['bell']),
+    ('柿食へば鐘が鳴るなり法隆寺', 'Kaki kueba / kane ga naru nari / Hōryū-ji', 'I bite into a persimmon, and a bell sounds: Hōryū-ji. — Masaoka Shiki', [], ['bell']),
+    ('一打一生', 'Ichida isshō', 'One strike, one lifetime: put the whole of yourself into each.', [], ['bell']),
+    # ---- the bridge
+    ('危ない橋を渡る', 'Abunai hashi o wataru', 'To cross a dangerous bridge.', [], ['bridge']),
+    ('渡りに船', 'Watari ni fune', 'A boat, just when you had to cross.', [], ['bridge']),
+    ('背水の陣', 'Haisui no jin', 'A battle line with its back to the water: no way left but forward.', [], ['bridge']),
+    ('後は野となれ山となれ', 'Ato wa no to nare yama to nare', 'After me, let it turn to field or to mountain.', [], ['bridge']),
+    ('後悔先に立たず', 'Kōkai saki ni tatazu', 'Regret never arrives first.', [], ['bridge']),
+    ('一か八か', 'Ichi ka bachi ka', 'One or eight: all or nothing.', [], ['bridge']),
+    ('行きはよいよい帰りは怖い', 'Iki wa yoi yoi, kaeri wa kowai', "Going is easy, easy; coming back is frightening. — from the children's song Tōryanse", [], ['bridge']),
+    # ---- the spider
+    ('油断大敵', 'Yudan taiteki', 'Carelessness is the great enemy.', [], ['web']),
+    ('自縄自縛', 'Jijō jibaku', "Bound with a rope of one's own making.", [], ['web']),
+    ('一網打尽', 'Ichimō dajin', 'One cast of the net, and all are taken.', [], ['web']),
+    ('蜘蛛の子を散らす', 'Kumo no ko o chirasu', 'Scattering like baby spiders, in every direction at once.', [], ['web']),
+    ('蜘蛛の糸', 'Kumo no ito', "The Spider's Thread: in Akutagawa's tale the Buddha lets one down into hell for a robber who once spared a spider.", [], ['web']),
+    ('足元から鳥が立つ', 'Ashimoto kara tori ga tatsu', 'A bird starts up from under your feet: the surprise was beside you all along.', [], ['web']),
+    ('止まるも修行', 'Tomaru mo shugyō', 'Stopping, too, is practice.', [], ['web']),
+    # ---- the sickle weasel
+    ('電光石火', 'Denkō sekka', 'Lightning, and the spark off a flint: done in an instant.', [], ['kama']),
+    ('疾風迅雷', 'Shippū jinrai', 'A sudden gale, a clap of thunder.', [], ['kama']),
+    ('先んずれば人を制す', 'Sakinzureba hito o seisu', 'Move first, and you command the other.', [], ['kama']),
+    ('鼬の最後っ屁', 'Itachi no saigoppe', "The weasel's last fart: the final trick of the cornered.", [], ['kama']),
+    ('鼬ごっこ', 'Itachi-gokko', 'The weasel game: round and round, and no one ever ahead.', [], ['kama']),
+    ('一足一刀', 'Issoku ittō', 'One step, one cut: the distance from which a single step brings the blade home.', [], ['kama']),
+    ('鼬の道切り', 'Itachi no michikiri', 'A weasel crossing your path: an old omen that something will be cut off.', [], ['kama']),
+    # ---- the seals: things in their order
+    ('物には順序', 'Mono ni wa junjo', 'Everything has its order.', [], ['order']),
+    ('序破急', 'Jo ha kyū', 'Beginning, break, rapid close: the rhythm Zeami taught for Noh.', [], ['order']),
+    ('起承転結', 'Ki shō ten ketsu', 'Opening, development, turn, conclusion: the four parts of a well-made verse.', [], ['order']),
+    ('一富士二鷹三茄子', 'Ichi Fuji, ni taka, san nasubi', 'First Fuji, second a hawk, third an aubergine: the luckiest first dreams of the year.', [], ['order']),
+    ('桃栗三年柿八年', 'Momo kuri sannen, kaki hachinen', 'Peach and chestnut take three years, persimmon eight.', [], ['order']),
+    ('二度あることは三度ある', 'Nido aru koto wa sando aru', 'What has happened twice will happen a third time.', [], ['order']),
+    ('一を聞いて十を知る', 'Ichi o kiite jū o shiru', 'Hear one, and understand ten.', [], ['order']),
+    ('二礼二拍手一礼', 'Nirei nihakushu ichirei', 'Two bows, two claps, one bow: how one prays at a shrine.', [], ['order']),
+    # ---- writing
+    ('書は人なり', 'Sho wa hito nari', 'The writing is the person.', [], ['write']),
+    ('永字八法', 'Eiji happō', 'The eight ways of the character 永, which between them make every stroke.', [], ['write']),
+    ('一字千金', 'Ichiji senkin', 'A single character worth a thousand pieces of gold.', [], ['write']),
+    ('習うは一生', 'Narau wa isshō', 'Learning takes a lifetime.', [], ['write']),
+    ('書き初め', 'Kakizome', 'The first writing of the year, done on the second of January.', [], ['write']),
+    ('言霊', 'Kotodama', 'The spirit that lives in words.', [], ['write']),
+    ('読書百遍義自ずから見る', 'Dokusho hyappen gi onozukara arawaru', 'Read it a hundred times and the meaning shows itself.', [], ['write']),
+    ('上手は下手の手本、下手は上手の手本', 'Jōzu wa heta no tehon, heta wa jōzu no tehon', 'The skilled are a model for the unskilled, and the unskilled a model for the skilled. — Zeami', [], ['write']),
 ]
-RULE_TAGS = ('koan', 'wet', 'enso', 'garden', 'gate', 'stone', 'nocut', 'wind', 'rain', 'snow', 'night', 'shiki')
+RULE_TAGS = ('koan', 'wet', 'enso', 'garden', 'gate', 'stone', 'nocut', 'wind', 'rain', 'snow', 'night', 'shiki', 'offer', 'bell', 'bridge', 'web', 'kama', 'order', 'write')
 # the more particular a stage's rule, the more its own sayings are preferred
-RULE_WEIGHT = {'wet': 4, 'enso': 5, 'koan': 6, 'garden': 6, 'gate': 6, 'stone': 7, 'nocut': 7, 'wind': 8, 'rain': 8, 'snow': 8, 'night': 8, 'shiki': 9}
-KINDS = {'d': 'daruma', 'a': 'tanuki', 'A': 'tanuki', 'e': 'hitodama', 'X': 'shinigami',
+RULE_WEIGHT = {'wet': 4, 'enso': 5, 'koan': 6, 'garden': 6, 'gate': 6, 'stone': 7, 'nocut': 7, 'wind': 8, 'rain': 8, 'snow': 8, 'night': 8, 'shiki': 9,
+               'offer': 9, 'bell': 9, 'bridge': 9, 'web': 9, 'kama': 9, 'order': 9, 'write': 9}
+KINDS = {'K': 'kama', 'd': 'daruma', 'a': 'tanuki', 'A': 'tanuki', 'e': 'hitodama', 'X': 'shinigami',
          'c': 'chochin', 'o': 'oni', 'O': 'bigoni', 'S': 'bigoni', 't': 'tengu', 'T': 'tengu', 'k': 'kitsune', 'y': 'yurei',
          'u': 'kasa', 'p': 'kappa', 'P': 'kappa', 'n': 'nurikabe', 'W': 'yukionna', 'G': 'gasha', 'Q': 'kitsune'}
 used_says = {}     # saying index -> the chapters it has been used in
@@ -413,7 +483,7 @@ def features(b, trace):
     """What a stage is about: its yokai, its ground, and the shape of its answer."""
     text = ''.join(b['rows'])
     f = set(KINDS[ch] for ch in text if ch in KINDS)
-    for ch, name in (('~', 'water'), ('i', 'ice'), ('f', 'fire'), ('#', 'rock')):
+    for ch, name in (('~', 'water'), ('i', 'ice'), ('f', 'fire'), ('#', 'rock'), ('m', 'offer'), ('b', 'bridge'), ('w', 'web')):
         if ch in text:
             f.add(name)
     counts = {}
@@ -432,6 +502,8 @@ def features(b, trace):
             f.add(w)
     if 'KATSU' in trace:
         f.add('katsu')
+    if 'bell' in (b.get('waza') or []):
+        f.add('bell')
     if b['par'] >= 7:
         f.add('long')
     if b['par'] <= 3:
@@ -469,7 +541,7 @@ def pick_saying(b, trace, chapter):
             seen = used_says.get(i, [])
             if len(seen) >= MAX_USES or chapter in seen or chs or any(t in RULE_TAGS for t in tags):
                 continue
-            score = sum(3 for t in tags if t in f) + 0.5
+            score = sum(3 for t in tags if t in f) + (0.5 if all(t in f for t in tags) else 0.1)
             if score > best_score:
                 best, best_score = i, score
     if best is None:
@@ -505,6 +577,13 @@ NOTES = [
     'Before electric light, travellers carried paper lanterns painted with their house crest. In the game Hyakumonogatari a hundred ghost stories were told through the night, and one light put out after each.',
     'Onmyōdō, the Way of Yin and Yang, was the court science of divination and protection in Heian Japan. Its most famous master, Abe no Seimei (921–1005), is said to have commanded twelve shikigami.',
     'The shinigami, a spirit that draws people toward death, appears in Edo-period puppet plays about lovers\' suicides and in the 1841 picture book Ehon Hyaku Monogatari.',
+    'Food and drink set before gods, buddhas and the dead are called kumotsu. In the old tales yokai are bought as easily: kappa with cucumbers, the oni king Shuten-dōji with drugged sake, and Momotarō\'s three companions with millet dumplings.',
+    'Bonshō, the great bronze bells of Buddhist temples, have no clapper: they are struck from outside with a hanging beam. On New Year\'s Eve they are rung 108 times, once for each of the worldly desires.',
+    'In 1180 Minamoto no Yorimasa and the warrior monks of Mii-dera tore up the planks of the bridge at Uji to hold back the Taira army. The Tale of the Heike tells how the monks fought on along the bare beams.',
+    'The jorōgumo is a spider grown old enough to take the shape of a woman. At Jōren Falls in Izu one is said to have thrown her thread around a resting woodcutter\'s foot. He looped it over a stump instead, and the stump was dragged under the water.',
+    'Kamaitachi, the sickle weasel, rides the whirlwinds of the snowy northern provinces and leaves clean cuts that do not bleed. In Hida they say there are three: one knocks you down, one cuts, and one puts on the salve.',
+    'An ofuda is a paper seal from a shrine or temple, and what it is pasted on stays bound until it is lifted. Much of Japanese practice is a matter of order: at a shrine, two bows, two claps, one bow, and never the other way about.',
+    'Shodō, the way of writing, came to Japan from China with the characters themselves. Kūkai, Emperor Saga and Tachibana no Hayanari are remembered as the Three Brushes. Children still write their first characters of the year on the second of January.',
 ]
 
 # A few words between Suzu and her master at the middle and the end of each style chapter.
@@ -540,6 +619,20 @@ BEATS = {
          [[T, 'In the game of a hundred tales, when the last light is put out, something is supposed to come. Put it out anyway.']]),
     24: ([[T, "Seimei's wife could not bear the faces of his shikigami, so he kept them under the Modori bridge, and not in the house."], [Z, 'That seems unkind to them.'], [T, 'You have met them. Would you want one in the kitchen?']],
          [[T, 'Last board. Everything you have bound, everything you have learned, and no blade. 適材適所: the right one in the right place.']]),
+    26: ([[Z, 'It ate, and then it came for me anyway.'], [T, 'An offering buys you one turn, not a friend. 腹が減っては戦ができぬ is true of them as well: fed, they fight better. Spend the turn.']],
+         [[T, 'Last table. At Setsubun people throw beans and shout 鬼は外. You have found that it is easier to feed them than to shout.']]),
+    27: ([[Z, 'I rang it too early.'], [T, '打てば響く. Strike and it answers, at once, whenever you strike. That is the trouble with it. The bell is never late. You are early.']],
+         [[T, 'Bashō heard a bell through a cloud of blossom and could not tell whether it was Ueno or Asakusa. 花の雲 鐘は上野か浅草か. Ring this last one so that they can tell.']]),
+    28: ([[Z, 'I crossed, and now I cannot get back.'], [T, '背水の陣. Han Xin drew up his army with its back to a river, so that no one could think of retreat. It is a fine stratagem when you choose it, and a poor one when you merely forget.']],
+         [[T, 'On Gojō bridge the monk Benkei had taken nine hundred and ninety-nine swords from passers-by. The thousandth belonged to a boy called Ushiwakamaru, who would not stand where he was expected. Last bridge. Do not stand where you are expected.']]),
+    29: ([[Z, 'I could go round, but it is three strokes longer.'], [T, 'Sometimes. And sometimes the web is exactly where you meant to stop. A wall is only in the way if you were not going to rest there.']],
+         [[T, 'When Raikō lay sick, a strange monk came to his bedside each night with a rope of silk. Raikō cut at him, followed the blood, and found the earth-spider in its mound. The sword was called Kumokiri, Spider-Cutter, ever after. Last web.']]),
+    30: ([[Z, 'Three steps. I keep counting two.'], [T, "一足一刀の間合い: one step, one cut. Every swordsman knows that distance in his feet. This one's distance is three. Learn it in your feet."]],
+         [[T, '鼬の最後っ屁. A cornered weasel has one last trick, and it is not a dignified one. Finish it before it remembers.']]),
+    31: ([[Z, 'The second is right beside me and I cannot touch it.'], [T, '二礼二拍手一礼. Two bows, two claps, one bow. Nobody at a shrine asks why they may not clap first. Walk past the two. Its turn will come.']],
+         [[T, '一富士二鷹三茄子. First Fuji, then a hawk, then an aubergine: the luckiest things to dream on the first night of the year, and in that order. Last count.']]),
+    32: ([[Z, 'My lines wobble.'], [T, 'Ryōkan was asked what he disliked. He said: poems by poets, cooking by cooks, and calligraphy by calligraphers. Wobble a little. It shows that someone was there.']],
+         [[T, 'One more. 初心忘るべからず. Write it as if it were the first character you were ever given.']]),
     25: ([[Z, 'It never hurries.'], [T, 'It does not have to. 無常迅速. It is you who are quick, and getting quicker.']],
          [[T, 'Ryōkan wrote, near the end: 散る桜 残る桜も 散る桜. Go and meet it once more, and then let us have some tea.']]),
 }
@@ -557,6 +650,11 @@ for c in ORDER:
     names = list(NAMES.get(c, []))
     started = set()
     rungs = ladder(c) if c >= STYLE_FROM else []
+    if c == 32:
+        ue = [g for g in rungs if (g.get('name') or '').startswith('上')]
+        if ue:
+            rungs.remove(ue[-1])
+            rungs.append(ue[-1])
     slots = ['L%d' % k for k in range(len(rungs))] if c >= STYLE_FROM else LAYOUT[c]
     for slot in slots:
         if slot[0] == 'H':
@@ -593,6 +691,8 @@ for c in ORDER:
                     b['kanji'] = ('第%s則' if c == 10 else '其の%s') % NUM[k]
                     b['name'] = ('Case %d' if c == 10 else CHAPTERS[c][1] + ' %d') % (k + 1)
                 b['say'] = pick_saying(b, trace, c)
+            if '|' in (g.get('name') or ''):
+                b['kanji'], b['name'] = g['name'].split('|')
             started.add(seg)
         b['sol'] = trace
         b.setdefault('say', [])
@@ -608,14 +708,23 @@ for c in ORDER:
                 levels[first + n // 2]['story'] = mid
             if not levels[-1]['story']:
                 levels[-1]['story'] = end
-    if c < 10 or c == ORDER[-1]:
+    if c < 10 or c in ENDINGS:
         bosses.append(len(levels) - 1)
+    if c == 24:
+        # the last board of the scroll carries its ending
+        levels[-1]['after'] = [
+            ['', 'Suzu closes the last circle. Inside it there is nothing at all: only paper, which is where everything was before it was anything.'],
+            ['Tessai', 'Now you can paint.'],
+        ]
 
-# the last board of all carries the ending
-levels[-1]['after'] = [
-    ['', 'Suzu closes the last circle. Inside it there is nothing at all: only paper, which is where everything was before it was anything.'],
-    ['Tessai', 'Now you can paint.'],
-]
+# and the last board of the road beyond carries the other one
+if ORDER[-1] == 32 and levels[-1]['rules'] == ['write']:
+    levels[-1]['after'] = [
+        ['', 'The last tile dries. Below it, with no grey to follow, Suzu writes two characters more: 上手.'],
+        ['Tessai', 'Zeami wrote: 上手は下手の手本、下手は上手の手本. The skilled are a model for the unskilled, and the unskilled a model for the skilled. So. Which are you?'],
+        ['Suzu', 'Both.'],
+        ['Tessai', 'Then go and teach someone.'],
+    ]
 
 waza_from = {w: next(i for i, l in enumerate(levels) if w in l['waza']) for w in ('leap', 'ward', 'katsu')}
 
@@ -669,7 +778,7 @@ for k, c in enumerate(ORDER):
     a = chapters[k]['from']
     b = chapters[k + 1]['from'] if k < NCH - 1 else len(levels)
     pars = [l['par'] for l in levels[a:b]]
-    ny = [sum(ch in 'coOStTkyQupPnWGdaAeX' for r in l['rows'] for ch in r) for l in levels[a:b]]
+    ny = [sum(ch in 'coOStTkyQupPnWGdaAeXK' for r in l['rows'] for ch in r) for l in levels[a:b]]
     if not pars:
         continue
     print('  %-12s pars %s  mean %.1f   yokai mean %.1f' % (CHAPTERS[c][1], pars, sum(pars) / len(pars), sum(ny) / len(ny)))

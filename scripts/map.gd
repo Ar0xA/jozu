@@ -9,10 +9,10 @@ var page = 0
 var tabs = []
 
 func setup():
-	btn(Rect2(40, 648, 164, 50), "Training", main.show_dojo, "修練")
-	btn(Rect2(214, 648, 110, 50), "Scroll", main.show_scroll, "巻")
-	btn(Rect2(334, 648, 106, 50), "More", main.show_hub, "別")
-	btn(Rect2(450, 648, 96, 50), "Title", main.show_title, "題")
+	btn(Rect2(40, 648, 172, 50), "Training", main.show_dojo, "修練")
+	btn(Rect2(216, 648, 118, 50), "Scroll", main.show_scroll, "巻")
+	btn(Rect2(338, 648, 108, 50), "More", main.show_hub, "別")
+	btn(Rect2(450, 648, 112, 50), "Title", main.show_title, "題")
 	page = _chapter_of(_next_open())
 	var n = Data.CHAPTERS.size()
 	var per = int(ceil(n / 2.0)) if n > 17 else n
@@ -113,7 +113,7 @@ func _draw():
 	# a line of history about this place
 	var note = ch.get("note", "")
 	if note != "":
-		var nr = Rect2(BAND.position.x + 14, BAND.end.y - 78, 700, 64)
+		var nr = Rect2(BAND.position.x + 14, BAND.end.y - 96, 860, 82)
 		draw_rect(nr, Ink.a(Ink.PAPER, 0.86))
 		Ink.frame(self, nr, 2.0, Ink.a(Ink.SUMI, 0.6))
 		Ink.para(self, f, nr.position + Vector2(12, 20), note, 14, Ink.SUMI, nr.size.x - 24)
@@ -174,6 +174,6 @@ func _draw():
 		if main.grade_of(i) == "jouzu":
 			best += 1
 	var rk = main.rank()
-	Ink.text(self, f, Vector2(566, 674), "%s %s   Stations %d / %d   Seals %d / %d   Points %d" % [rk[0], rk[1], done, Data.LEVELS.size(), main.seal_count(), 3 * Data.LEVELS.size(), main.points()], 17, Ink.SUMI)
+	Ink.text(self, f, Vector2(576, 674), "%s %s   Stations %d / %d   Seals %d / %d   Points %d" % [rk[0], rk[1], done, Data.LEVELS.size(), main.seal_count(), 3 * Data.LEVELS.size(), main.points()], 17, Ink.SUMI)
 	Ink.text(self, f, Vector2(566, 700), "Seals: 上手 mastery · 潔 no stroke taken back · 惜墨 sparing of ink.", 14, Ink.a(Ink.SUMI, 0.6))
 	draw_btns()

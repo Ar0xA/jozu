@@ -1978,5 +1978,213 @@
   "par": 1,
   "waza": [],
   "rows": []
+ },
+ {
+  "kanji": "供物",
+  "name": "Offerings",
+  "hint": "Offering 供: walking yokai (oni, umbrellas, kappa, the great skeleton) go to the nearest offering instead of to you. One that is standing on an offering does not strike: it spends its next turn eating, and then the offering is gone. Ghosts are not hungry.",
+  "story": [
+   [
+    "",
+    "At a crossroads someone has left three dumplings on a leaf, for whoever, or whatever, passes."
+   ],
+   [
+    "Suzu",
+    "Is it wrong to make use of them?"
+   ],
+   [
+    "Tessai",
+    "花より団子. Dumplings over blossoms. An oni will choose its stomach over your head every time. Let it choose."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "Momotarō took the Isle of Oni with a dog, a monkey and a pheasant, and he hired all three for millet dumplings. Never look down on a dumpling."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "梵鐘",
+  "name": "The Temple Bell",
+  "hint": "Bell 鐘 (key 5): once in the stage, ring the temple bell. It costs one ink. Until your next stroke no yokai strikes and none moves. Fire still burns.",
+  "story": [
+   [
+    "",
+    "A bronze bell hangs in an open tower above the road. The beam that strikes it is roped back, waiting."
+   ],
+   [
+    "Tessai",
+    "諸行無常の響きあり. When that sounds, everything that hears it remembers that it will not last, and stops to think about it. Even oni. Especially oni."
+   ],
+   [
+    "Suzu",
+    "For how long?"
+   ],
+   [
+    "Tessai",
+    "One breath. Yours."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "On the last night of the year they strike it a hundred and eight times, once for each desire. You were given one stroke. I notice it was enough."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "板橋",
+  "name": "The Plank Bridge",
+  "hint": "Bridge 橋: planks carry anyone over water. The planks you cross in a stroke crack, and after the yokai have moved they fall in, with whatever is standing on them. Ghosts and kappa do not drown.",
+  "story": [
+   [
+    "",
+    "A river, and one narrow bridge of old planks. They creak under Suzu. Something heavier is coming down to the far bank."
+   ],
+   [
+    "Tessai",
+    "At Uji the Minamoto pulled up the planks behind them and left the river to argue with the Taira horsemen. You need not pull. Your feet will do it. Cross, and let them follow."
+   ]
+  ],
+  "after": [
+   [
+    "Suzu",
+    "It walked straight on after me."
+   ],
+   [
+    "Tessai",
+    "石橋を叩いて渡る. The careful tap even a stone bridge before they cross. Oni do not tap."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "蜘蛛",
+  "name": "The Spider",
+  "hint": "Web 巣: step into a web and your stroke ends there; whatever ink you had left is lost. Yokai walk over webs freely. A leap clears one.",
+  "story": [
+   [
+    "",
+    "The path runs under old cedars strung with silk as thick as fishing line. From somewhere above comes the sound of a biwa, played very well."
+   ],
+   [
+    "Suzu",
+    "Someone lives here."
+   ],
+   [
+    "Tessai",
+    "Something. Do not look up, and mind your feet. A web does not hurt you. It only keeps you where you are until what does hurt you arrives."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "油断大敵. Carelessness is the great enemy. The spider never chased anyone in her life."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "鎌鼬",
+  "name": "Kamaitachi",
+  "hint": "Kamaitachi 鎌鼬: it runs up to three tiles a turn toward you, and strikes if it is beside you when a stroke ends. One cut finishes it. Stone and water turn it aside: end your stroke where three steps cannot reach you.",
+  "story": [
+   [
+    "",
+    "A dust-devil crosses the road against the wind. When it has passed there is a cut in Suzu's sleeve, straight as a ruled line."
+   ],
+   [
+    "Suzu",
+    "I did not even see it."
+   ],
+   [
+    "Tessai",
+    "電光石火. Lightning, and the spark off a flint. You will not outrun it, so do not try. Count its steps, and be standing somewhere it has to go around."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "They say there are three of them. One trips you, one cuts, and the third rubs in the salve, so that it never bleeds. Very considerate animals."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "封印",
+  "name": "The Seals",
+  "hint": "Seals 封: every yokai carries a numbered seal. Only the lowest number still on the board can be cut, shoved into water or bound. The others cannot be harmed, though they can still harm you.",
+  "story": [
+   [
+    "",
+    "Each of these has a slip of paper pasted to its forehead, numbered in a neat hand. Someone bound them once, in order, and they have come loose in order."
+   ],
+   [
+    "Tessai",
+    "They must be put back the same way. 物には順序. One, then two. Cut the three first and you will only blunt your brush."
+   ],
+   [
+    "Suzu",
+    "And if the one is at the back?"
+   ],
+   [
+    "Tessai",
+    "Then that is the puzzle."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "序破急. Begin slowly, break, finish fast. Zeami said it of Noh, but it is true of anything done properly, including this."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "書",
+  "name": "The Character",
+  "hint": "Writing 書: the grey tiles are a character. Paint every one of them, over as many strokes as it takes; a tile once painted stays painted. Nothing need be cut, but the yokai will not stand and watch.",
+  "story": [
+   [
+    "",
+    "Tessai unrolls a clean sheet and weights its corners with four stones. Faintly, in grey, a character is already there, the way a teacher writes it for a child to go over."
+   ],
+   [
+    "Tessai",
+    "You have cut, bound, raked and run. Now write. 書は人なり: the writing is the person."
+   ],
+   [
+    "Suzu",
+    "There are yokai on the paper."
+   ],
+   [
+    "Tessai",
+    "There are always yokai on the paper. Write anyway."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "永字八法. They say the one character 永 holds all eight strokes there are. You will get to it. Start with the ones that are straight lines."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
  }
 ]

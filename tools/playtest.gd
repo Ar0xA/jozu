@@ -49,6 +49,8 @@ func play(i, use_mouse, lv = null):
 			var before = b.s.ink
 			if tok == "KATSU":
 				b.on_key(KEY_3)
+			elif tok == "BELL":
+				b.on_key(KEY_5)
 			elif tok.begins_with("leap") or tok.begins_with("ward") or tok.begins_with("shiki"):
 				var d = tok.right(1)
 				b.on_key(KEY_1 if tok.begins_with("leap") else (KEY_2 if tok.begins_with("ward") else KEY_4))
@@ -62,7 +64,7 @@ func play(i, use_mouse, lv = null):
 				b.on_click(b.ctr(b.s.hero + DIR[tok]), MOUSE_BUTTON_LEFT)
 			else:
 				b.on_key(KEYS[tok])
-			if b.s.ink != before - 1 and not b.done:
+			if b.s.ink >= before and not b.done:
 				bad("stage %d: action %s was not accepted" % [i + 1, tok])
 				return
 			await frames()

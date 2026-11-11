@@ -23,6 +23,7 @@ var kinds = []
 var b_leap
 var b_ward
 var b_katsu
+var b_bell
 var b_end
 var b_undo
 var b_restart
@@ -62,6 +63,7 @@ func setup():
 	b_leap = btn(Rect2(PX, 470, 172, 46), "Leap [1]", _mode.bind("leap"), "縮地")
 	b_ward = btn(Rect2(PX + 184, 470, 172, 46), "Ward [2]", _mode.bind("ward"), "結界")
 	b_katsu = btn(Rect2(PX + 368, 470, 172, 46), "Shout [3]", _katsu, "喝")
+	b_bell = btn(Rect2(PX, 470, 172, 46), "Bell [5]", _bell, "鐘")
 	b_end = btn(Rect2(PX, 526, 264, 50), "Sheathe  [Space]", _end, "納刀")
 	b_undo = btn(Rect2(PX + 276, 526, 264, 50), "Undo  [Z]", _undo, "戻")
 	b_hint = btn(Rect2(PX, 586, 264, 42), "Ask the master  [H]", _hint, "師")
@@ -109,7 +111,15 @@ func _sync():
 	b_leap.show = lv.waza.has("leap")
 	b_ward.show = lv.waza.has("ward")
 	b_katsu.show = lv.waza.has("katsu")
+	b_bell.show = lv.waza.has("bell")
+	# the techniques this stage allows share the row evenly
+	var row = [b_leap, b_ward, b_katsu, b_bell].filter(func(b): return b.show)
+	for i in range(row.size()):
+		var bw = (540.0 - 12.0 * (row.size() - 1)) / row.size() if row.size() > 3 else 172.0
+		row[i].rect = Rect2(PX + i * (bw + 12.0), 470, bw, 46)
 	var live = not done and s.ink > 0
+	b_bell.on = live and s.bell > 0 and not s.stun
+	b_bell.sel = s.stun
 	b_leap.on = live and s.leap > 0
 	b_ward.on = live and s.ward > 0
 	b_katsu.on = live and s.katsu > 0
@@ -145,7 +155,7 @@ func _after(ok, quiet = "step"):
 		s.spent += 1
 	var heard = false
 	for e in s.events:
-		if ["kill", "cut", "hit", "katsu", "ward", "leap"].has(e.t):
+		if ["kill", "cut", "hit", "katsu", "ward", "leap", "bell"].has(e.t):
 			main.sfx(e.t)
 			heard = true
 	if not heard:
@@ -162,6 +172,10 @@ func _after(ok, quiet = "step"):
 		elif e.t == "katsu":
 			fx.append({"k": "katsu", "pos": Vector2(e.pos), "life": 0.6, "max": 0.6})
 			shake = 0.2
+		elif e.t == "bell":
+			fx.append({"k": "bell", "pos": Vector2(e.pos), "life": 1.4, "max": 1.4})
+		elif e.t == "fall" or e.t == "eat":
+			fx.append({"k": "kill", "pos": Vector2(e.pos), "life": 0.5, "max": 0.5, "quiet": true})
 	if s.status != "play":
 		_finish()
 	_sync()
@@ -172,7 +186,7 @@ func _clear_hint():
 	hint_msg = ""
 
 func _same_board(a, b):
-	if a.hero != b.hero or a.yokai.size() != b.yokai.size() or a.wards != b.wards:
+	if a.hero != b.hero or a.yokai.size() != b.yokai.size() or a.wards != b.wards or a.rows != b.rows or a.inked != b.inked or a.bell != b.bell:
 		return false
 	for i in range(a.yokai.size()):
 		if a.yokai[i].ch != b.yokai[i].ch or a.yokai[i].pos != b.yokai[i].pos or a.yokai[i].hp != b.yokai[i].hp:
@@ -182,9 +196,13 @@ func _same_board(a, b):
 func _play_tokens(st, stroke, track):
 	for tok in stroke.split(" ", false):
 		var d = Vector2i.ZERO
-		if tok != "KATSU":
+		if tok != "KATSU" and tok != "BELL":
 			d = {"R": Vector2i(1, 0), "L": Vector2i(-1, 0), "D": Vector2i(0, 1), "U": Vector2i(0, -1)}[tok.right(1)]
-		if tok == "KATSU":
+		if tok == "BELL":
+			Sim.act_bell(st)
+			if track:
+				hint_marks.append([st.hero, "鐘"])
+		elif tok == "KATSU":
 			Sim.act_katsu(st)
 			if track:
 				hint_marks.append([st.hero, "喝"])
@@ -274,6 +292,14 @@ func _katsu():
 		_clear_hint()
 	_push()
 	_after(Sim.act_katsu(s))
+
+func _bell():
+	if done:
+		return
+	if not guide:
+		_clear_hint()
+	_push()
+	_after(Sim.act_bell(s))
 
 func _end():
 	if done:
@@ -384,6 +410,8 @@ func on_key(code):
 			if b_katsu.show and b_katsu.on: _katsu()
 		KEY_4:
 			if b_shiki.show and b_shiki.on: _mode("shiki")
+		KEY_5:
+			if b_bell.show and b_bell.on: _bell()
 		KEY_ESCAPE:
 			if mode != "":
 				_mode(mode)
@@ -443,10 +471,28 @@ func _draw():
 		rl.append("雪 all water is ice")
 	if rules.has("night"):
 		rl.append("夜 you see only near yourself and near light")
+	var ground = "".join(lv.rows)
+	if rules.has("order"):
+		rl.append("封 only the lowest number can be harmed")
+	if rules.has("write"):
+		var left = s.marks
+		for i in range(s.w * s.h):
+			if s.inked & (1 << i):
+				left -= 1
+		rl.append("書 paint every grey tile  (%d left)" % left)
+	if ground.contains("m"):
+		rl.append("供 walking yokai go to an offering, and eat")
+	if ground.contains("b"):
+		rl.append("橋 planks you cross fall after the yokai move")
+	if ground.contains("w"):
+		rl.append("巣 a web ends your stroke")
+	if s.stun:
+		rl.append("鐘 the bell is ringing: nothing strikes, nothing moves")
 	if rl.size() >= 3:
 		# with many rules in force, name each in a word or two so the line stays over the board
 		var brief = {"公": "公案 one stroke", "墨": "墨 wet wall", "円": "円相 circle binds", "石": "石庭 rake all", "鳥": "鳥居 reach it",
-			"無": "無刀 no cut", "硯": "硯 ink kept", "式": "式神 set allies", "風": "風 wind", "雨": "雨 rain", "雪": "雪 ice", "夜": "夜 night"}
+			"無": "無刀 no cut", "硯": "硯 ink kept", "式": "式神 set allies", "風": "風 wind", "雨": "雨 rain", "雪": "雪 ice", "夜": "夜 night",
+			"封": "封 in order", "書": "書 write it", "供": "供 offerings lure", "橋": "橋 planks fall", "巣": "巣 webs stop you", "鐘": "鐘 all still"}
 		for k in range(rl.size()):
 			rl[k] = brief.get(rl[k].substr(0, 1), rl[k])
 	if not rl.is_empty():
@@ -471,6 +517,15 @@ func _draw():
 				Ink.fire(self, r, time + x + y)
 			elif ch == "g":
 				Ink.torii(self, r)
+			elif ch == "m":
+				Ink.offering(self, r.get_center(), TS)
+			elif ch == "b":
+				Ink.water(self, r, time)
+				Ink.bridge(self, r, s.visited.has(p) and p != s.hero)
+			elif ch == "w":
+				Ink.web(self, r.get_center(), TS)
+			elif ch == "x":
+				Ink.mark(self, r, (s.inked & (1 << (y * s.w + x))) != 0)
 			if s.r_garden and (ch == "." or ch == "i") and not s.visited.has(p):
 				# gravel not yet raked
 				for k in range(3):
@@ -501,7 +556,7 @@ func _draw():
 			if not Sim.inb(s, t):
 				continue
 			var yi = Sim.yokai_at(s, t)
-			if Sim.ally_at(s, t) >= 0 or (yi >= 0 and (Sim.hidden(s.yokai[yi]) or s.r_nocut)):
+			if Sim.ally_at(s, t) >= 0 or (yi >= 0 and (Sim.hidden(s.yokai[yi]) or s.r_nocut or Sim.is_sealed(s, yi))):
 				continue
 			if mode == "" and yi >= 0:
 				var c = ctr(t)
@@ -589,12 +644,26 @@ func _draw():
 		if Sim.hidden(y) or (not lit.is_empty() and not lit.has(y.pos)):
 			continue
 		Ink.hp_pips(self, ORG + (disp.get(y.id, Vector2(y.pos)) + Vector2(0.5, 0.5)) * TS, TS, y.hp, y.max)
+	if s.r_order:
+		var num = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六"]
+		for i in range(s.yokai.size()):
+			var y = s.yokai[i]
+			if not lit.is_empty() and not lit.has(y.pos):
+				continue
+			Ink.tag(self, f, ORG + (disp.get(y.id, Vector2(y.pos)) + Vector2(0.5, 0.5)) * TS, TS, num[min(y.id, 15)], i == 0)
 	_weather(br)
 
 	for e in fx:
 		var u = 1.0 - e.life / e.max
 		var c = ctr(e.pos)
-		if e.k == "kill":
+		if e.k == "bell":
+			for ring in range(3):
+				var uu = clamp(u * 1.6 - ring * 0.22, 0.0, 1.0)
+				draw_arc(c, TS * (0.4 + 3.2 * uu), 0, TAU, 48, Ink.a(Ink.KIN, (1.0 - uu) * 0.9), 6.0, true)
+			Ink.text(self, f, c + Vector2(-28, -40 - 20 * u), "鐘", 56, Ink.a(Ink.KIN, 1.0 - u))
+		elif e.k == "kill" and e.has("quiet"):
+			draw_arc(c, TS * (0.2 + 0.4 * u), 0, TAU, 32, Ink.a(Ink.AI, 1.0 - u), 4.0, true)
+		elif e.k == "kill":
 			draw_arc(c, TS * (0.2 + 0.5 * u), 0, TAU, 32, Ink.a(Ink.SUMI, 1.0 - u), 6.0 * (1.0 - u) + 1.0, true)
 			for i in range(7):
 				var ang = i * 0.9 + 0.3
@@ -693,7 +762,9 @@ func _panel(f):
 	if lv.waza.has("ward"):
 		wz += "結界 %d   " % s.ward
 	if lv.waza.has("katsu"):
-		wz += "喝 %d" % s.katsu
+		wz += "喝 %d   " % s.katsu
+	if lv.waza.has("bell"):
+		wz += "鐘 %d" % s.bell
 	if wz != "":
 		Ink.text(self, f, Vector2(PX, 206), "Waza left:  " + wz, 18, Ink.SUMI)
 	var y = 226.0
@@ -753,6 +824,8 @@ func _result(f):
 			why = "A kōan has no second stroke. Begin again."
 		elif rules.has("garden"):
 			why = "The garden is not yet raked. Begin again."
+		elif rules.has("write") and s.ki > 0:
+			why = "The character is not finished."
 		Ink.text(self, f, Vector2(150, 384), why, 18, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
 		Ink.text(self, f, Vector2(150, 416), "七転び八起き  —  fall seven times, rise eight", 15, Ink.a(Ink.SHU, 0.9), HORIZONTAL_ALIGNMENT_CENTER, 400)
 

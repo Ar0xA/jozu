@@ -214,6 +214,8 @@ def sfx():
     one('sheathe', [(0, swish(0.14, 2600, 900, 0.5, False)), (0.12, rim(0.07, 0.45))], 0.3)
     one('click', [(0, rim(0.08, 0.6))], 0.12)
     one('win', [(k * 0.13, pluck(hz(n), 2.4, 0.6, 0.996, 0.6)) for k, n in enumerate(['D4', 'G4', 'A4', 'D5', 'G5', 'A5', 'D6'])] + [(0, taiko(0.8, 100, 50, 0.5))], 3.2)
+    # a temple bell: low, struck once, and a long time dying away
+    one('bell', [(0, taiko(0.25, 130, 95, 0.45)), (0, bell(hz('D3'), 3.4, 0.9)), (0.01, bell(hz('A2'), 3.4, 0.55))], 3.6)
     one('lose', [(0, taiko(1.4, 80, 36, 0.9)), (0.25, pluck(hz('Eb3'), 2.5, 0.3, 0.996, 0.6)), (0.7, pluck(hz('D3'), 3.0, 0.3, 0.996, 0.6))], 3.4)
 
 sakura()

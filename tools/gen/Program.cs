@@ -17,7 +17,8 @@ using System.Threading.Tasks;
 sealed class St
 {
     public int hx, hy, ki, ink, inkMax, leap, ward, katsu, mom, mdx, mdy, turn, hits, status, n, nextId, nhand, na;
-    public ulong visited, wards, wet, revive;
+    public ulong visited, wards, wet, revive, chg, inked;
+    public int bell; public bool stun;
     public byte[] path; public int plen;
     public char[] yc; public int[] yx, yy, yhp, yid; public bool[] ydown;
     public char[] hand; public char[] ak; public int[] ax, ay;
@@ -51,27 +52,31 @@ sealed class Sim
         ['u'] = ("kasa", 1), ['p'] = ("kappa", 2), ['P'] = ("kappa", 4), ['n'] = ("nurikabe", 3),
         ['W'] = ("yukionna", 3), ['G'] = ("gasha", 7),
         ['d'] = ("daruma", 2), ['a'] = ("tanuki", 1), ['A'] = ("tanuki", 1), ['e'] = ("hitodama", 1),
-        ['X'] = ("shinigami", 3),
+        ['X'] = ("shinigami", 3), ['K'] = ("kamaitachi", 1),
     };
     const int HandMax = 3, AllyMax = 12;
     readonly char[][] rows; readonly int w, h;
     readonly bool rKoan, rWet, rEnso, rGarden, rGate, rNocut, rStone, rShiki, rRain;
     readonly int windX, windY;
+    readonly bool rOrder, rWrite, hasChg;
+    readonly int marks;
+    readonly List<(int x, int y)> offers = new();
     readonly int open;
     public St start;
 
-    public Sim(string[] src, int ink, int ki, bool leap, bool ward, bool katsu, string[] rules = null)
+    public Sim(string[] src, int ink, int ki, bool leap, bool ward, bool katsu, string[] rules = null, bool bell = false)
     {
         rules ??= Array.Empty<string>();
         rKoan = rules.Contains("koan"); rWet = rules.Contains("wet"); rEnso = rules.Contains("enso");
         rGarden = rules.Contains("garden"); rGate = rules.Contains("gate"); rNocut = rules.Contains("nocut"); rStone = rules.Contains("stone");
         rShiki = rules.Contains("shiki"); rRain = rules.Contains("rain");
+        rOrder = rules.Contains("order"); rWrite = rules.Contains("write");
         bool snow = rules.Contains("snow");
         foreach (var r in rules)
             if (r.StartsWith("wind:")) { int d = Array.IndexOf(TAG, r.Substring(5)); windX = DX[d]; windY = DY[d]; }
         h = src.Length; w = src[0].Length;
         rows = new char[h][];
-        var s = new St { ki = ki, ink = ink, inkMax = ink, leap = leap ? 1 : 0, ward = ward ? 1 : 0, katsu = katsu ? 1 : 0 };
+        var s = new St { ki = ki, ink = ink, inkMax = ink, leap = leap ? 1 : 0, ward = ward ? 1 : 0, katsu = katsu ? 1 : 0, bell = bell ? 1 : 0 };
         var yc = new List<char>(); var yx = new List<int>(); var yy = new List<int>(); var yh = new List<int>();
         for (int y = 0; y < h; y++)
         {
@@ -91,17 +96,28 @@ sealed class Sim
         s.path = new byte[64]; s.path[0] = (byte)(s.hy * w + s.hx); s.plen = 1;
         if (rShiki) { s.hand = new char[HandMax]; s.ak = new char[AllyMax]; s.ax = new int[AllyMax]; s.ay = new int[AllyMax]; }
         foreach (var row in rows) foreach (char ch in row) if (ch == '.' || ch == 'i') open++;
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                if (rows[y][x] == 'm') { offers.Add((x, y)); hasChg = true; }
+                if (rows[y][x] == 'b') hasChg = true;
+                if (rows[y][x] == 'x') marks++;
+            }
         start = s;
     }
 
     ulong Bit(int x, int y) => 1UL << (y * w + x);
     bool Inb(int x, int y) => x >= 0 && y >= 0 && x < w && y < h;
-    bool Walk(int x, int y) { char c = rows[y][x]; return c == '.' || c == 'i' || c == 'f' || c == 'g'; }
+    // ground changes as the stage is played: an offering eaten is floor, a plank fallen is water
+    char T(St s, int x, int y) { char c = rows[y][x]; if ((s.chg & Bit(x, y)) != 0) return c == 'b' ? '~' : '.'; return c; }
+    bool WalkAt(St s, int x, int y) { char c = T(s, x, y); return c == '.' || c == 'i' || c == 'f' || c == 'g' || c == 'm' || c == 'b' || c == 'w' || c == 'x'; }
+    bool Sealed(int yi) => rOrder && yi > 0;
+    bool Eating(St s, int i) => T(s, s.yx[i], s.yy[i]) == 'm' && !Ghost(Kind(s.yc[i]));
     static string Kind(char c) => DEF[c].kind;
     static bool Ghost(string k) => k == "yurei" || k == "yukionna" || k == "shinigami";
     static bool Harmless(string k) => k == "kitsune" || k == "nurikabe" || k == "tanuki" || k == "hitodama";
     static bool Light(string k) => k == "chochin" || k == "kasa" || k == "yurei" || k == "hitodama";
-    static bool Mover(string k) => k == "oni" || k == "yurei" || k == "yukionna" || k == "kasa" || k == "kappa" || k == "gasha" || k == "shinigami";
+    static bool Mover(string k) => k == "kamaitachi" || k == "oni" || k == "yurei" || k == "yukionna" || k == "kasa" || k == "kappa" || k == "gasha" || k == "shinigami";
     int YokaiAt(St s, int x, int y) { for (int i = 0; i < s.n; i++) if (s.yx[i] == x && s.yy[i] == y) return i; return -1; }
     int AllyAt(St s, int x, int y) { for (int i = 0; i < s.na; i++) if (s.ax[i] == x && s.ay[i] == y) return i; return -1; }
     static bool Hidden(St s, int i) => s.yc[i] == 'a';
@@ -109,8 +125,8 @@ sealed class Sim
     bool CanStand(St s, string kind, int x, int y)
     {
         if (!Inb(x, y)) return false;
-        if (kind == "kappa") { if (rows[y][x] != '~' && !(rRain && Walk(x, y))) return false; }
-        else if (!Ghost(kind) && !Walk(x, y)) return false;
+        if (kind == "kappa") { if (T(s, x, y) != '~' && !(rRain && WalkAt(s, x, y))) return false; }
+        else if (!Ghost(kind) && !WalkAt(s, x, y)) return false;
         if ((x == s.hx && y == s.hy) || ((s.wards | s.wet) & Bit(x, y)) != 0) return false;
         return YokaiAt(s, x, y) < 0 && AllyAt(s, x, y) < 0;
     }
@@ -123,7 +139,7 @@ sealed class Sim
         int dx = Math.Sign(px - qx), dy = Math.Sign(py - qy), tx = qx + dx, ty = qy + dy;
         while (tx != px || ty != py)
         {
-            if (rows[ty][tx] == '#' || ((s.wards | s.wet) & Bit(tx, ty)) != 0 || YokaiAt(s, tx, ty) >= 0 || AllyAt(s, tx, ty) >= 0) return false;
+            if (T(s, tx, ty) == '#' || ((s.wards | s.wet) & Bit(tx, ty)) != 0 || YokaiAt(s, tx, ty) >= 0 || AllyAt(s, tx, ty) >= 0) return false;
             tx += dx; ty += dy;
         }
         return true;
@@ -141,7 +157,7 @@ sealed class Sim
     public bool Threatens(St s, int i, int px, int py)
     {
         string k = Kind(s.yc[i]);
-        if (Harmless(k)) return false;
+        if (Harmless(k) || s.stun || Eating(s, i)) return false;
         if (k == "daruma" && s.ydown[i]) return false;
         if (k == "chochin" && rRain) return false;
         return Reaches(s, Cls(k), s.yx[i], s.yy[i], px, py);
@@ -149,14 +165,14 @@ sealed class Sim
 
     public bool Danger(St s, int x, int y)
     {
-        if (rows[y][x] == 'f' && !rRain) return true;
+        if (T(s, x, y) == 'f' && !rRain) return true;
         for (int i = 0; i < s.n; i++) if (Threatens(s, i, x, y)) return true;
         return false;
     }
 
     void CheckWin(St s)
     {
-        if (rGate) return;   // a gate stage is won by arriving, in Enter
+        if (rGate || rWrite) return;   // won by arriving, or by the last tile of the character: both in Enter
         if (rGarden) { if (s.status == 0 && BitOperations.PopCount(s.visited) >= open) { s.status = 1; s.turn++; } return; }
         if (s.n == 0 && s.status == 0) { s.status = 1; s.turn++; }
     }
@@ -175,7 +191,13 @@ sealed class Sim
                 if (CanStand(s, k, mx, my)) { s.yx[i] = mx; s.yy[i] = my; }
             }
         }
-        if (rGate && rows[ty][tx] == 'g' && s.status == 0) { s.status = 1; s.turn++; }
+        if (rGate && T(s, tx, ty) == 'g' && s.status == 0) { s.status = 1; s.turn++; }
+        if (T(s, tx, ty) == 'w') s.ink = 0;   // caught in the web
+        if (rWrite && T(s, tx, ty) == 'x')
+        {
+            s.inked |= Bit(tx, ty);
+            if (BitOperations.PopCount(s.inked) >= marks && s.status == 0) { s.status = 1; s.turn++; }
+        }
     }
 
     // a yokai is about to leave the board, by whatever means
@@ -184,6 +206,7 @@ sealed class Sim
     // true if the yokai is gone; a daruma only ever topples, once per stroke
     bool Hurt(St s, int yi, int dmg)
     {
+        if (Sealed(yi)) return false;
         bool daruma = Kind(s.yc[yi]) == "daruma";
         if (daruma) { if (s.ydown[yi]) return false; dmg = 1; }
         s.yhp[yi] -= dmg;
@@ -195,20 +218,20 @@ sealed class Sim
     bool Cut(St s, int yi, int tx, int ty, int dx, int dy)
     {
         if (Hurt(s, yi, CutPower(s, dx, dy)))
-            if (Walk(tx, ty) && (s.visited & Bit(tx, ty)) == 0) { Enter(s, tx, ty, dx, dy); return true; }
+            if (WalkAt(s, tx, ty) && (s.visited & Bit(tx, ty)) == 0) { Enter(s, tx, ty, dx, dy); return true; }
         s.mom = 0;
         return false;
     }
 
     void Slide(St s, int dx, int dy)
     {
-        while (s.status == 0 && rows[s.hy][s.hx] == 'i')
+        while (s.status == 0 && T(s, s.hx, s.hy) == 'i')
         {
             int tx = s.hx + dx, ty = s.hy + dy;
             if (!Inb(tx, ty) || AllyAt(s, tx, ty) >= 0) return;
             int yi = YokaiAt(s, tx, ty);
-            if (yi >= 0) { if (rNocut || Hidden(s, yi) || !Cut(s, yi, tx, ty, dx, dy)) return; continue; }
-            if (!Walk(tx, ty) || (s.visited & Bit(tx, ty)) != 0) return;
+            if (yi >= 0) { if (rNocut || Hidden(s, yi) || Sealed(yi) || !Cut(s, yi, tx, ty, dx, dy)) return; continue; }
+            if (!WalkAt(s, tx, ty) || (s.visited & Bit(tx, ty)) != 0) return;
             Enter(s, tx, ty, dx, dy);
         }
     }
@@ -221,13 +244,13 @@ sealed class Sim
         int yi = YokaiAt(s, tx, ty);
         if (yi >= 0)
         {
-            if (rNocut || Hidden(s, yi)) return false;
+            if (rNocut || Hidden(s, yi) || Sealed(yi)) return false;
             s.ink--;
             if (Cut(s, yi, tx, ty, dx, dy)) Slide(s, dx, dy);
             CheckWin(s);
             return true;
         }
-        if (!Walk(tx, ty) || (s.visited & Bit(tx, ty)) != 0) return false;
+        if (!WalkAt(s, tx, ty) || (s.visited & Bit(tx, ty)) != 0) return false;
         s.ink--;
         Enter(s, tx, ty, dx, dy);
         Slide(s, dx, dy);
@@ -239,7 +262,7 @@ sealed class Sim
     {
         if (s.status != 0 || s.ink <= 0 || s.leap <= 0) return false;
         int tx = s.hx + dx * 2, ty = s.hy + dy * 2;
-        if (!Inb(tx, ty) || !Walk(tx, ty) || (s.visited & Bit(tx, ty)) != 0 || YokaiAt(s, tx, ty) >= 0 || AllyAt(s, tx, ty) >= 0) return false;
+        if (!Inb(tx, ty) || !WalkAt(s, tx, ty) || (s.visited & Bit(tx, ty)) != 0 || YokaiAt(s, tx, ty) >= 0 || AllyAt(s, tx, ty) >= 0) return false;
         s.ink--; s.leap--;
         Enter(s, tx, ty, dx, dy);
         Slide(s, dx, dy);
@@ -251,7 +274,7 @@ sealed class Sim
     {
         if (s.status != 0 || s.ink <= 0 || s.ward <= 0) return false;
         int tx = s.hx + dx, ty = s.hy + dy;
-        if (!Inb(tx, ty) || rows[ty][tx] != '.' || (s.wards & Bit(tx, ty)) != 0 || YokaiAt(s, tx, ty) >= 0 || AllyAt(s, tx, ty) >= 0) return false;
+        if (!Inb(tx, ty) || T(s, tx, ty) != '.' || (s.wards & Bit(tx, ty)) != 0 || YokaiAt(s, tx, ty) >= 0 || AllyAt(s, tx, ty) >= 0) return false;
         s.ink--; s.ward--; s.mom = 0;
         s.wards |= Bit(tx, ty);
         return true;
@@ -261,7 +284,7 @@ sealed class Sim
     {
         if (s.status != 0 || s.ink <= 0 || !rShiki || s.nhand == 0 || s.na >= AllyMax) return false;
         int tx = s.hx + dx, ty = s.hy + dy;
-        if (!Inb(tx, ty) || rows[ty][tx] != '.' || (s.wards & Bit(tx, ty)) != 0 || YokaiAt(s, tx, ty) >= 0 || AllyAt(s, tx, ty) >= 0) return false;
+        if (!Inb(tx, ty) || T(s, tx, ty) != '.' || (s.wards & Bit(tx, ty)) != 0 || YokaiAt(s, tx, ty) >= 0 || AllyAt(s, tx, ty) >= 0) return false;
         s.ink--; s.mom = 0;
         s.ak[s.na] = s.hand[0]; s.ax[s.na] = tx; s.ay[s.na] = ty; s.na++;
         for (int k = 0; k < s.nhand - 1; k++) s.hand[k] = s.hand[k + 1];
@@ -285,7 +308,7 @@ sealed class Sim
             int tx = s.yx[yi] + DX[d], ty = s.yy[yi] + DY[d];
             bool swims = k == "kappa" || Ghost(k);
             if (k == "nurikabe") { }
-            else if (Inb(tx, ty) && rows[ty][tx] == '~' && !swims && YokaiAt(s, tx, ty) < 0) { Gone(s, yi); s.RemoveAt(yi); continue; }
+            else if (Inb(tx, ty) && T(s, tx, ty) == '~' && !swims && YokaiAt(s, tx, ty) < 0 && !Sealed(yi)) { Gone(s, yi); s.RemoveAt(yi); continue; }
             else if (CanStand(s, k, tx, ty)) { s.yx[yi] = tx; s.yy[yi] = ty; continue; }
             Hurt(s, yi, 1);
         }
@@ -293,10 +316,39 @@ sealed class Sim
         return true;
     }
 
+    bool ActBell(St s)
+    {
+        if (s.status != 0 || s.ink <= 0 || s.bell <= 0 || s.stun) return false;
+        s.ink--; s.bell--; s.mom = 0; s.stun = true;
+        return true;
+    }
+
     void Chase(St s, int i)
     {
         string k = Kind(s.yc[i]);
-        int dx = s.hx - s.yx[i], dy = s.hy - s.yy[i];
+        if (Eating(s, i)) { s.chg |= Bit(s.yx[i], s.yy[i]); return; }   // it eats, and that is its whole turn
+        int gx = s.hx, gy = s.hy;
+        if (!Ghost(k))
+        {
+            int far = 999;
+            foreach (var (ox, oy) in offers)
+            {
+                if ((s.chg & Bit(ox, oy)) != 0) continue;
+                int dist = Math.Abs(ox - s.yx[i]) + Math.Abs(oy - s.yy[i]);
+                if (dist < far) { far = dist; gx = ox; gy = oy; }
+            }
+        }
+        int steps = k == "kamaitachi" ? 3 : 1;
+        for (int st = 0; st < steps; st++)
+        {
+            if (st > 0 && (Math.Abs(s.hx - s.yx[i]) + Math.Abs(s.hy - s.yy[i]) == 1 || Eating(s, i))) return;
+            Step(s, i, k, gx, gy);
+        }
+    }
+
+    void Step(St s, int i, string k, int gx, int gy)
+    {
+        int dx = gx - s.yx[i], dy = gy - s.yy[i];
         int ax = Math.Sign(dx), by = Math.Sign(dy);
         (int x, int y)[] order = Math.Abs(dy) > Math.Abs(dx) ? new[] { (0, by), (ax, 0) } : new[] { (ax, 0), (0, by) };
         if (k == "kasa")
@@ -336,7 +388,7 @@ sealed class Sim
             int ax = s.path[0] % w, ay = s.path[0] / w, bx = s.path[s.plen - 1] % w, by = s.path[s.plen - 1] / w;
             if (Math.Abs(ax - bx) + Math.Abs(ay - by) == 1)
                 for (int i = s.n - 1; i >= 0; i--)
-                    if (Inside(s, s.yx[i], s.yy[i]))
+                    if (!Sealed(i) && Inside(s, s.yx[i], s.yy[i]))
                     {
                         Gone(s, i);
                         if (rShiki && s.nhand < HandMax) s.hand[s.nhand++] = Cls(Kind(s.yc[i]));
@@ -358,14 +410,14 @@ sealed class Sim
             }
             s.revive = 0;
         }
-        if (s.n == 0) { Won(s); return; }
+        if (s.n == 0 && !rWrite) { Won(s); return; }
         if (rWet) s.wet = s.visited & ~Bit(s.hx, s.hy);
         for (int i = 0; i < s.n; i++)
             if (Hidden(s, i) && Math.Abs(s.yx[i] - s.hx) + Math.Abs(s.yy[i] - s.hy) == 1) s.yc[i] = 'A';
         for (int a = 0; a < s.na; a++)
             for (int i = s.n - 1; i >= 0; i--)
                 if (Reaches(s, s.ak[a], s.ax[a], s.ay[a], s.yx[i], s.yy[i])) Hurt(s, i, 1);
-        if (s.n == 0) { Won(s); return; }
+        if (s.n == 0 && !rWrite) { Won(s); return; }
         ulong struck = 0;
         for (int i = 0; i < s.n; i++)
             if (Threatens(s, i, s.hx, s.hy))
@@ -373,17 +425,31 @@ sealed class Sim
                 if (Kind(s.yc[i]) == "shinigami") s.ki = 0; else s.ki--;
                 s.hits++; struck |= 1UL << i;
             }
-        if (rows[s.hy][s.hx] == 'f' && !rRain) { s.ki--; s.hits++; }
+        if (T(s, s.hx, s.hy) == 'f' && !rRain) { s.ki--; s.hits++; }
         for (int i = 0; i < s.n; i++) s.ydown[i] = false;
         for (int i = 0; i < s.n; i++)
-            if (Mover(Kind(s.yc[i])) && (struck & (1UL << i)) == 0) Chase(s, i);
+            if (!s.stun && Mover(Kind(s.yc[i])) && (struck & (1UL << i)) == 0) Chase(s, i);
         if (windX != 0 || windY != 0)
             for (int i = 0; i < s.n; i++)
             {
                 string k = Kind(s.yc[i]);
                 if (Light(k) && CanStand(s, k, s.yx[i] + windX, s.yy[i] + windY)) { s.yx[i] += windX; s.yy[i] += windY; }
             }
-        s.wet = 0;
+        s.wet = 0; s.stun = false;
+        if (hasChg)
+        {
+            // the planks crossed this stroke give way, and take whatever stands on them
+            bool fell = false;
+            for (int k = 0; k < s.plen; k++)
+            {
+                int vx = s.path[k] % w, vy = s.path[k] / w;
+                if ((vx == s.hx && vy == s.hy) || T(s, vx, vy) != 'b') continue;
+                s.chg |= Bit(vx, vy); fell = true;
+                int yi = YokaiAt(s, vx, vy);
+                if (yi >= 0 && Kind(s.yc[yi]) != "kappa" && !Ghost(Kind(s.yc[yi])) && !Sealed(yi)) { Gone(s, yi); s.RemoveAt(yi); }
+            }
+            if (fell && s.n == 0 && !rWrite && s.ki > 0) { Won(s); return; }
+        }
         s.turn++; s.ink = rStone ? Math.Min(8, s.inkMax + s.ink) : s.inkMax; s.mom = 0; s.mdx = 0; s.mdy = 0;
         s.visited = Bit(s.hx, s.hy);
         s.plen = 1; s.path[0] = (byte)(s.hy * w + s.hx);
@@ -393,6 +459,7 @@ sealed class Sim
     static void Put64(StringBuilder sb, ulong v) =>
         sb.Append((char)(v & 0xFFFF)).Append((char)((v >> 16) & 0xFFFF)).Append((char)((v >> 32) & 0xFFFF)).Append((char)((v >> 48) & 0xFFFF));
 
+    bool noInk;   // leave the painted tiles out of the key (for the dominance test below)
     string Key(St s, bool full)
     {
         var sb = new StringBuilder(24 + s.n * 4);
@@ -400,6 +467,9 @@ sealed class Sim
         Put64(sb, s.wards);
         for (int i = 0; i < s.n; i++) sb.Append(s.yc[i]).Append((char)(s.yx[i] + s.yy[i] * 8 + s.yhp[i] * 64 + (s.ydown[i] ? 1024 : 0)));
         if (rStone) sb.Append((char)(0x300 + s.ink));
+        if (hasChg) Put64(sb, s.chg);
+        if (rWrite && !noInk) Put64(sb, s.inked);
+        sb.Append((char)(0x400 + s.bell));
         if (rShiki)
         {
             sb.Append('h');
@@ -409,7 +479,7 @@ sealed class Sim
         }
         if (full)
         {
-            sb.Append('|').Append((char)(s.ink + s.mom * 16 + (s.mdx + 1) * 256 + (s.mdy + 1) * 1024));
+            sb.Append(s.stun ? '!' : '|').Append((char)(s.ink + s.mom * 16 + (s.mdx + 1) * 256 + (s.mdy + 1) * 1024));
             Put64(sb, s.visited);
             Put64(sb, s.revive);
             if (rEnso) for (int i = 0; i < s.plen; i++) sb.Append((char)s.path[i]);
@@ -441,6 +511,8 @@ sealed class Sim
             if (rShiki && s.nhand > 0 && s.plen == 1) Try(s, tr, 4, d);
         }
         if (s.katsu > 0) Try(s, tr, 3, 0);
+        // the bell is rung at the start of a stroke or not at all: when in the stroke makes no difference
+        if (s.bell > 0 && !s.stun && s.plen == 1) Try(s, tr, 5, 0);
     }
 
     void Try(St s, string tr, int kind, int d)
@@ -454,6 +526,7 @@ sealed class Sim
             case 1: ok = ActLeap(c, DX[d], DY[d]); tag = "leap" + TAG[d]; break;
             case 2: ok = ActWard(c, DX[d], DY[d]); tag = "ward" + TAG[d]; break;
             case 4: ok = ActShiki(c, DX[d], DY[d]); tag = "shiki" + TAG[d]; break;
+            case 5: ok = ActBell(c); tag = "BELL"; break;
             default: ok = ActKatsu(c); tag = "KATSU"; break;
         }
         if (!ok) return;
@@ -497,6 +570,9 @@ sealed class Sim
         var frontier = new List<St> { start };
         var seen = new HashSet<string> { Key(start, false) };
         var ways = new Dictionary<string, double> { [Key(start, false)] = 1 };
+        // writing: with everything else equal, a board with more tiles painted is never worse, so a
+        // position is dropped when one already seen has painted all it has and more
+        var dom = new Dictionary<string, List<ulong>>();
         for (int depth = 1; depth <= maxDepth; depth++)
         {
             var next = new List<St>();
@@ -510,6 +586,15 @@ sealed class Sim
                 if (won) { W += ws; if (winFrom == null) { winFrom = s; winStroke = winTrace; } continue; }
                 foreach (var kv in outD)
                 {
+                    if (rWrite)
+                    {
+                        noInk = true; string bk = Key(kv.Value, false); noInk = false;
+                        if (!dom.TryGetValue(bk, out var lst)) dom[bk] = lst = new List<ulong>();
+                        ulong m = kv.Value.inked;
+                        if (lst.Any(x => (x & m) == m)) continue;
+                        lst.RemoveAll(x => (x & m) == x);
+                        lst.Add(m);
+                    }
                     if (seen.Add(kv.Key)) { kv.Value.parent = s; next.Add(kv.Value); layer.Add(kv.Key); ways[kv.Key] = ws; }
                     else if (layer.Contains(kv.Key)) ways[kv.Key] += ws;
                 }
@@ -552,7 +637,7 @@ static class Gen
 {
     static Result SolveRows(string[] rows, string[] waza, int cap, string[] rules = null, int ink = 4)
     {
-        var sim = new Sim(rows, ink <= 0 ? 4 : ink, 3, waza.Contains("leap"), waza.Contains("ward"), waza.Contains("katsu"), rules);
+        var sim = new Sim(rows, ink <= 0 ? 4 : ink, 3, waza.Contains("leap"), waza.Contains("ward"), waza.Contains("katsu"), rules, waza.Contains("bell"));
         return rules != null && (rules.Contains("koan") || rules.Contains("garden")) ? sim.SolveKoan(20_000_000) : sim.Solve(cap);
     }
 
@@ -608,9 +693,66 @@ static class Gen
         return rows;
     }
 
+    // Characters that can be written with straight strokes on a 7 by 7 board.
+    static readonly (string name, string[] rows)[] KANJI =
+    {
+        ("十|Ten", new[] { "...x...", "...x...", "...x...", "xxxxxxx", "...x...", "...x...", "...x..." }),
+        ("口|Mouth", new[] { ".......", ".xxxxx.", ".x...x.", ".x...x.", ".x...x.", ".xxxxx.", "......." }),
+        ("日|Sun", new[] { ".xxxxx.", ".x...x.", ".x...x.", ".xxxxx.", ".x...x.", ".x...x.", ".xxxxx." }),
+        ("田|Rice Field", new[] { "xxxxxxx", "x..x..x", "x..x..x", "xxxxxxx", "x..x..x", "x..x..x", "xxxxxxx" }),
+        ("山|Mountain", new[] { "...x...", "...x...", ".x.x.x.", ".x.x.x.", ".x.x.x.", ".xxxxx.", "......." }),
+        ("川|River", new[] { ".x.x.x.", ".x.x.x.", ".x.x.x.", ".x.x.x.", ".x.x.x.", ".x.x.x.", "......." }),
+        ("上|Above", new[] { "...x...", "...x...", "...xxx.", "...x...", "...x...", "...x...", "xxxxxxx" }),
+        ("下|Below", new[] { "xxxxxxx", "...x...", "...xxx.", "...x...", "...x...", "...x...", "......." }),
+        ("中|Middle", new[] { "...x...", ".xxxxx.", ".x.x.x.", ".xxxxx.", "...x...", "...x...", "...x..." }),
+        ("王|King", new[] { "xxxxxxx", "...x...", "...x...", ".xxxxx.", "...x...", "...x...", "xxxxxxx" }),
+        ("土|Earth", new[] { "...x...", "...x...", ".xxxxx.", "...x...", "...x...", "...x...", "xxxxxxx" }),
+        ("工|Craft", new[] { ".xxxxx.", "...x...", "...x...", "...x...", "...x...", "...x...", "xxxxxxx" }),
+        ("二|Two", new[] { ".......", ".xxxxx.", ".......", ".......", ".......", "xxxxxxx", "......." }),
+        ("三|Three", new[] { ".xxxxx.", ".......", ".......", "..xxx..", ".......", ".......", "xxxxxxx" }),
+        ("正|Correct", new[] { "xxxxxxx", "...x...", "...x...", ".x.xxx.", ".x.x...", ".x.x...", "xxxxxxx" }),
+        ("止|Stop", new[] { "...x...", "...x...", "...xxx.", ".x.x...", ".x.x...", ".x.x...", "xxxxxxx" }),
+        ("干|Dry", new[] { ".xxxxx.", "...x...", "...x...", "xxxxxxx", "...x...", "...x...", "...x..." }),
+        ("丁|Block", new[] { "xxxxxxx", "...x...", "...x...", "...x...", "...x...", "...x...", "..xx..." }),
+        ("回|Turn", new[] { "xxxxxxx", "x.....x", "x.xxx.x", "x.x.x.x", "x.xxx.x", "x.....x", "xxxxxxx" }),
+        ("円|Circle", new[] { "xxxxxxx", "x..x..x", "x..x..x", "xxxxxxx", "x.....x", "x.....x", "x.....x" }),
+    };
+    [ThreadStatic] static string lastName;
+
+    // A character to be written: its tiles marked, Suzu and a few yokai on the blank paper around it.
+    static string[] MakeWrite(Random r, Seg g)
+    {
+        var (name, src) = KANJI[r.Next(KANJI.Length)];
+        var b = new char[7, 7];
+        for (int y = 0; y < 7; y++) for (int x = 0; x < 7; x++) b[y, x] = src[y][x];
+        for (int k = r.Next(0, 3); k > 0; k--) { int x = r.Next(7), y = r.Next(7); if (b[y, x] == '.') b[y, x] = '#'; }
+        int hx = r.Next(7), hy = r.Next(7);
+        if (b[hy, hx] != '.') return null;
+        b[hy, hx] = 'H';
+        int ny = r.Next(g.minY, g.maxY + 1);
+        for (int k = 0; k < ny; k++)
+        {
+            char c = g.palette[r.Next(g.palette.Length)];
+            bool placed = false;
+            for (int tries = 0; tries < 60 && !placed; tries++)
+            {
+                int x = r.Next(7), y = r.Next(7);
+                if (b[y, x] != '.' || Math.Abs(x - hx) + Math.Abs(y - hy) < 3) continue;
+                b[y, x] = c; placed = true;
+            }
+            if (!placed) return null;
+        }
+        var rows = new string[7];
+        for (int y = 0; y < 7; y++) { var sb = new StringBuilder(); for (int x = 0; x < 7; x++) sb.Append(b[y, x]); rows[y] = sb.ToString(); }
+        lastName = name;
+        return rows;
+    }
+
     static string[] Make(Random r, Seg g)
     {
+        lastName = "";
         if (g.rules == "garden") return MakeGarden(r, g);
+        if (g.rules.Contains("write")) return MakeWrite(r, g);
         var b = new char[7, 7];
         for (int y = 0; y < 7; y++) for (int x = 0; x < 7; x++) b[y, x] = '.';
         bool sym = r.NextDouble() < 0.65;
@@ -623,6 +765,13 @@ static class Gen
             else if (kind == 1) { int x0 = r.Next(1, 4), y0 = r.Next(0, 4), ww = r.Next(2, 4), hh = r.Next(2, 4); for (int y = y0; y < Math.Min(6, y0 + hh); y++) for (int x = x0; x < Math.Min(7, x0 + ww); x++) b[y, x] = '~'; }
             else if (kind == 2) { int y0 = r.Next(0, 3), hh = r.Next(3, 5); for (int y = y0; y < Math.Min(6, y0 + hh); y++) { b[y, 0] = '~'; b[y, 6] = '~'; if (r.Next(2) == 0) { b[y, 1] = '~'; b[y, 5] = '~'; } } }
             else { int cx = r.Next(2, 5); for (int y = 0; y < r.Next(3, 6); y++) b[y, cx] = '~'; }
+        }
+        if (g.rules.Contains("+bridge"))
+        {
+            // a river right across the board, with a plank bridge or two
+            int ry = r.Next(2, 5);
+            for (int x = 0; x < 7; x++) b[ry, x] = '~';
+            for (int k = r.Next(1, 3); k > 0; k--) b[ry, r.Next(7)] = 'b';
         }
         if (r.NextDouble() < g.ice)
         {
@@ -639,6 +788,18 @@ static class Gen
         if (r.NextDouble() < 0.35) { hx = r.Next(7); hy = r.Next(4, 7); }
         if (b[hy, hx] != '.') return null;
         b[hy, hx] = 'H';
+        if (g.rules.Contains("+offer"))
+            for (int k = r.Next(1, 4); k > 0; k--)
+            {
+                int x = r.Next(7), y = r.Next(7);
+                if (b[y, x] == '.' && Math.Abs(x - hx) + Math.Abs(y - hy) >= 2) b[y, x] = 'm';
+            }
+        if (g.rules.Contains("+web"))
+            for (int k = r.Next(3, 8); k > 0; k--)
+            {
+                int x = r.Next(7), y = r.Next(7);
+                if (b[y, x] == '.') b[y, x] = 'w';
+            }
         if (g.rules.Contains("gate"))
         {
             // the torii stands far from where Suzu starts
@@ -777,6 +938,27 @@ static class Gen
             // Shinigami: through anything, and one touch is the end
             new(25, 0, 4, new[] { "", "leap" }, "Xcc", "X", 2, 4, 3, 5, 0.3, 0, 0),
             new(25, 1, 4, new[] { "", "leap", "ward", "katsu" }, "Xoctu", "X", 4, 6, 4, 7, 0.4, 0.2, 0.2),
+            // Offerings: walking yokai go to the food, and eat instead of striking
+            new(26, 0, 4, none, "ooc", "o", 2, 4, 2, 5, 0.2, 0, 0, "+offer"),
+            new(26, 1, 4, new[] { "", "leap", "katsu" }, "oOSuc", "O", 4, 6, 3, 7, 0.3, 0.1, 0, "+offer"),
+            // The Temple Bell: once, nothing strikes and nothing moves
+            new(27, 0, 4, none, "ooct", "o", 3, 4, 2, 5, 0.2, 0, 0, "+bell"),
+            new(27, 1, 4, new[] { "", "leap", "katsu" }, "oOtTuyc", "T", 4, 6, 3, 7, 0.3, 0.2, 0, "+bell"),
+            // The Bridge: planks crossed fall in, with whatever followed
+            new(28, 0, 4, none, "ooc", "o", 2, 4, 2, 5, 0, 0, 0, "+bridge"),
+            new(28, 1, 4, new[] { "", "leap", "katsu" }, "oOSuc", "S", 3, 6, 3, 7, 0, 0, 0, "+bridge"),
+            // The Spider: a web ends the stroke
+            new(29, 0, 4, none, "ccoo", "o", 3, 4, 3, 5, 0.2, 0, 0, "+web"),
+            new(29, 1, 4, new[] { "", "leap", "katsu" }, "coOtu", "", 4, 6, 4, 7, 0.3, 0, 0, "+web"),
+            // Kamaitachi: three tiles a turn
+            new(30, 0, 4, new[] { "", "leap" }, "Kcc", "K", 2, 4, 2, 5, 0.3, 0, 0),
+            new(30, 1, 4, new[] { "", "leap", "ward", "katsu" }, "KKoctu", "K", 4, 6, 3, 7, 0.4, 0.2, 0),
+            // The Seals: only the first yokai left, in reading order, can be harmed
+            new(31, 0, 4, none, "ccco", "", 3, 4, 3, 5, 0.2, 0, 0, "order"),
+            new(31, 1, 4, new[] { "", "leap", "katsu" }, "ccoOtn", "", 4, 6, 4, 7, 0.3, 0.2, 0, "order"),
+            // The Character: paint every marked tile
+            new(32, 0, 4, none, "co", "", 1, 2, 2, 5, 0, 0, 0, "write", 6, 8),
+            new(32, 1, 4, new[] { "", "leap" }, "coOuty", "", 2, 4, 3, 8, 0, 0, 0, "write", 5, 7),
         };
         var jopt = new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
         var all = File.Exists(outPath) ? JsonSerializer.Deserialize<List<LevelOut>>(File.ReadAllText(outPath)) : new List<LevelOut>();
@@ -798,15 +980,19 @@ static class Gen
                     var r = new Random(baseSeed + k);
                     var rows = Make(r, g);
                     if (rows == null) return;
+                    string kanjiName = lastName;
                     var waza = g.wazaSets[r.Next(g.wazaSets.Length)].Split(',', StringSplitOptions.RemoveEmptyEntries);
-                    var rules = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    var feats = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith("+")).ToArray();
+                    if (feats.Contains("+bell")) waza = waza.Append("bell").ToArray();
+                    var rules = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => !x.StartsWith("+"))
                         .Select(x => x == "wind" ? "wind:" + "RLDU"[r.Next(4)] : x).ToArray();
+                    bool B = waza.Contains("bell");
                     bool weather = rules.Any(x => x.StartsWith("wind") || x == "rain" || x == "snow");
                     int ink = r.Next(g.inkLo, g.inkHi + 1);
                     bool garden = rules.Contains("garden");
                     if (garden) ink = rows.Sum(l => l.Count(ch => ch == '.' || ch == 'i' || ch == 'H')) - 1;
                     bool L = waza.Contains("leap"), Wd = waza.Contains("ward"), K = waza.Contains("katsu");
-                    var sim = new Sim(rows, ink, 3, L, Wd, K, rules);
+                    var sim = new Sim(rows, ink, 3, L, Wd, K, rules, B);
                     Result res;
                     double score;
                     if (rules.Contains("koan") || garden)
@@ -831,7 +1017,33 @@ static class Gen
                             var dry = new Sim(rows, ink, 3, L, Wd, K).Solve(120_000, g.parHi + 2, 10);
                             if (dry.capped || dry.par == res.par) return;
                         }
-                        else if (rules.Length > 0 && !rules.Contains("gate") && (!rules.Contains("nocut") || rules.Contains("shiki")) && !rules.Contains("night"))
+                        else if (rules.Contains("order"))
+                        {
+                            // the seals must cost at least a stroke
+                            var free = new Sim(rows, ink, 3, L, Wd, K).Solve(120_000, res.par - 1, 10);
+                            if (free.capped || free.par <= 0) return;
+                        }
+                        else if (feats.Length > 0)
+                        {
+                            string[] bare = rows.Select(l => l.Replace('m', '.').Replace('b', '.').Replace('w', '.')).ToArray();
+                            if (B)
+                            {
+                                if (!res.trace.Contains("BELL")) return;
+                                var mute = new Sim(rows, ink, 3, L, Wd, K, rules).Solve(120_000, res.par, 10);
+                                if (mute.capped || mute.par > 0) return;   // the bell must be what makes this par possible
+                            }
+                            else if (feats.Contains("+web"))
+                            {
+                                var clear = new Sim(bare, ink, 3, L, Wd, K, rules).Solve(120_000, res.par - 1, 10);
+                                if (clear.capped || clear.par <= 0) return;   // the webs must cost at least a stroke
+                            }
+                            else
+                            {
+                                var clear = new Sim(bare, ink, 3, L, Wd, K, rules).Solve(120_000, res.par, 10);
+                                if (clear.capped || clear.par > 0) return;   // the offering or the bridge must be what makes this par possible
+                            }
+                        }
+                        else if (rules.Length > 0 && !rules.Contains("write") && !rules.Contains("gate") && (!rules.Contains("nocut") || rules.Contains("shiki")) && !rules.Contains("night"))
                         {
                             // the new rule must be what makes this par possible
                             // for an enso board, the circle itself must matter: compare against wet ink alone
@@ -842,7 +1054,7 @@ static class Gen
                         }
                         score = Score(res, rows);
                     }
-                    var lv = new LevelOut { chapter = g.chapter, seg = g.seg, rows = rows, waza = waza, rules = rules, ink = ink, par = res.par, ways = res.ways, states = res.states, trace = res.trace, score = score };
+                    var lv = new LevelOut { chapter = g.chapter, seg = g.seg, name = kanjiName ?? "", rows = rows, waza = waza, rules = rules, ink = ink, par = res.par, ways = res.ways, states = res.states, trace = res.trace, score = score };
                     lock (lk) found.Add(lv);
                 });
             }

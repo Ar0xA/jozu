@@ -5,16 +5,18 @@ const Sim = preload("res://scripts/sim.gd")
 const TS = 84.0
 const ORG = Vector2(56, 104)
 const PX = 700.0
-const GROUND = [[".", "地", "floor"], ["#", "石", "stone"], ["~", "水", "water"], ["i", "氷", "ice"], ["f", "火", "fire"], ["g", "門", "gate"]]
+const GROUND = [[".", "地", "floor"], ["#", "石", "stone"], ["~", "水", "water"], ["i", "氷", "ice"], ["f", "火", "fire"], ["g", "門", "gate"],
+	["m", "供", "offering"], ["b", "橋", "plank bridge"], ["w", "巣", "web"], ["x", "字", "a tile to be written"]]
 const PIECES = [
 	["H", "鈴", "Suzu"], ["c", "灯", "lantern"], ["o", "鬼", "oni (2)"], ["O", "剛", "great oni (3)"], ["S", "王", "oni king (5)"],
 	["t", "天", "tengu (1)"], ["T", "狗", "great tengu (2)"], ["k", "狐", "fox"], ["Q", "玉", "Tamamo (5)"], ["y", "霊", "ghost"],
 	["u", "傘", "umbrella"], ["p", "河", "kappa (2)"], ["P", "伯", "kappa lord (4)"], ["n", "壁", "wall (3)"], ["W", "雪", "snow woman (3)"],
 	["G", "骸", "skeleton (7)"], ["d", "磨", "daruma"], ["a", "狸", "tanuki"], ["e", "魂", "soul-flame"], ["X", "死", "shinigami (3)"],
+	["K", "鼬", "kamaitachi"],
 ]
 const RULES = [["koan", "公案"], ["garden", "石庭"], ["gate", "鳥居"], ["wet", "墨"], ["enso", "円相"], ["stone", "硯"],
-	["nocut", "無刀"], ["shiki", "式神"], ["wind", "風"], ["rain", "雨"], ["snow", "雪"], ["night", "夜"]]
-const WAZA = [["leap", "縮地"], ["ward", "結界"], ["katsu", "喝"]]
+	["nocut", "無刀"], ["shiki", "式神"], ["wind", "風"], ["rain", "雨"], ["snow", "雪"], ["night", "夜"], ["order", "封"], ["write", "書"]]
+const WAZA = [["leap", "縮地"], ["ward", "結界"], ["katsu", "喝"], ["bell", "鐘"]]
 const WINDS = ["", "R", "L", "D", "U"]
 const ARROW = {"": "", "R": "→", "L": "←", "D": "↓", "U": "↑"}
 
@@ -35,11 +37,11 @@ func setup():
 	for i in range(GROUND.size()):
 		tool_btns[GROUND[i][0]] = btn(Rect2(PX + i * 50, 92, 46, 38), GROUND[i][1], _tool.bind(GROUND[i][0], GROUND[i][2]))
 	for i in range(PIECES.size()):
-		tool_btns[PIECES[i][0]] = btn(Rect2(PX + (i % 10) * 54, 162 + (i / 10) * 44, 50, 38), PIECES[i][1], _tool.bind(PIECES[i][0], PIECES[i][2]))
+		tool_btns[PIECES[i][0]] = btn(Rect2(PX + (i % 11) * 49, 162 + (i / 11) * 44, 45, 38), PIECES[i][1], _tool.bind(PIECES[i][0], PIECES[i][2]))
 	for i in range(RULES.size()):
-		rule_btns[RULES[i][0]] = btn(Rect2(PX + (i % 6) * 90, 282 + (i / 6) * 42, 86, 36), RULES[i][1], _rule.bind(RULES[i][0]))
+		rule_btns[RULES[i][0]] = btn(Rect2(PX + (i % 7) * 77, 282 + (i / 7) * 42, 73, 36), RULES[i][1], _rule.bind(RULES[i][0]))
 	for i in range(WAZA.size()):
-		waza_btns[WAZA[i][0]] = btn(Rect2(PX + i * 100, 398, 96, 36), WAZA[i][1], _waza.bind(WAZA[i][0]))
+		waza_btns[WAZA[i][0]] = btn(Rect2(PX + i * 80, 398, 76, 36), WAZA[i][1], _waza.bind(WAZA[i][0]))
 	btn(Rect2(PX + 330, 398, 40, 36), "−", _ink.bind(-1))
 	btn(Rect2(PX + 446, 398, 40, 36), "+", _ink.bind(1))
 	btn(Rect2(PX, 494, 264, 50), "Play it", _test, "試")
@@ -142,6 +144,9 @@ func _problem():
 	elif st.rules.has("gate"):
 		if text.count("g") < 1:
 			return "A gate stage needs a torii (門)."
+	elif st.rules.has("write"):
+		if text.count("x") < 1:
+			return "A writing stage needs tiles to be written (字)."
 	elif yokai == 0:
 		return "Place at least one yokai."
 	if st.rules.has("koan") and st.rules.has("garden"):
@@ -209,6 +214,15 @@ func _draw():
 				Ink.fire(self, r, time + x + y)
 			elif ch == "g":
 				Ink.torii(self, r)
+			elif ch == "m":
+				Ink.offering(self, c, TS)
+			elif ch == "b":
+				Ink.water(self, r, time)
+				Ink.bridge(self, r, false)
+			elif ch == "w":
+				Ink.web(self, c, TS)
+			elif ch == "x":
+				Ink.mark(self, r, false)
 	for i in range(8):
 		draw_line(ORG + Vector2(i * TS, 0), ORG + Vector2(i * TS, 7 * TS), Ink.a(Ink.SUMI, 0.28), 1.2)
 		draw_line(ORG + Vector2(0, i * TS), ORG + Vector2(7 * TS, i * TS), Ink.a(Ink.SUMI, 0.28), 1.2)

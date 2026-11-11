@@ -4,6 +4,10 @@ extends RefCounted
 #
 # Terrain:  . floor   # stone   ~ water   i ice (you slide)   f fire (burns if you rest on it)
 #           g torii gate (the goal of a gate stage)
+#           m offering (walking yokai go to it instead of you, and eat instead of striking)
+#           b plank bridge (planks you crossed fall in after the yokai's turn, with whatever is on them)
+#           w spider's web (stepping in ends your stroke)
+#           x a tile of the character to be written (write stages)
 #
 # Stage rules (optional):
 #   koan    one stroke only, and nothing answers it: clear the board or begin again
@@ -18,6 +22,10 @@ extends RefCounted
 #   rain    lanterns and fire are out; kappa leave the water
 #   snow    all water is frozen to ice
 #   night   (display only) you see near yourself and near light
+#   order   the yokai are sealed in reading order: only the first one left can be harmed
+#   write   paint every marked tile, over as many strokes as it takes; nothing need be cut
+#
+# Techniques: leap, ward, katsu, and bell (once: no yokai strikes or moves this turn)
 
 const DIRS = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 const DEF = {
@@ -26,12 +34,12 @@ const DEF = {
 	"u": ["kasa", 1], "p": ["kappa", 2], "P": ["kappa", 4], "n": ["nurikabe", 3],
 	"W": ["yukionna", 3], "G": ["gasha", 7],
 	"d": ["daruma", 2], "a": ["tanuki", 1], "A": ["tanuki", 1], "e": ["hitodama", 1],
-	"X": ["shinigami", 3],
+	"X": ["shinigami", 3], "K": ["kamaitachi", 1],
 }
 const GHOSTS = ["yurei", "yukionna", "shinigami"]
 const HARMLESS = ["kitsune", "nurikabe", "tanuki", "hitodama"]
 const LIGHT = ["chochin", "kasa", "yurei", "hitodama"]   # what the wind can carry
-const MOVERS = ["oni", "yurei", "yukionna", "kasa", "kappa", "gasha", "shinigami"]
+const MOVERS = ["oni", "yurei", "yukionna", "kasa", "kappa", "gasha", "shinigami", "kamaitachi"]
 const WIND = {"R": Vector2i(1, 0), "L": Vector2i(-1, 0), "D": Vector2i(0, 1), "U": Vector2i(0, -1)}
 const INK_CAP = 8
 const HAND_MAX = 3
@@ -48,6 +56,8 @@ static func new_state(rows, stats, rules = []):
 		"r_stone": rules.has("stone"), "open": 0,
 		"r_shiki": rules.has("shiki"), "r_rain": rules.has("rain"), "r_night": rules.has("night"),
 		"wind": Vector2i.ZERO, "hand": [], "allies": [], "revive": [], "next_id": 0,
+		"bell": stats.get("bell", 0), "stun": false, "r_order": rules.has("order"), "r_write": rules.has("write"),
+		"inked": 0, "marks": 0,
 	}
 	for r in rules:
 		if r.begins_with("wind:"):
@@ -76,6 +86,8 @@ static func new_state(rows, stats, rules = []):
 		for ch in line:
 			if ch == "." or ch == "i":
 				s.open += 1
+			if ch == "x":
+				s.marks += 1
 	return s
 
 static func key(s, full):
@@ -86,8 +98,9 @@ static func key(s, full):
 		k += "|i" + str(s.ink)
 	if s.r_shiki:
 		k += "|h" + str(s.hand) + str(s.allies)
+	k += "|" + "".join(s.rows) + str(s.bell) + str(s.inked)
 	if full:
-		k += "|" + str(s.ink) + str(s.mom) + str(s.mom_dir) + str(s.visited) + str(s.revive)
+		k += "|" + str(s.ink) + str(s.mom) + str(s.mom_dir) + str(s.visited) + str(s.revive) + str(s.stun)
 	return k
 
 static func inb(s, p):
@@ -99,7 +112,19 @@ static func ter(s, p):
 # ground a person can stand on
 static func walk(s, p):
 	var c = s.rows[p.y][p.x]
-	return c == "." or c == "i" or c == "f" or c == "g"
+	return c == "." or c == "i" or c == "f" or c == "g" or c == "m" or c == "b" or c == "w" or c == "x"
+
+static func _put(s, p, ch):
+	var row = s.rows[p.y]
+	s.rows[p.y] = row.substr(0, p.x) + ch + row.substr(p.x + 1)
+
+# under the order rule every yokai but the first one left is sealed: it cannot be harmed
+static func is_sealed(s, yi):
+	return s.r_order and yi > 0
+
+# a walking yokai on an offering is busy eating
+static func eating(s, y):
+	return ter(s, y.pos) == "m" and not GHOSTS.has(y.kind)
 
 static func yokai_at(s, p):
 	for i in range(s.yokai.size()):
@@ -157,7 +182,7 @@ static func reaches(s, kind, q, p):
 
 # Would yokai y strike a hero standing on p when the stroke ends?
 static func threatens(s, y, p):
-	if HARMLESS.has(y.kind):
+	if HARMLESS.has(y.kind) or s.stun or eating(s, y):
 		return false
 	if y.kind == "daruma" and y.down:
 		return false
@@ -189,7 +214,7 @@ static func enso_bound(s):
 	if abs(a.x - b.x) + abs(a.y - b.y) != 1:
 		return out
 	for i in range(s.yokai.size()):
-		if _inside(s.visited, s.yokai[i].pos):
+		if not is_sealed(s, i) and _inside(s.visited, s.yokai[i].pos):
 			out.append(i)
 	return out
 
@@ -222,8 +247,8 @@ static func danger(s):
 	return out
 
 static func _check_win(s):
-	if s.r_gate:
-		return  # a gate stage is won by arriving, in _enter
+	if s.r_gate or s.r_write:
+		return  # a gate stage is won by arriving, a character by its last tile: both in _enter
 	if s.r_garden:
 		if s.status == "play" and s.visited.size() >= s.open:
 			s.status = "won"
@@ -250,6 +275,17 @@ static func _enter(s, t, d, gain):
 	if s.r_gate and ter(s, t) == "g" and s.status == "play":
 		s.status = "won"
 		s.turn += 1
+	if ter(s, t) == "w":
+		s.ink = 0   # caught in the web: the stroke ends here
+	if s.r_write and ter(s, t) == "x":
+		s.inked |= 1 << (t.y * s.w + t.x)
+		var n = 0
+		for i in range(s.w * s.h):
+			if s.inked & (1 << i):
+				n += 1
+		if n >= s.marks and s.status == "play":
+			s.status = "won"
+			s.turn += 1
 
 # A yokai has left the board, by whatever means.
 static func _gone(s, y):
@@ -259,6 +295,8 @@ static func _gone(s, y):
 # Hurt yokai yi. A daruma only ever topples, once per stroke. Returns true if it is gone.
 static func _hurt(s, yi, dmg):
 	var y = s.yokai[yi]
+	if is_sealed(s, yi):
+		return false
 	if y.kind == "daruma":
 		if y.down:
 			return false
@@ -291,7 +329,7 @@ static func _slide(s, d):
 			return
 		var yi = yokai_at(s, t)
 		if yi >= 0:
-			if s.r_nocut or hidden(s.yokai[yi]) or not _cut(s, yi, t, d):
+			if s.r_nocut or hidden(s.yokai[yi]) or is_sealed(s, yi) or not _cut(s, yi, t, d):
 				return
 			continue
 		if not walk(s, t) or s.visited.has(t):
@@ -306,7 +344,7 @@ static func act_move(s, d):
 		return false
 	var yi = yokai_at(s, t)
 	if yi >= 0:
-		if s.r_nocut or hidden(s.yokai[yi]):
+		if s.r_nocut or hidden(s.yokai[yi]) or is_sealed(s, yi):
 			return false
 		s.events = []
 		s.ink -= 1
@@ -391,7 +429,7 @@ static func act_katsu(s):
 		var swims = y.kind == "kappa" or GHOSTS.has(y.kind)
 		if y.kind == "nurikabe":
 			pass  # a wall does not move; it only cracks
-		elif inb(s, t) and ter(s, t) == "~" and not swims and yokai_at(s, t) < 0:
+		elif inb(s, t) and ter(s, t) == "~" and not swims and yokai_at(s, t) < 0 and not is_sealed(s, yi):
 			s.yokai.remove_at(yi)
 			_gone(s, y)
 			s.events.append({"t": "kill", "pos": t, "kind": y.kind, "dmg": 0})
@@ -403,9 +441,46 @@ static func act_katsu(s):
 	_check_win(s)
 	return true
 
+# Bonsho: ring the temple bell. Until the next stroke no yokai strikes and none moves.
+static func act_bell(s):
+	if s.status != "play" or s.ink <= 0 or s.bell <= 0 or s.stun:
+		return false
+	s.events = [{"t": "bell", "pos": s.hero}]
+	s.ink -= 1
+	s.bell -= 1
+	s.mom = 0
+	s.stun = true
+	return true
+
+# where a yokai is heading: the nearest offering if it walks and one is laid out, else Suzu
+static func _goal(s, y):
+	var best = s.hero
+	if GHOSTS.has(y.kind):
+		return best
+	var far = 999
+	for ty in range(s.h):
+		for tx in range(s.w):
+			if s.rows[ty][tx] == "m":
+				var dist = abs(tx - y.pos.x) + abs(ty - y.pos.y)
+				if dist < far:
+					far = dist
+					best = Vector2i(tx, ty)
+	return best
+
 static func _chase(s, y):
-	var dx = s.hero.x - y.pos.x
-	var dy = s.hero.y - y.pos.y
+	if eating(s, y):
+		_put(s, y.pos, ".")   # it eats, and that is its whole turn
+		s.events.append({"t": "eat", "pos": y.pos})
+		return
+	var goal = _goal(s, y)
+	for step in range(3 if y.kind == "kamaitachi" else 1):
+		if step > 0 and (abs(s.hero.x - y.pos.x) + abs(s.hero.y - y.pos.y) == 1 or eating(s, y)):
+			return
+		_step(s, y, goal)
+
+static func _step(s, y, goal):
+	var dx = goal.x - y.pos.x
+	var dy = goal.y - y.pos.y
 	var a = Vector2i(sign(dx), 0)
 	var b = Vector2i(0, sign(dy))
 	var order = [a, b]
@@ -445,6 +520,8 @@ static func end_stroke(s):
 		bound.reverse()
 		for i in bound:
 			var y = s.yokai[i]
+			if is_sealed(s, i):
+				continue
 			s.yokai.remove_at(i)
 			_gone(s, y)
 			if s.r_shiki and s.hand.size() < HAND_MAX:
@@ -462,7 +539,7 @@ static func end_stroke(s):
 				s.yokai.append({"id": s.next_id, "ch": "e", "kind": "hitodama", "hp": 1, "max": 1, "pos": p, "down": false})
 				s.next_id += 1
 		s.revive = []
-	if s.yokai.is_empty():
+	if s.yokai.is_empty() and not s.r_write:
 		_won(s)
 		return
 	if s.r_wet:
@@ -477,7 +554,7 @@ static func end_stroke(s):
 		for i in range(s.yokai.size() - 1, -1, -1):
 			if reaches(s, al.kind, al.pos, s.yokai[i].pos):
 				_hurt(s, i, 1)
-	if s.yokai.is_empty():
+	if s.yokai.is_empty() and not s.r_write:
 		_won(s)
 		return
 	var struck = []
@@ -494,13 +571,30 @@ static func end_stroke(s):
 	for y in s.yokai:
 		y.down = false   # a daruma always gets back up
 	for y in s.yokai:
-		if MOVERS.has(y.kind) and not struck.has(y.id):
+		if MOVERS.has(y.kind) and not struck.has(y.id) and not s.stun:
 			_chase(s, y)
 	if s.wind != Vector2i.ZERO:
 		for y in s.yokai:
 			if LIGHT.has(y.kind) and can_stand(s, y.kind, y.pos + s.wind):
 				y.pos += s.wind
 	s.wet = []
+	s.stun = false
+	# the planks Suzu crossed this stroke give way, and take whatever stands on them
+	var fell = false
+	for v in s.visited:
+		if v != s.hero and ter(s, v) == "b":
+			_put(s, v, "~")
+			fell = true
+			s.events.append({"t": "fall", "pos": v})
+			var yi = yokai_at(s, v)
+			if yi >= 0 and s.yokai[yi].kind != "kappa" and not GHOSTS.has(s.yokai[yi].kind) and not is_sealed(s, yi):
+				var y = s.yokai[yi]
+				s.yokai.remove_at(yi)
+				_gone(s, y)
+				s.events.append({"t": "kill", "pos": v, "kind": y.kind, "dmg": 0})
+	if fell and s.yokai.is_empty() and not s.r_write and s.ki > 0:
+		_won(s)
+		return
 	s.turn += 1
 	s.ink = min(INK_CAP, s.ink_max + s.ink) if s.r_stone else s.ink_max
 	s.mom = 0
