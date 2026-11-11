@@ -27,7 +27,7 @@ Each figure was cropped from the painting and its paper made transparent.
 - `daruma.png` - Hakuin Ekaku, *Portrait of Daruma*, 18th century. Metropolitan Museum of Art. Public domain.
 - `tanuki.png` - Katsushika Hokusai, tanuki in a monk's robe beside a tea kettle (*Bunbuku chagama*). Public domain.
 - `shinigami.png` - Katsushika Hokusai, *The Ghost of Kohada Koheiji*, from *One Hundred Ghost Stories*, 1831-32 (detail). Scan: Rawpixel, CC BY-SA 4.0.
-- `kamaitachi.png` - Ryūkansai Masasumi, *Kamaitachi*, from *Kyōka Hyaku Monogatari*, 1853 (detail). Public domain.
+- `kamaitachi.png` - Ryūkansai Masasumi, *Kamaitachi*, from *Kyōka Hyaku Monogatari*, 1853 (detail: the animal alone, turned head up, its pale fur tinted). Public domain.
 
 ## Sound (`audio/`)
 
