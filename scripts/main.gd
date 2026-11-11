@@ -14,6 +14,7 @@ var art = {}
 var touch = false   # a phone or tablet: no hover, no right-click, fingers not pointers
 var turn_note
 var paint_rect
+var wipe
 var music
 var music_name = ""
 var sfx_pool = []
@@ -377,6 +378,12 @@ func go(scr):
 	cur = scr
 	scr.main = self
 	add_child(scr)
+	if wipe == null:
+		wipe = load("res://scripts/wipe.gd").new()
+		add_child(wipe)
+	move_child(wipe, -1)
+	if data.opts.motion:
+		wipe.start()
 
 func show_title():
 	play_music("title")

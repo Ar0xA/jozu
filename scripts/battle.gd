@@ -20,6 +20,7 @@ var walk_t = 0.0
 var aim = {}           # where each yokai is being drawn towards while it walks
 var later = []         # sounds waiting for their moment: [{at, nm}]
 var last_inked = 0
+var done_t = 0.0       # when the stage ended, for the seal and the replay of your strokes
 var flash = 0.0
 var last_drag = Vector2i(-9, -9)
 var done = false
@@ -356,6 +357,9 @@ func _end():
 	_clear_hint()
 	_push()
 	s.paths.append(s.visited.duplicate())
+	if s.visited.size() > 1 and main.data.opts.motion:
+		var tip = s.visited[s.visited.size() - 1]
+		fx.append({"k": "flick", "pos": Vector2(tip), "dir": Vector2(tip - s.visited[s.visited.size() - 2]), "life": 0.5, "max": 0.5})
 	Sim.end_stroke(s)
 	ending = true
 	_after(true, "sheathe")
@@ -378,6 +382,11 @@ func _undo():
 
 func _finish():
 	done = true
+	done_t = time
+	if s.status == "won" and rules.has("write") and main.data.opts.motion:
+		# the finished character is shown whole before the result is laid over it
+		fx.append({"k": "glyph", "pos": Vector2(3, 3), "life": 1.7, "max": 1.7})
+		done_t = time + 1.5
 	if s.status == "won":
 		grade = "jouzu" if (s.hits == 0 and s.turn <= lv.par) else "ka"
 		main.sfx("win")
@@ -476,6 +485,8 @@ func tick(dt):
 	var k = 1.0 - exp(-dt * 18.0)
 	hdisp = hdisp.lerp(Vector2(s.hero), k)
 	walk_t += dt
+	for b in extra:
+		b.show = time >= done_t
 	while not walk.is_empty() and walk[0].at <= walk_t:
 		aim[walk[0].id] = walk[0].to
 		walk.pop_front()
@@ -511,7 +522,10 @@ func _draw():
 
 	# header
 	Ink.seal(self, f, Vector2(84, 52), 24, "上手")
-	Ink.text(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI)
+	if main.data.opts.motion:
+		Ink.written(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI, time - 0.35)
+	else:
+		Ink.text(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI)
 	Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 48), ("Station %d" % (idx + 1)) if custom == null else label, 16, Ink.a(Ink.SUMI, 0.6))
 	Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 72), lv.name, 22, Ink.SUMI)
 	var rl = []
@@ -672,6 +686,8 @@ func _draw():
 		trail.append(ctr(v))
 	if trail.size() > 1:
 		Ink.brush(self, trail, 20.0, Color(0.2, 0.18, 0.17))
+		if not done:
+			draw_circle(trail[trail.size() - 1], 7.5 + (1.2 * sin(time * 5.0) if main.data.opts.motion else 0.0), Color(0.12, 0.10, 0.10))
 		for i in range(1, trail.size()):
 			var m = (trail[i - 1] + trail[i]) * 0.5
 			var n = (trail[i] - trail[i - 1]).orthogonal().normalized()
@@ -731,7 +747,18 @@ func _draw():
 			continue
 		var u = 1.0 - e.life / e.max
 		var c = ctr(e.pos)
-		if e.k == "bell":
+		if e.k == "flick":
+			# drops thrown on along the line of the stroke
+			for i in range(6):
+				var side = e.dir.orthogonal() * ((i % 3) - 1) * 0.22
+				var far = (0.30 + 0.16 * i) * (0.4 + 0.6 * u)
+				draw_circle(c + (e.dir * far + side * (0.5 + u)) * TS, (5.0 - i * 0.6) * (1.0 - u * 0.6), Ink.a(Ink.SUMI, 0.8 * (1.0 - u)))
+		elif e.k == "glyph":
+			# the character just written, whole, over the board
+			var gs = TS * 5.6
+			var ga = clamp(u * 5.0, 0.0, 1.0) * clamp((1.0 - u) * 2.5, 0.0, 1.0)
+			Ink.text(self, f, ORG + Vector2(3.5 * TS - gs * 0.5, 3.5 * TS + gs * 0.36), lv.kanji.substr(0, 1), gs, Ink.a(Ink.SHU, 0.55 * ga), HORIZONTAL_ALIGNMENT_CENTER, gs)
+		elif e.k == "bell":
 			for ring in range(3):
 				var uu = clamp(u * 1.6 - ring * 0.22, 0.0, 1.0)
 				draw_arc(c, TS * (0.4 + 3.2 * uu), 0, TAU, 48, Ink.a(Ink.KIN, (1.0 - uu) * 0.9), 6.0, true)
@@ -759,7 +786,7 @@ func _draw():
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if flash > 0.0:
 		draw_rect(Rect2(0, 0, 1280, 720), Ink.a(Ink.SHU, flash * 0.35))
-	if done:
+	if done and time >= done_t:
 		_result(f)
 	draw_btns()
 
@@ -879,12 +906,12 @@ func _result(f):
 	draw_rect(box, Ink.a(Ink.PAPER, 0.9))
 	Ink.slip(self, box, 5.0)
 	if grade == "jouzu":
-		Ink.seal(self, f, Vector2(232, 296), 50, "上手")
+		Ink.stamp(self, f, Vector2(232, 296), 50, "上手", _since(0.15, 0.3))
 		_my_scroll()
 		_seals(f)
 		Ink.text(self, f, Vector2(150, 408), "Mastered in %d stroke%s, unharmed." % [s.turn, "" if s.turn == 1 else "s"], 19, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
 	elif grade == "ka":
-		Ink.seal(self, f, Vector2(232, 290), 58, "可", Ink.AI)
+		Ink.stamp(self, f, Vector2(232, 290), 58, "可", _since(0.15, 0.3), Ink.AI)
 		_my_scroll()
 		_seals(f)
 		var why = "%d strokes; mastery asks %d." % [s.turn, lv.par]
@@ -919,4 +946,10 @@ func _my_scroll():
 	var r = Rect2(318, 222, 196, 160)
 	draw_rect(r, Ink.a(Ink.GOFUN, 0.9))
 	Ink.frame(self, r, 2.5, Ink.a(Ink.SUMI, 0.7))
-	Ink.calligraphy(self, r.grow(-10), my_paths, s.w, s.h)
+	Ink.calligraphy(self, r.grow(-10), my_paths, s.w, s.h, _since(0.45, 0.28 * max(1, my_paths.size())))
+
+# how far along something is that began `after` seconds past the end of the stage and takes `length`
+func _since(after, length):
+	if not main.data.opts.motion:
+		return 1.0
+	return clamp((time - done_t - after) / length, 0.0, 1.0)

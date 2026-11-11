@@ -33,8 +33,13 @@ func _draw():
 	draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false)
 	Ink.sun(self, Vector2(150, 150), 62)
 	# title, written top to bottom in the empty panel
-	Ink.tategaki(self, f, Vector2(1140, 30), "上手", 180, Ink.SUMI)
-	Ink.seal(self, f, Vector2(1012, 360), 34, "筆剣")
+	# the name is written out, stroke by stroke, and then settles into the cut of the typeface
+	var t = time - 0.5
+	var done = 1.0 if not main.data.opts.motion else Ink.title_strokes(self, Vector2(1140, 30), 180, Ink.a(Ink.SUMI, clamp(1.0 - (t - 3.5) / 0.8, 0.0, 1.0)), t)
+	var settle = 1.0 if not main.data.opts.motion else clamp((t - 3.4) / 0.8, 0.0, 1.0)
+	if done >= 1.0 and settle > 0.0:
+		Ink.tategaki(self, f, Vector2(1140, 30), "上手", 180, Ink.a(Ink.SUMI, settle))
+	Ink.stamp(self, f, Vector2(1012, 360), 34, "筆剣", 1.0 if not main.data.opts.motion else (t - 4.0) / 0.3)
 	Ink.blot(self, Vector2(420, 640), 560, 120, Color(0.93, 0.89, 0.79), 0.95)
 	Ink.text(self, f, Vector2(60, 592), "J Ō Z U", 52, Ink.SUMI)
 	Ink.text(self, f, Vector2(64, 628), "the upper hand", 24, Ink.a(Ink.SUMI, 0.8))

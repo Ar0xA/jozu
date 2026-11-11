@@ -104,6 +104,125 @@ static func brush(ci, pts, w, col):
 			else:
 				ci.draw_colored_polygon(quad, col)
 
+# The first part of a path, by length: u = 0 nothing, 1 all of it.
+static func part(pts, u):
+	if u >= 1.0 or pts.size() < 2:
+		return pts
+	var total = 0.0
+	for i in range(1, pts.size()):
+		total += pts[i - 1].distance_to(pts[i])
+	var want = total * max(u, 0.0)
+	var out = [pts[0]]
+	for i in range(1, pts.size()):
+		var seg = pts[i - 1].distance_to(pts[i])
+		if want <= seg:
+			if seg > 0.0:
+				out.append(pts[i - 1].lerp(pts[i], want / seg))
+			return out
+		want -= seg
+		out.append(pts[i])
+	return out
+
+# A stroke being written: the part done so far, and a wet bead where the brush is.
+static func writing(ci, pts, w, col, u):
+	if u <= 0.0:
+		return
+	var done = part(pts, u)
+	brush(ci, done, w, col)
+	if u < 1.0 and done.size() > 0:
+		ci.draw_circle(done[done.size() - 1], w * 0.42, col)
+
+# Text brushed in a character at a time: each one lands a little dark and wet, then dries.
+static func written(ci, font, pos, s, size, col, u, per = 0.14):
+	var x = pos.x
+	for i in range(s.length()):
+		var k = clamp((u - i * per) / (per * 2.2), 0.0, 1.0)
+		var adv = font.get_string_size(s[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+		if k > 0.0:
+			if k < 1.0:
+				blot(ci, Vector2(x + adv * 0.5, pos.y - size * 0.34), size * 0.55, size * 0.55, SUMI, 0.28 * (1.0 - k))
+			ci.draw_string(font, Vector2(x, pos.y + size * 0.10 * (1.0 - k) * (1.0 - k)), s[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size, a(col, col.a * k))
+		x += adv
+
+# A seal coming down on the paper: large and faint, then pressed home.
+static func stamp(ci, font, c, size, kanji, u, col = SHU):
+	if u <= 0.0:
+		return
+	if u >= 1.0:
+		seal(ci, font, c, size, kanji, col)
+		return
+	var k = 1.0 + 0.9 * (1.0 - u) * (1.0 - u)
+	ci.draw_set_transform(c - c * k, 0.0, Vector2(k, k))
+	seal(ci, font, c, size, kanji, a(col, u))
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+# One stroke of a written character, as a calligrapher makes it: the brush is pressed down, drawn
+# along more lightly, and pressed again before it lifts. u is how much of it has been written.
+static func kaku(ci, pts, w, col, u):
+	if u <= 0.0 or pts.size() < 2:
+		return
+	# the path, evenly divided and gently rounded
+	var total = 0.0
+	for i in range(1, pts.size()):
+		total += pts[i - 1].distance_to(pts[i])
+	var n = 22
+	var line = []
+	for k in range(n + 1):
+		var want = total * k / float(n)
+		var q = pts[pts.size() - 1]
+		for i in range(1, pts.size()):
+			var seg = pts[i - 1].distance_to(pts[i])
+			if want <= seg:
+				q = pts[i - 1].lerp(pts[i], want / max(seg, 0.001))
+				break
+			want -= seg
+		line.append(q)
+	var upto = int(ceil(clamp(u, 0.0, 1.0) * n))
+	var lf = PackedVector2Array()
+	var rt = PackedVector2Array()
+	for k in range(upto + 1):
+		var t = k / float(n)
+		var d = (line[min(k + 1, n)] - line[max(k - 1, 0)]).normalized()
+		var press = 0.58 + 0.42 * exp(-pow((t - 0.05) / 0.11, 2.0)) + 0.30 * exp(-pow((t - 0.96) / 0.09, 2.0))
+		var hw = w * 0.5 * press
+		lf.append(line[k] + d.orthogonal() * hw)
+		rt.append(line[k] - d.orthogonal() * hw)
+	for k in range(upto):
+		var quad = PackedVector2Array([lf[k], lf[k + 1], rt[k + 1], rt[k]])
+		if Geometry2D.triangulate_polygon(quad).is_empty():
+			ci.draw_line(line[k], line[k + 1], col, lf[k].distance_to(rt[k]), true)
+		else:
+			ci.draw_colored_polygon(quad, col)
+	ci.draw_circle(line[0], lf[0].distance_to(rt[0]) * 0.5, col)
+	ci.draw_circle(line[upto], lf[upto].distance_to(rt[upto]) * 0.5, col)
+
+# The two characters of the title, as strokes in the order they are written (a unit square each).
+const TITLE_STROKES = [
+	[[Vector2(0.49, 0.06), Vector2(0.52, 0.30), Vector2(0.51, 0.60), Vector2(0.50, 0.84)],
+	 [Vector2(0.53, 0.40), Vector2(0.66, 0.37), Vector2(0.80, 0.39), Vector2(0.86, 0.44)],
+	 [Vector2(0.06, 0.88), Vector2(0.30, 0.85), Vector2(0.70, 0.85), Vector2(0.95, 0.89)]],
+	[[Vector2(0.80, 0.07), Vector2(0.62, 0.14), Vector2(0.42, 0.18), Vector2(0.22, 0.21)],
+	 [Vector2(0.17, 0.42), Vector2(0.40, 0.39), Vector2(0.66, 0.39), Vector2(0.84, 0.42)],
+	 [Vector2(0.05, 0.63), Vector2(0.30, 0.59), Vector2(0.72, 0.59), Vector2(0.96, 0.63)],
+	 [Vector2(0.52, 0.17), Vector2(0.54, 0.45), Vector2(0.54, 0.74), Vector2(0.50, 0.88), Vector2(0.42, 0.90), Vector2(0.34, 0.82)]],
+]
+
+# 上手 written top to bottom, a stroke at a time; t is seconds since the brush touched the paper.
+# Returns how far along the whole thing is, 0 to 1.
+static func title_strokes(ci, top, size, col, t):
+	var each = 0.34
+	var gap = 0.13
+	var k = 0
+	for ci_i in range(TITLE_STROKES.size()):
+		var org = top + Vector2(-size * 0.5, size * 0.04 + ci_i * size * 1.08)
+		for st in TITLE_STROKES[ci_i]:
+			var pts = []
+			for v in st:
+				pts.append(org + v * size)
+			kaku(ci, pts, size * 0.125, col, (t - k * (each + gap)) / each)
+			k += 1
+	return clamp(t / (k * (each + gap)), 0.0, 1.0)
+
 static func text(ci, font, pos, s, size, col, align = HORIZONTAL_ALIGNMENT_LEFT, width = -1.0):
 	ci.draw_string(font, pos, s, align, width, size, col)
 
@@ -238,18 +357,23 @@ static func water(ci, r, t):
 
 # The strokes that cleared a stage, with the board taken away: what is left is handwriting.
 # A stroke that never moved is a single dot.
-static func calligraphy(ci, r, paths, w, h):
+# u: how much has been written so far, one stroke after another (1 = all of it)
+static func calligraphy(ci, r, paths, w, h, u = 1.0):
 	var cell = min(r.size.x / w, r.size.y / h)
 	var org = r.position + (r.size - Vector2(w, h) * cell) * 0.5
-	for path in paths:
+	var n = max(1, paths.size())
+	for i in range(paths.size()):
+		var k = clamp(u * n - i, 0.0, 1.0)
+		if k <= 0.0:
+			break
 		var pts = []
-		for v in path:
+		for v in paths[i]:
 			var q = Vector2(v.x, v.y) if v is Vector2i else Vector2(v[0], v[1])
 			pts.append(org + (q + Vector2(0.5, 0.5)) * cell)
 		if pts.size() == 1:
-			ci.draw_circle(pts[0], cell * 0.15, a(SUMI, 0.85))
+			ci.draw_circle(pts[0], cell * 0.15 * k, a(SUMI, 0.85))
 		else:
-			brush(ci, pts, cell * 0.42, a(SUMI, 0.88))
+			writing(ci, pts, cell * 0.42, a(SUMI, 0.88), k)
 
 # hitodama: a soul leaving, pale blue, with a tail
 static func hitodama(ci, c, s, t):

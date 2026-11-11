@@ -4,6 +4,7 @@ extends "res://scripts/screen_base.gd"
 
 var page = 0
 var tabs = []
+var page_t = 0.0     # when this chapter was turned to: its strokes are written out afresh
 
 func setup():
 	btn(Rect2(40, 672, 220, 40), "Back to the road", main.show_map, "道")
@@ -19,6 +20,7 @@ func setup():
 
 func _page(c):
 	page = c
+	page_t = time
 	for k in range(tabs.size()):
 		tabs[k].sel = k == page
 
@@ -58,7 +60,7 @@ func _draw():
 		var key = str(i)
 		if main.data.scroll.has(key):
 			painted += 1
-			Ink.calligraphy(self, Rect2(r.position + Vector2(14, 8), r.size - Vector2(28, 44)), main.data.scroll[key], lv.rows[0].length(), lv.rows.size())
+			Ink.calligraphy(self, Rect2(r.position + Vector2(14, 8), r.size - Vector2(28, 44)), main.data.scroll[key], lv.rows[0].length(), lv.rows.size(), 1.0 if not main.data.opts.motion else clamp((time - page_t - 0.3 - k * 0.07) / 0.9, 0.0, 1.0))
 			if main.grade_of(i) == "jouzu":
 				Ink.seal(self, f, r.end - Vector2(20, 24), 10, "上手")
 			var ks = 19 if rws == 2 else 16

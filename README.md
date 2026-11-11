@@ -67,6 +67,9 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   compiled to WebAssembly, in a web worker), and every board they hand over is replayed through the game's
   own rules before it is shown. If none turns up in time, or outside the browser, a board comes from a
   shelf of some 1,500 proven boards the story never used. Each has a code to pass on.
+- **Brushwork:** the title is written out stroke by stroke; an ink wash turns one screen into the next;
+  stage names are brushed in; the seal is stamped; and the strokes that cleared a stage are written out
+  again on the result and in your scroll. All of it stops with Motion off.
 - **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, and the
   painted look.
 - **Three seals a station:** 上手 mastery, 潔 no stroke taken back, 惜墨 sparing of ink. Seals earn the
