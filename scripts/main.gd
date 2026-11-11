@@ -46,7 +46,7 @@ func _ready():
 	art["tohaku"] = load("res://art/tohaku.jpg")
 	for nm in ["sesshu", "hyakki"]:
 		art[nm] = [load("res://art/%s_0.jpg" % nm), load("res://art/%s_1.jpg" % nm)]
-	for nm in ["hero", "oni", "oni3", "tengu", "kitsune", "yurei", "tamamo", "chochin", "kasa", "kappa", "nurikabe", "yukionna", "gasha", "daruma", "tanuki"]:
+	for nm in ["hero", "oni", "oni3", "tengu", "kitsune", "yurei", "tamamo", "chochin", "kasa", "kappa", "nurikabe", "yukionna", "gasha", "daruma", "tanuki", "shinigami"]:
 		var t = load("res://art/pieces/%s.png" % nm)
 		if t:
 			var img = t.get_image()
@@ -109,15 +109,15 @@ func _unhandled_input(ev):
 # On the board it stands on its tile and may rise above it; flat = centred, for the legend.
 const PIECE_SCALE = {"hero": 1.3, "oni": 1.3, "oni3": 1.25, "tengu": 1.3, "kitsune": 1.12, "yurei": 1.2, "tamamo": 1.3, "chochin": 0.95,
 	"kasa": 1.25, "kappa": 1.0, "nurikabe": 1.1, "yukionna": 1.3, "gasha": 1.15,
-	"daruma": 1.05, "tanuki": 1.05}
+	"daruma": 1.05, "tanuki": 1.05, "shinigami": 1.25}
 
 func piece(ci, kind, c, s, t = 0.0, big = false, flat = false, grow = 1.0, mod = Color.WHITE):
 	var key = kind
 	if kind == "hitodama":
 		Ink.hitodama(ci, c, s, t)
 		return
-	if kind == "shinigami":
-		# the death god has no portrait: a black seal with one character
+	if kind == "shinigami" and not art.has("p_shinigami"):
+		# without its painting, the death god is a black seal with one character
 		ci.draw_circle(c, s * 0.40, Ink.a(Ink.SUMI, 0.92 * mod.a))
 		Ink.enso(ci, c, s * 0.44, s * 0.05, Ink.a(Ink.SHU, mod.a))
 		Ink.text(ci, font, Vector2(c.x - s * 0.5, c.y + s * 0.17), "死", s * 0.46, Ink.GOFUN if mod.r > 0.5 else Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, s)
@@ -135,6 +135,9 @@ func piece(ci, kind, c, s, t = 0.0, big = false, flat = false, grow = 1.0, mod =
 		off = Vector2(sin(t * 1.4) * s * 0.03, cos(t * 1.9) * s * 0.02)
 	elif kind == "tamamo":
 		Ink.blot(ci, c, s * 0.6, s * 0.6, Ink.KIN, 0.45)
+	elif kind == "shinigami":
+		Ink.blot(ci, c, s * 0.62, s * 0.62, Ink.SUMI, 0.5 * mod.a)   # it brings its own dark
+		off = Vector2(sin(t * 1.1) * s * 0.03, cos(t * 1.5) * s * 0.03)
 	if not art.has("p_" + key):
 		# no painting for this one: a brushed ring and its name
 		ci.draw_circle(c, s * 0.36, Ink.PAPER)
@@ -144,7 +147,7 @@ func piece(ci, kind, c, s, t = 0.0, big = false, flat = false, grow = 1.0, mod =
 		return
 	var sz = Vector2(s, s) * k
 	var pos = c + off - sz * 0.5
-	if not flat and kind != "chochin" and kind != "kappa":
+	if not flat and kind != "chochin" and kind != "kappa" and kind != "shinigami":
 		pos.y = c.y + s * 0.47 - sz.y
 	ci.draw_texture_rect(art["p_" + key], Rect2(pos, sz), false, mod)
 

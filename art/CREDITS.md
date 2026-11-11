@@ -26,6 +26,7 @@ Each figure was cropped from the painting and its paper made transparent.
 - `gasha.png` - Utagawa Kuniyoshi, *Takiyasha the Witch and the Skeleton Spectre*, c. 1844 (detail). Public domain.
 - `daruma.png` - Hakuin Ekaku, *Portrait of Daruma*, 18th century. Metropolitan Museum of Art. Public domain.
 - `tanuki.png` - Katsushika Hokusai, tanuki in a monk's robe beside a tea kettle (*Bunbuku chagama*). Public domain.
+- `shinigami.png` - Katsushika Hokusai, *The Ghost of Kohada Koheiji*, from *One Hundred Ghost Stories*, 1831-32 (detail). Scan: Rawpixel, CC BY-SA 4.0.
 
 ## Sound (`audio/`)
 

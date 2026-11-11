@@ -38,21 +38,7 @@ func _initialize():
 	root.add_child(main)
 	main.erase_save()
 	steps = [
-		["title", func(): main.show_title()],
-		["daruma", func(): main.show_battle(first(17) + 3); play(1, 1)],
-		["tanuki", func(): main.show_battle(first(18) + 6)],
-		["thread", func(): main.show_battle(first(19) + 9)],
-		["wind", func(): main.show_battle(first(20) + 8)],
-		["rain", func(): main.show_battle(first(21) + 8)],
-		["snow", func(): main.show_battle(first(22) + 9)],
-		["night", func(): main.show_battle(first(23) + 8)],
 		["shinigami", func(): main.show_battle(first(24) + 9)],
-		["shikigami", func(): main.show_battle(first(25) + 4); play(2, 1)],
-		["enso", func(): main.show_battle(first(14) + 1); play(1, 99)],
-		["garden", func(): main.show_battle(first(11) + 5); play(0, 9)],
-		["won", func(): main.show_battle(first(17)); play(99, 99)],
-		["map", func(): main.show_map(); main.cur._page(20)],
-		["scroll", _fill_scroll],
 	]
 
 func _fill_scroll():
