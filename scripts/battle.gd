@@ -29,6 +29,14 @@ var b_restart
 var b_road
 var b_hint
 var b_shiki
+# A board from outside the story (daily koan, pilgrimage, workshop) is passed in as `custom`,
+# with what to do when it is won or lost and where "back" leads.
+var custom = null
+var kind_of = "story"   # story | daily | henro | custom
+var label = ""
+var on_win = Callable()
+var on_fail = Callable()
+var back = Callable()
 var guide = false      # first visit to a chapter's opening stage: the master's line is shown unasked
 var guide_msg = ""
 var dng = {}
@@ -43,11 +51,14 @@ var hint_msg = ""
 var ending = false
 
 func setup():
-	lv = Data.LEVELS[idx]
+	lv = custom if custom != null else Data.LEVELS[idx]
 	rules = lv.get("rules", [])
-	for c in Data.CHAPTERS:
-		if c.from == idx and main.grade_of(idx) == "":
-			guide = true
+	if not back.is_valid():
+		back = main.show_map
+	if custom == null:
+		for c in Data.CHAPTERS:
+			if c.from == idx and main.grade_of(idx) == "":
+				guide = true
 	b_leap = btn(Rect2(PX, 470, 172, 46), "Leap [1]", _mode.bind("leap"), "縮地")
 	b_ward = btn(Rect2(PX + 184, 470, 172, 46), "Ward [2]", _mode.bind("ward"), "結界")
 	b_katsu = btn(Rect2(PX + 368, 470, 172, 46), "Shout [3]", _katsu, "喝")
@@ -55,15 +66,28 @@ func setup():
 	b_undo = btn(Rect2(PX + 276, 526, 264, 50), "Undo  [Z]", _undo, "戻")
 	b_hint = btn(Rect2(PX, 586, 264, 42), "Ask the master  [H]", _hint, "師")
 	b_shiki = btn(Rect2(PX + 276, 586, 264, 42), "Set  [4]", _mode.bind("shiki"), "式神")
-	b_restart = btn(Rect2(PX, 642, 264, 44), "Restart  [R]", _restart)
-	b_road = btn(Rect2(PX + 276, 642, 264, 44), "Back to the road", main.show_map)
+	b_restart = btn(Rect2(PX, 642, 264, 44), "Restart  [R]" if kind_of != "henro" else "Give up this temple", _retry)
+	b_road = btn(Rect2(PX + 276, 642, 264, 44), "Back to the road" if custom == null else "Leave", _leave)
 	_restart()
 	for y in s.yokai:
 		if not kinds.has(y.kind):
 			kinds.append(y.kind)
 
+# the Restart button and key: on the pilgrimage, starting a temple again costs a staff
+# Walking out of a temple once a step has been painted is the same as giving it up.
+func _leave():
+	if kind_of == "henro" and not done and (s.turn > 0 or s.visited.size() > 1):
+		main.henro_spend()
+	back.call()
+
+func _retry():
+	if kind_of == "henro":
+		on_fail.call()
+	else:
+		_restart()
+
 func _restart():
-	s = Sim.new_state(lv.rows, main.stats_for(idx), rules)
+	s = Sim.new_state(lv.rows, main.stats_for(idx) if custom == null else Data.base_stats(lv), rules)
 	s["paths"] = []
 	s["spent"] = 0
 	undos = 0
@@ -92,7 +116,7 @@ func _sync():
 	b_leap.sel = mode == "leap"
 	b_ward.sel = mode == "ward"
 	b_end.on = not done
-	b_hint.on = not done
+	b_hint.on = not done and kind_of != "henro" and lv.get("sol", "") != ""
 	b_shiki.show = s.r_shiki
 	b_shiki.on = live and not s.hand.is_empty()
 	b_shiki.sel = mode == "shiki"
@@ -102,7 +126,7 @@ func _sync():
 	b_shiki.label = "Set  [4]   " + ("・".join(names) if not names.is_empty() else "—")
 	dng = {} if done else Sim.danger(s)
 	_guide_update()
-	b_undo.on = not hist.is_empty() and grade != "jouzu" and grade != "ka"
+	b_undo.on = not hist.is_empty() and grade != "jouzu" and grade != "ka" and kind_of != "henro"
 	b_restart.on = true
 
 func _mode(m):
@@ -263,8 +287,8 @@ func _end():
 	ending = false
 
 func _undo():
-	if hist.is_empty() or grade == "jouzu" or grade == "ka":
-		return
+	if hist.is_empty() or grade == "jouzu" or grade == "ka" or kind_of == "henro":
+		return   # a pilgrim does not take a step back
 	s = hist.pop_back()
 	undos += 1
 	mode = ""
@@ -290,6 +314,12 @@ func _finish():
 		for st in lv.get("sol", "").split("/"):
 			master += st.split(" ", false).size()
 		seal_mask = (1 if grade == "jouzu" else 0) | (2 if grade == "jouzu" and undos == 0 else 0) | (4 if s.hits == 0 and s.spent <= master else 0)
+		if custom != null:
+			var nxt2 = on_win.call(grade, seal_mask, s.turn)   # returns where "Onward" leads
+			extra.append(btn(Rect2(250, 470, 200, 50), "Onward", nxt2 if nxt2 is Callable else back, "進"))
+			if kind_of != "henro":
+				extra.append(btn(Rect2(250, 526, 200, 44), "Try again", _restart))
+			return
 		main.record(idx, grade, my_paths, seal_mask)
 		var nxt = main.show_map
 		if first:
@@ -299,6 +329,9 @@ func _finish():
 	else:
 		grade = "lost"
 		main.sfx("lose")
+		if kind_of == "henro":
+			extra.append(btn(Rect2(250, 440, 200, 54), "Rise", on_fail, "起"))
+			return
 		extra.append(btn(Rect2(250, 440, 200, 54), "Take it back", _undo, "戻"))
 		extra.append(btn(Rect2(250, 506, 200, 46), "Restart", _restart))
 
@@ -341,7 +374,7 @@ func on_key(code):
 		KEY_UP, KEY_W: _dir(Vector2i(0, -1))
 		KEY_SPACE, KEY_ENTER: _end()
 		KEY_Z, KEY_BACKSPACE: _undo()
-		KEY_R: _restart()
+		KEY_R: _retry()
 		KEY_H: _hint()
 		KEY_1:
 			if b_leap.show and b_leap.on: _mode("leap")
@@ -355,7 +388,7 @@ func on_key(code):
 			if mode != "":
 				_mode(mode)
 			else:
-				main.show_map()
+				_leave()
 
 func tick(dt):
 	var k = 1.0 - exp(-dt * 18.0)
@@ -383,7 +416,7 @@ func _draw():
 	# header
 	Ink.seal(self, f, Vector2(84, 52), 24, "上手")
 	Ink.text(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI)
-	Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 48), "Station %d" % (idx + 1), 16, Ink.a(Ink.SUMI, 0.6))
+	Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 48), ("Station %d" % (idx + 1)) if custom == null else label, 16, Ink.a(Ink.SUMI, 0.6))
 	Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 72), lv.name, 22, Ink.SUMI)
 	var rl = []
 	if rules.has("koan"):

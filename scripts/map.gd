@@ -9,9 +9,10 @@ var page = 0
 var tabs = []
 
 func setup():
-	btn(Rect2(40, 648, 180, 50), "Training", main.show_dojo, "修練")
-	btn(Rect2(232, 648, 128, 50), "Scroll", main.show_scroll, "巻")
-	btn(Rect2(372, 648, 110, 50), "Title", main.show_title, "題")
+	btn(Rect2(40, 648, 164, 50), "Training", main.show_dojo, "修練")
+	btn(Rect2(214, 648, 110, 50), "Scroll", main.show_scroll, "巻")
+	btn(Rect2(334, 648, 106, 50), "More", main.show_hub, "別")
+	btn(Rect2(450, 648, 96, 50), "Title", main.show_title, "題")
 	page = _chapter_of(_next_open())
 	var n = Data.CHAPTERS.size()
 	var per = int(ceil(n / 2.0)) if n > 17 else n
@@ -173,6 +174,6 @@ func _draw():
 		if main.grade_of(i) == "jouzu":
 			best += 1
 	var rk = main.rank()
-	Ink.text(self, f, Vector2(504, 674), "%s %s    Stations %d / %d    Seals %d / %d    Points %d" % [rk[0], rk[1], done, Data.LEVELS.size(), main.seal_count(), 3 * Data.LEVELS.size(), main.points()], 19, Ink.SUMI)
-	Ink.text(self, f, Vector2(504, 700), "Three seals a station: 上手 mastery · 潔 no stroke taken back · 惜墨 sparing of ink.", 14, Ink.a(Ink.SUMI, 0.6))
+	Ink.text(self, f, Vector2(566, 674), "%s %s   Stations %d / %d   Seals %d / %d   Points %d" % [rk[0], rk[1], done, Data.LEVELS.size(), main.seal_count(), 3 * Data.LEVELS.size(), main.points()], 17, Ink.SUMI)
+	Ink.text(self, f, Vector2(566, 700), "Seals: 上手 mastery · 潔 no stroke taken back · 惜墨 sparing of ink.", 14, Ink.a(Ink.SUMI, 0.6))
 	draw_btns()

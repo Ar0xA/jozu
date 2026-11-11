@@ -3,6 +3,7 @@ extends Control
 
 const Ink = preload("res://scripts/ink.gd")
 const Data = preload("res://scripts/data.gd")
+const Extra = preload("res://scripts/extra.gd")
 var save_path = "user://jozu_save.json"
 
 var font
@@ -219,7 +220,8 @@ func _draw():
 # ---------------------------------------------------------------- save
 
 func fresh():
-	return {"cleared": {}, "scroll": {}, "seals": {}, "sound": true, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
+	return {"cleared": {}, "scroll": {}, "seals": {}, "daily": {"day": -1, "last": -1, "streak": 0, "best": 0},
+		"henro": {"at": 0, "staffs": 3, "best": 0, "done": 0}, "mine": "", "sound": true, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
 
 func load_save():
 	data = fresh()
@@ -231,6 +233,13 @@ func load_save():
 				data.sound = bool(j.sound)
 			if j.has("scroll") and typeof(j.scroll) == TYPE_DICTIONARY:
 				data.scroll = j.scroll
+			for grp in ["daily", "henro"]:
+				if j.has(grp) and typeof(j[grp]) == TYPE_DICTIONARY:
+					for k in data[grp]:
+						if j[grp].has(k):
+							data[grp][k] = int(j[grp][k])
+			if j.has("mine"):
+				data.mine = str(j.mine)
 			if j.has("seals") and typeof(j.seals) == TYPE_DICTIONARY:
 				for k in j.seals:
 					data.seals[k] = int(j.seals[k])
@@ -347,6 +356,187 @@ func show_title():
 func show_map():
 	play_music("title")
 	go(load("res://scripts/map.gd").new())
+
+func show_hub():
+	play_music("title")
+	go(load("res://scripts/hub.gd").new())
+
+func show_custom(lv, kind, label, on_win, on_fail, back):
+	play_music("battle")
+	var scr = load("res://scripts/battle.gd").new()
+	scr.custom = lv
+	scr.kind_of = kind
+	scr.label = label
+	scr.on_win = on_win
+	scr.on_fail = on_fail
+	scr.back = back
+	go(scr)
+
+# ---------------------------------------------------------------- the daily koan
+# One single-stroke board a day, the same for everyone: gentle on Monday, hardest on Sunday.
+
+func today():
+	return int(Time.get_unix_time_from_system() / 86400.0)
+
+func daily_level():
+	var bank = Extra.DAILY
+	var day = today()
+	var weekday = (day + 3) % 7              # day 0 was a Thursday; 0 = Monday
+	var slice = bank.size() / 7
+	var lv = bank[weekday * slice + (day / 7) % slice].duplicate(true)
+	var d = Time.get_date_dict_from_unix_time(day * 86400)
+	lv["kanji"] = "日課"
+	lv["name"] = "%d-%02d-%02d" % [d.year, d.month, d.day]
+	lv["hint"] = "Today's kōan. One stroke, and only one. It is the same board for everyone today."
+	lv["story"] = []
+	lv["after"] = []
+	lv["say"] = []
+	return lv
+
+func daily_done():
+	return int(data.daily.day) == today()
+
+func show_daily():
+	var names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+	show_custom(daily_level(), "daily", names[(today() + 3) % 7] + "'s kōan", _daily_won, Callable(), show_hub)
+
+func _daily_won(_grade, _mask, _turns):
+	var d = data.daily
+	if int(d.day) != today():
+		d.streak = int(d.streak) + 1 if int(d.last) == today() - 1 else 1
+		d.last = today()
+		d.day = today()
+		d.best = max(int(d.best), int(d.streak))
+		write_save()
+	return show_hub
+
+# ---------------------------------------------------------------- the 88 temples
+# A pilgrimage of 88 boards with no stroke taken back. Three staffs: a temple lost or given
+# up costs one, and a province completed gives one back. With none left, you begin again.
+
+const PROVINCES = [[0, "発心の道場", "Awa, the place of awakening"], [23, "修行の道場", "Tosa, the place of discipline"],
+	[39, "菩提の道場", "Iyo, the place of enlightenment"], [65, "涅槃の道場", "Sanuki, the place of nirvana"]]
+
+func province(at):
+	var p = PROVINCES[0]
+	for q in PROVINCES:
+		if at >= q[0]:
+			p = q
+	return p
+
+func show_henro():
+	var h = data.henro
+	if int(h.at) >= Extra.HENRO.size():
+		h.at = 0
+		h.staffs = 3
+	var at = int(h.at)
+	var lv = Extra.HENRO[at].duplicate(true)
+	lv["kanji"] = "第%d番" % (at + 1)
+	lv["name"] = province(at)[2]
+	lv["hint"] = "Temple %d of 88. No stroke can be taken back here, and there is no master to ask. Staffs left: %d." % [at + 1, int(h.staffs)]
+	lv["story"] = []
+	lv["after"] = []
+	lv["say"] = []
+	show_custom(lv, "henro", province(at)[1], _henro_won, _henro_failed, show_hub)
+
+func _henro_won(_grade, _mask, _turns):
+	var h = data.henro
+	h.at = int(h.at) + 1
+	h.best = max(int(h.best), int(h.at))
+	for q in PROVINCES:
+		if q[0] == int(h.at) and int(h.at) > 0:
+			h.staffs = min(3, int(h.staffs) + 1)   # a province walked: one staff restored
+	if int(h.at) >= Extra.HENRO.size():
+		h.done = int(h.done) + 1
+		write_save()
+		return show_hub
+	write_save()
+	return show_henro
+
+func henro_spend():
+	var h = data.henro
+	h.staffs = int(h.staffs) - 1
+	if int(h.staffs) <= 0:
+		h.at = 0
+		h.staffs = 3
+		write_save()
+		return false
+	write_save()
+	return true
+
+func _henro_failed():
+	if henro_spend():
+		show_henro()
+	else:
+		show_hub()
+
+# ---------------------------------------------------------------- the workshop
+# A board is given away as a short code: "JZ1." and the board, base64-encoded.
+
+func show_editor():
+	play_music("title")
+	go(load("res://scripts/editor.gd").new())
+
+# the author has cleared their own board: their stroke count becomes its mastery target
+func mine_won(_grade, _mask, turns):
+	var b = board_from_code(data.mine)
+	if not b.is_empty():
+		b.par = turns if int(b.par) == 0 else min(int(b.par), turns)
+		data.mine = board_code(b)
+		write_save()
+	return show_editor
+
+func blank_board():
+	return {"rows": [".......", ".......", ".......", ".......", ".......", ".......", "...H..."], "waza": [], "rules": [], "ink": 4, "par": 0}
+
+func board_code(b):
+	var initials = ""
+	for w in b.waza:
+		initials += w.substr(0, 1)
+	var raw = "".join(b.rows) + "|" + initials + "|" + ",".join(b.rules) + "|" + str(int(b.ink)) + "|" + str(int(b.par))
+	return "JZ1." + Marshalls.utf8_to_base64(raw).replace("+", "-").replace("/", "_").replace("=", "")
+
+func board_from_code(code):
+	if not code.begins_with("JZ1."):
+		return {}
+	var b64 = code.substr(4).replace("-", "+").replace("_", "/")
+	for ch in b64:
+		if not "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".contains(ch):
+			return {}
+	if b64.length() % 4 == 1 or b64.length() < 60:
+		return {}
+	while b64.length() % 4 != 0:
+		b64 += "="
+	var raw = Marshalls.base64_to_utf8(b64)
+	var parts = raw.split("|")
+	if parts.size() != 5 or parts[0].length() != 49:
+		return {}
+	var allowed = ".#~ifgH" + "".join(preload("res://scripts/sim.gd").DEF.keys())
+	for ch in parts[0]:
+		if not allowed.contains(ch):
+			return {}
+	if parts[0].count("H") != 1:
+		return {}
+	var out = blank_board()
+	out.rows = []
+	for y in range(7):
+		out.rows.append(parts[0].substr(y * 7, 7))
+	var names = {"l": "leap", "w": "ward", "k": "katsu"}
+	for ch in parts[1]:
+		if names.has(ch) and not out.waza.has(names[ch]):
+			out.waza.append(names[ch])
+	var known = ["koan", "garden", "gate", "wet", "enso", "stone", "nocut", "shiki", "rain", "snow", "night", "wind:R", "wind:L", "wind:D", "wind:U"]
+	for r in parts[2].split(",", false):
+		if known.has(r) and not out.rules.has(r):
+			out.rules.append(r)
+	out.ink = clamp(int(parts[3]), 2, 12)
+	out.par = clamp(int(parts[4]), 0, 99)
+	return out
+
+# a board from the workshop, in the shape the battle screen plays
+func board_level(b):
+	return {"kanji": "", "name": "", "par": int(b.par) if int(b.par) > 0 else 99, "waza": b.waza.duplicate(), "rules": b.rules.duplicate(),
+		"ink": int(b.ink), "rows": b.rows.duplicate(), "hint": "", "say": [], "story": [], "after": [], "sol": ""}
 
 func show_scroll():
 	play_music("title")

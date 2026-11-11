@@ -4,6 +4,7 @@ extends SceneTree
 # stored solutions, alternating keyboard and mouse input, on a throwaway save file.
 
 const Data = preload("res://scripts/data.gd")
+const Extra = preload("res://scripts/extra.gd")
 const KEYS = {"R": KEY_RIGHT, "L": KEY_LEFT, "D": KEY_DOWN, "U": KEY_UP}
 const DIR = {"R": Vector2i(1, 0), "L": Vector2i(-1, 0), "D": Vector2i(0, 1), "U": Vector2i(0, -1)}
 
@@ -37,8 +38,9 @@ func skip_story():
 	if kind() == "story":
 		bad("story screen never ends")
 
-func play(i, use_mouse):
-	var lv = Data.LEVELS[i]
+func play(i, use_mouse, lv = null):
+	if lv == null:
+		lv = Data.LEVELS[i]
 	var b = main.cur
 	var trace = lv.get("sol", "")
 	var strokes = trace.split(" / ")
@@ -264,11 +266,188 @@ func _run():
 	if kind() != "map" or main.grade_of(3) != "jouzu":
 		bad("leaving a replayed stage lost its seal or did not return to the map")
 
+	await other_roads()
+
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://playtest_save.json"))
 	print("playtest finished: %d problem(s)" % fails.size())
 	for f in fails:
 		print("  - ", f)
 	quit(1 if fails.size() > 0 else 0)
+
+# ---- the daily koan, the 88 temples and the workshop
+func other_roads():
+	main.show_map()
+	await frames()
+	for bt in main.cur.btns:
+		if bt.label == "More":
+			bt.cb.call()
+	await frames(2)
+	if kind() != "hub":
+		bad("the map's More button does not open the other roads")
+		return
+
+	# the daily koan
+	if main.daily_done():
+		bad("the daily koan is answered on a fresh save")
+	main.show_daily()
+	await frames(2)
+	var b = main.cur
+	if kind() != "battle" or b.kind_of != "daily":
+		bad("the daily koan does not open")
+		return
+	b.on_key(KEY_H)
+	if b.hint_path.size() < 2:
+		bad("the daily koan has no hint")
+	await play(-1, true, b.lv)
+	await frames(2)
+	if b.grade != "jouzu":
+		bad("the daily koan's stored answer graded '%s'" % b.grade)
+	else:
+		b.extra[0].cb.call()
+		await frames(2)
+		if kind() != "hub":
+			bad("the daily koan does not lead back to the other roads")
+	if not main.daily_done() or int(main.data.daily.streak) != 1 or int(main.data.daily.best) != 1:
+		bad("the daily koan was not recorded")
+	if int(main.data.cleared.size()) != Data.LEVELS.size():
+		bad("a board outside the story changed the story's record")
+	main.data.daily.day -= 1     # as if that had been yesterday
+	main.data.daily.last -= 1
+	main._daily_won("jouzu", 7, 1)
+	if int(main.data.daily.streak) != 2:
+		bad("answering on the next day does not lengthen the streak")
+	main.data.daily.day -= 3
+	main.data.daily.last -= 3
+	main._daily_won("jouzu", 7, 1)
+	if int(main.data.daily.streak) != 1 or int(main.data.daily.best) != 2:
+		bad("a missed day does not reset the streak")
+
+	# the pilgrimage: losing staffs
+	main.show_henro()
+	await frames(2)
+	b = main.cur
+	if b.kind_of != "henro" or b.b_hint.on:
+		bad("a temple offers the master's hint")
+	b.on_key(KEY_UP)
+	b.on_key(KEY_LEFT)
+	var where = b.s.hero
+	b.on_key(KEY_Z)
+	if b.s.hero != where:
+		bad("a pilgrim could take a step back")
+	b.on_key(KEY_R)              # give up this temple
+	await frames(2)
+	if int(main.data.henro.staffs) != 2 or int(main.data.henro.at) != 0 or kind() != "battle":
+		bad("giving up a temple should cost one staff and stay at it")
+	main.cur.on_key(KEY_R)
+	await frames()
+	main.cur.on_key(KEY_R)
+	await frames(2)
+	if int(main.data.henro.staffs) != 3 or int(main.data.henro.at) != 0 or kind() != "hub":
+		bad("losing the last staff should begin the pilgrimage again")
+
+	# walking out mid-temple costs a staff; walking out untouched does not
+	main.show_henro()
+	await frames(2)
+	main.cur.on_key(KEY_ESCAPE)
+	await frames(2)
+	if int(main.data.henro.staffs) != 3:
+		bad("leaving an untouched temple cost a staff")
+	main.show_henro()
+	await frames(2)
+	main.cur.on_key(KEY_UP)
+	main.cur.on_key(KEY_ESCAPE)
+	await frames(2)
+	if int(main.data.henro.staffs) != 2 or kind() != "hub":
+		bad("walking out of a temple mid-stroke should cost a staff")
+	main.data.henro.staffs = 3
+
+	# the pilgrimage: all 88
+	main.show_henro()
+	await frames(2)
+	for t in range(Extra.HENRO.size()):
+		b = main.cur
+		if kind() != "battle" or int(main.data.henro.at) != t:
+			bad("temple %d did not open" % (t + 1))
+			return
+		await play(-1, t % 2 == 0, b.lv)
+		await frames(2)
+		if not b.done or (b.grade != "jouzu" and b.grade != "ka"):
+			bad("temple %d: finished with grade '%s'" % [t + 1, b.grade])
+			return
+		b.extra[0].cb.call()
+		await frames(2)
+	if kind() != "hub" or int(main.data.henro.done) != 1 or int(main.data.henro.best) != 88:
+		bad("finishing the 88 temples was not recorded")
+	main.cur.queue_redraw()
+	await frames(2)
+
+	# the workshop
+	main.show_editor()
+	await frames(2)
+	var e = main.cur
+	if kind() != "editor":
+		bad("the workshop does not open")
+		return
+	if e._problem() == "":
+		bad("an empty board can be played")
+	e.tool_btns["o"].cb.call()
+	e.on_click(e.ORG + Vector2(3.5, 2.5) * e.TS, MOUSE_BUTTON_LEFT)
+	e.on_motion(e.ORG + Vector2(4.5, 2.5) * e.TS, true)
+	if e.st.rows[2] != "...oo..":
+		bad("painting on the workshop board gives %s" % e.st.rows[2])
+	e.tool_btns["H"].cb.call()
+	e.on_click(e.ORG + Vector2(0.5, 0.5) * e.TS, MOUSE_BUTTON_LEFT)
+	if "".join(e.st.rows).count("H") != 1 or e.st.rows[0][0] != "H":
+		bad("placing Suzu twice leaves two of her")
+	for r in ["wind", "wind", "rain", "koan", "koan"]:
+		e.rule_btns[r].cb.call()
+	if not e.st.rules.has("wind:L") or not e.st.rules.has("rain") or e.st.rules.has("koan"):
+		bad("the workshop's rule buttons misbehave: %s" % str(e.st.rules))
+	if e.line.text != "":
+		bad("an uncleared board already has a code")
+	# lay out stage 1 and clear it
+	var lv = Data.LEVELS[0]
+	e._clear()
+	e.st.rows = lv.rows.duplicate()
+	e.st.ink = Data.base_stats(lv).ink
+	e._changed()
+	await frames(2)
+	e._test()
+	await frames(2)
+	b = main.cur
+	if kind() != "battle" or b.kind_of != "custom":
+		bad("'Play it' does not start the board")
+		return
+	await play(-1, false, lv)
+	await frames(2)
+	if b.grade != "jouzu" and b.grade != "ka":
+		bad("the workshop board graded '%s'" % b.grade)
+		return
+	b.extra[0].cb.call()
+	await frames(2)
+	e = main.cur
+	if kind() != "editor" or int(e.st.par) != lv.par or not e.line.text.begins_with("JZ1."):
+		bad("clearing a workshop board does not make its code")
+		return
+	var code = e.line.text
+	var back = main.board_from_code(code)
+	if back.is_empty() or back.rows != lv.rows or int(back.par) != lv.par or int(back.ink) != int(e.st.ink):
+		bad("a board code does not read back as the same board")
+	for junk in ["", "JZ1.", "JZ1.!!!!", "hello", code.substr(0, code.length() - 6), "JZ1." + Marshalls.utf8_to_base64("x|y")]:
+		if not main.board_from_code(junk).is_empty():
+			bad("a broken code was accepted: " + junk)
+	e._clear()
+	e.line.text = "  " + code + " "
+	e._load()
+	if e.st.rows != lv.rows or int(e.st.par) != lv.par:
+		bad("loading a code does not bring the board back")
+	main.load_save()
+	if main.data.mine != code or int(main.data.henro.done) != 1:
+		bad("the workshop board or the pilgrimage did not survive a reload")
+	e.on_key(KEY_ESCAPE)
+	await frames(2)
+	if kind() != "hub":
+		bad("Escape does not leave the workshop")
 
 func _key(code):
 	var e = InputEventKey.new()

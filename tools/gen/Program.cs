@@ -680,7 +680,7 @@ static class Gen
     }
 
     // pool = true: keep every accepted board of the style chapters (10+), for the assembler to build a ladder from
-    public static void Generate(string outPath, int seed, bool pool = false)
+    public static void Generate(string outPath, int seed, bool pool = false, int only = -1)
     {
         string[] none = { "" };
         var segs = new List<Seg>
@@ -783,10 +783,11 @@ static class Gen
         foreach (var g in segs)
         {
             if (pool && g.chapter < 10) continue;
+            if (only >= 0 && g.chapter != only) continue;
             if (all.Any(l => l.chapter == g.chapter && l.seg == g.seg)) { Console.WriteLine($"ch{g.chapter} seg{g.seg}: already done"); continue; }
             var found = new List<LevelOut>();
             var lk = new object();
-            int want = pool ? 36 : g.count * 5, attempts = 0;
+            int want = only >= 0 ? 90 : pool ? 36 : g.count * 5, attempts = 0;
             var sw = System.Diagnostics.Stopwatch.StartNew();
             while (found.Count < want && attempts < 60000 && sw.Elapsed.TotalSeconds < (pool ? 170 : 200))
             {
@@ -872,7 +873,7 @@ static class Program
     {
         Console.OutputEncoding = Encoding.UTF8;
         if (a.Length >= 3 && a[0] == "solve") Gen.SolveFile(a[1], a[2]);
-        else if (a.Length >= 2 && a[0] == "gen") Gen.Generate(a[1], a.Length > 2 ? int.Parse(a[2]) : 1, a.Length > 3 && a[3] == "pool");
+        else if (a.Length >= 2 && a[0] == "gen") Gen.Generate(a[1], a.Length > 2 ? int.Parse(a[2]) : 1, a.Length > 3 && a[3] == "pool", a.Length > 4 ? int.Parse(a[4]) : -1);
         else Console.WriteLine("usage: solve in.json out.json | gen out.json [seed]");
     }
 }

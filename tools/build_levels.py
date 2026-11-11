@@ -41,10 +41,15 @@ def ladder(c):
         seen_rows.add(k)
         seen_sol.add(g['trace'])
         out.append(g)
+    SPARE[c] = list(out)
     if len(out) > MAX_PER_STYLE:
         idx = sorted(set(round(i * (len(out) - 1) / (MAX_PER_STYLE - 1)) for i in range(MAX_PER_STYLE)))
         out = [out[i] for i in idx]
+    used = set(''.join(g['rows']) for g in out)
+    SPARE[c] = [g for g in SPARE[c] if ''.join(g['rows']) not in used]
     return out
+
+SPARE = {}   # chapter -> boards found but not used in its ladder
 
 NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十']
 
@@ -632,6 +637,32 @@ head = head[:i] + ch + head[j:]
 body = 'const LEVELS = [\n' + ''.join('\t' + gd(l) + ',\n' for l in levels) + ']\n'
 open(p, 'w', encoding='utf-8').write(head + body)
 json.dump(sols, open(os.path.join(root, 'tools', 'solutions.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+
+# ---- boards for the daily koan and the 88 temples (scripts/extra.gd)
+def slim(g):
+    return {'rows': g['rows'], 'waza': g['waza'], 'rules': g.get('rules') or [], 'ink': g.get('ink') or 4, 'par': g['par'], 'sol': g['trace']}
+
+daily = list(SPARE.get(10, []))
+dp = os.path.join(root, 'tools', 'daily_pool.json')
+if os.path.exists(dp):
+    daily += json.load(open(dp, encoding='utf-8'))
+seen, bank = set(''.join(l['rows']) for l in levels), []
+for g in sorted(daily, key=difficulty):
+    k = ''.join(g['rows'])
+    if k not in seen:
+        seen.add(k)
+        bank.append(slim(g))
+bank = bank[:len(bank) // 7 * 7]   # seven equal slices, Monday's the gentlest
+
+rest = [g for c in sorted(SPARE) if c >= 12 for g in SPARE[c]]
+rest.sort(key=difficulty)
+henro = [slim(rest[round(i * (len(rest) - 1) / 87)]) for i in range(88)] if len(rest) >= 88 else []
+
+with open(os.path.join(root, 'scripts', 'extra.gd'), 'w', encoding='utf-8') as fh:
+    fh.write('extends RefCounted\n# Boards outside the story, written by tools/build_levels.py. All are proven solvable.\n\n')
+    fh.write('# The daily koan bank, easiest first.\nconst DAILY = [\n' + ''.join('\t' + json.dumps(b, ensure_ascii=False) + ',\n' for b in bank) + ']\n\n')
+    fh.write('# The 88 temples, in the order they are walked.\nconst HENRO = [\n' + ''.join('\t' + json.dumps(b, ensure_ascii=False) + ',\n' for b in henro) + ']\n')
+print('%d daily koan, %d temples' % (len(bank), len(henro)))
 
 print('%d stages' % len(levels))
 for k, c in enumerate(ORDER):

@@ -5,6 +5,7 @@ extends SceneTree
 
 const Sim = preload("res://scripts/sim.gd")
 const Data = preload("res://scripts/data.gd")
+const Extra = preload("res://scripts/extra.gd")
 const DIR = {"R": Vector2i(1, 0), "L": Vector2i(-1, 0), "D": Vector2i(0, 1), "U": Vector2i(0, -1)}
 
 func _init():
@@ -16,6 +17,20 @@ func _init():
 			bad += 1
 			print("FAIL %3d %s  %s" % [i + 1, lv.kanji, why])
 	print("%d stages checked, %d failed" % [Data.LEVELS.size(), bad])
+	var seen = {}
+	for set in [["daily", Extra.DAILY], ["temple", Extra.HENRO]]:
+		var wrong = 0
+		for i in range(set[1].size()):
+			var lv = set[1][i]
+			var why = check(lv, lv.get("sol", ""))
+			if why == "" and seen.has("".join(lv.rows)):
+				why = "the same board twice"
+			seen["".join(lv.rows)] = true
+			if why != "":
+				wrong += 1
+				print("FAIL %s %3d  %s" % [set[0], i + 1, why])
+		bad += wrong
+		print("%d %s boards checked, %d failed" % [set[1].size(), set[0], wrong])
 	quit(1 if bad > 0 else 0)
 
 func check(lv, trace):
