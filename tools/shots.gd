@@ -38,7 +38,8 @@ func _initialize():
 	root.add_child(main)
 	main.erase_save()
 	steps = [
-		["shinigami", func(): main.show_battle(first(24) + 9)],
+		["guide", func(): main.show_battle(0)],
+		["guide2", func(): main.show_battle(first(11))],
 	]
 
 func _fill_scroll():

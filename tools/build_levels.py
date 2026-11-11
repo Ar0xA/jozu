@@ -401,7 +401,8 @@ RULE_WEIGHT = {'wet': 4, 'enso': 5, 'koan': 6, 'garden': 6, 'gate': 6, 'stone': 
 KINDS = {'d': 'daruma', 'a': 'tanuki', 'A': 'tanuki', 'e': 'hitodama', 'X': 'shinigami',
          'c': 'chochin', 'o': 'oni', 'O': 'bigoni', 'S': 'bigoni', 't': 'tengu', 'T': 'tengu', 'k': 'kitsune', 'y': 'yurei',
          'u': 'kasa', 'p': 'kappa', 'P': 'kappa', 'n': 'nurikabe', 'W': 'yukionna', 'G': 'gasha', 'Q': 'kitsune'}
-used_says = set()
+used_says = {}     # saying index -> the chapters it has been used in
+MAX_USES = 3       # a saying may appear three times in the whole game, never twice in one chapter
 
 def features(b, trace):
     """What a stage is about: its yokai, its ground, and the shape of its answer."""
@@ -438,7 +439,8 @@ def pick_saying(b, trace, chapter):
     f = features(b, trace)
     best, best_score = None, 0
     for i, (jp, ro, en, chs, tags) in enumerate(SAY):
-        if i in used_says:
+        seen = used_says.get(i, [])
+        if len(seen) >= MAX_USES or chapter in seen:
             continue
         rule = [t for t in tags if t in RULE_TAGS]
         if rule and not any(t in f for t in rule):
@@ -453,19 +455,21 @@ def pick_saying(b, trace, chapter):
             continue
         if not chs and not tags:
             score = 0.5
+        score -= 1.5 * len(seen)   # prefer one not yet heard
         if score > best_score:
             best, best_score = i, score
     if best is None and any(t in f for t in RULE_TAGS):
         # this style's own sayings are all spoken for: fall back on the common stock
         for i, (jp, ro, en, chs, tags) in enumerate(SAY):
-            if i in used_says or chs or any(t in RULE_TAGS for t in tags):
+            seen = used_says.get(i, [])
+            if len(seen) >= MAX_USES or chapter in seen or chs or any(t in RULE_TAGS for t in tags):
                 continue
             score = sum(3 for t in tags if t in f) + 0.5
             if score > best_score:
                 best, best_score = i, score
     if best is None:
         return []
-    used_says.add(best)
+    used_says.setdefault(best, []).append(chapter)
     return list(SAY[best][:3])
 
 # A line of history or legend about each chapter's place, shown on the road map.
@@ -497,6 +501,43 @@ NOTES = [
     'Onmyōdō, the Way of Yin and Yang, was the court science of divination and protection in Heian Japan. Its most famous master, Abe no Seimei (921–1005), is said to have commanded twelve shikigami.',
     'The shinigami, a spirit that draws people toward death, appears in Edo-period puppet plays about lovers\' suicides and in the 1841 picture book Ehon Hyaku Monogatari.',
 ]
+
+# A few words between Suzu and her master at the middle and the end of each style chapter.
+T, Z = 'Tessai', 'Suzu'
+BEATS = {
+    10: ([[T, 'A monk asked Jōshū whether a dog has Buddha-nature. Jōshū said 無. Monks have sat with that one word for a thousand years.'], [Z, 'What does it mean?'], [T, 'It means stop asking and paint.']],
+         [[T, 'The last case. 百尺竿頭一歩を進む: from the top of a hundred-foot pole, take one step more.'], [Z, 'There is no more pole.'], [T, 'Yes.']]),
+    11: ([[Z, "I keep leaving one stone's shadow unraked."], [T, 'Then you began in the wrong place. 脚下照顧. Look at where you are standing before you look at where you are going.']],
+         [[T, 'Musō Soseki, who laid out the great temple gardens, taught that whoever tells the garden apart from the practice has not found the Way.'], [Z, 'Then this is the practice.'], [T, 'It was the practice ten gardens ago. Go on.']]),
+    12: ([[Z, 'Running feels like losing.'], [T, 'Sun Tzu wrote: 百戦百勝は善の善なる者に非ず. To win a hundred battles in a hundred is not the highest skill. To prevail without fighting is.']],
+         [[T, 'The last gate. A torii has no doors. Nothing has ever been keeping you out.'], [Z, 'Only what stands in front of it.'], [T, 'Only that.']]),
+    13: ([[T, 'Sesshū was tied to a temple pillar as a boy, for drawing when he should have been chanting. He drew a mouse on the floor in his own tears, with his toe, so well that the abbot let him paint.'], [Z, 'Wet ink.'], [T, 'The wettest.']],
+         [[T, '一期一会. This stroke, on this paper, once. Let the last one be a wall you are glad to have built.']]),
+    14: ([[Z, 'My circles do not close cleanly.'], [T, 'Nor do mine. An ensō left a little open is still an ensō. The gap is where the rest of the world gets in.']],
+         [[T, 'Draw the last one as if it were the only one.'], [Z, 'It is the only one.'], [T, 'Now you sound like a monk. Go.']]),
+    15: ([[T, 'Good ink sticks are kept for decades before anyone uses them. 古墨. The old ones grind smoother.'], [Z, 'Then waiting improves it.'], [T, 'Waiting improves most things that are not soup.']],
+         [[T, '惜墨如金. Treasure ink like gold. One last time: spend nothing you do not have to, and then spend all of it at once.']]),
+    16: ([[T, 'Tsukahara Bokuden was challenged on a ferry by a loud young swordsman. He proposed an island, let the man leap ashore first, and pushed the boat back out.'], [Z, 'He never drew.'], [T, 'He called it 無手勝流.']],
+         [[T, 'The last of the empty-handed ones. 活人剣: the sword that gives life. Yours has not left its scabbard all chapter.']]),
+    17: ([[Z, 'It got up again.'], [T, 'It will always get up again. That is not the daruma being difficult. That is the daruma showing you how.']],
+         [[T, "When a daruma's wish is granted, its second eye is painted in. Let us see whether these have earned theirs."]]),
+    18: ([[Z, 'Now I do not trust any of the stones.'], [T, 'Good. 人は見かけによらぬもの: nothing is what it appears. But most stones are stones. Do not spend your whole life checking.']],
+         [[T, 'In the old tale the tea-kettle tanuki danced on a tightrope to make his poor master rich, and was honoured for it ever after. They are not wicked. They are only bored.']]),
+    19: ([[Z, 'If I stand where one fell, it cannot come back.'], [T, '会うは別れの始め. To meet is the beginning of parting. You are only hurrying it along.']],
+         [[T, 'The last pair. Be gentle. They have been looking for each other longer than the scroll has existed.']]),
+    20: ([[T, 'Bashō wrote that the wind that moves the clouds had got into him, and he could not stop thinking of the road. 片雲の風にさそはれて.'], [Z, 'So he followed it.'], [T, 'For fifteen hundred miles. You need only follow it a tile at a time.']],
+         [[T, '疾風に勁草を知る. In a gale you learn which grass is strong. Last gale.']]),
+    21: ([[Z, 'The kappa are slower on land.'], [T, "Everyone is slower away from home. Remember that, the next time you are in someone else's water."]],
+         [[T, 'After this the rains end. 梅雨明け. Finish before the lanterns dry out.']]),
+    22: ([[T, 'Issa lost his mother at two, was sent away at thirteen, and came home to this snow country to die. He still wrote: 雪とけて村いっぱいの子どもかな.'], [Z, 'The snow melts, and the village is full of children.'], [T, 'He never stopped noticing.']],
+         [[T, '雪中の松柏. Pine and cypress stay green in the snow. Be one of those.']]),
+    23: ([[Z, 'I put out the lantern and lost the whole corner.'], [T, '月夜に提灯 is a lantern you did not need. 闇夜の提灯 is one you did. Learn to tell which night it is.']],
+         [[T, 'In the game of a hundred tales, when the last light is put out, something is supposed to come. Put it out anyway.']]),
+    24: ([[T, "Seimei's wife could not bear the faces of his shikigami, so he kept them under the Modori bridge, and not in the house."], [Z, 'That seems unkind to them.'], [T, 'You have met them. Would you want one in the kitchen?']],
+         [[T, 'Last board. Everything you have bound, everything you have learned, and no blade. 適材適所: the right one in the right place.']]),
+    25: ([[Z, 'It never hurries.'], [T, 'It does not have to. 無常迅速. It is you who are quick, and getting quicker.']],
+         [[T, 'Ryōkan wrote, near the end: 散る桜 残る桜も 散る桜. Go and meet it once more, and then let us have some tea.']]),
+}
 
 levels, sols, chapters, bosses = [], {}, [], []
 NCH = len(CHAPTERS)
@@ -553,6 +594,15 @@ for c in ORDER:
         b = {k: b[k] for k in ('kanji', 'name', 'par', 'waza', 'rules', 'ink', 'rows', 'hint', 'say', 'story', 'after', 'sol')}
         sols[b['kanji'] + '|' + ''.join(b['rows'])] = trace
         levels.append(b)
+    if c in BEATS:
+        first = chapters[-1]['from']
+        n = len(levels) - first
+        if n >= 4:
+            mid, end = BEATS[c]
+            if not levels[first + n // 2]['story']:
+                levels[first + n // 2]['story'] = mid
+            if not levels[-1]['story']:
+                levels[-1]['story'] = end
     if c < 10 or c == ORDER[-1]:
         bosses.append(len(levels) - 1)
 

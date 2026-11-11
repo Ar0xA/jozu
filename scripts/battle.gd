@@ -29,6 +29,8 @@ var b_restart
 var b_road
 var b_hint
 var b_shiki
+var guide = false      # first visit to a chapter's opening stage: the master's line is shown unasked
+var guide_msg = ""
 var dng = {}
 var undos = 0
 var seal_mask = 0
@@ -43,6 +45,9 @@ var ending = false
 func setup():
 	lv = Data.LEVELS[idx]
 	rules = lv.get("rules", [])
+	for c in Data.CHAPTERS:
+		if c.from == idx and main.grade_of(idx) == "":
+			guide = true
 	b_leap = btn(Rect2(PX, 470, 172, 46), "Leap [1]", _mode.bind("leap"), "縮地")
 	b_ward = btn(Rect2(PX + 184, 470, 172, 46), "Ward [2]", _mode.bind("ward"), "結界")
 	b_katsu = btn(Rect2(PX + 368, 470, 172, 46), "Shout [3]", _katsu, "喝")
@@ -96,6 +101,7 @@ func _sync():
 		names.append(Data.LEGEND[k][0].substr(0, 1))
 	b_shiki.label = "Set  [4]   " + ("・".join(names) if not names.is_empty() else "—")
 	dng = {} if done else Sim.danger(s)
+	_guide_update()
 	b_undo.on = not hist.is_empty() and grade != "jouzu" and grade != "ka"
 	b_restart.on = true
 
@@ -178,32 +184,55 @@ func _play_tokens(st, stroke, track):
 		if track and hint_path.back() != st.hero:
 			hint_path.append(st.hero)
 
-# The master shows the next stroke of a known solution, if you are still on its line.
-func _hint():
-	if done:
-		return
+# The next stroke of the known solution, if the board is still on its line. Returns a reason
+# when it cannot be shown.
+func _master_line():
 	_clear_hint()
 	if s.visited.size() > 1 or s.ink != s.ink_max:
-		hint_msg = "Finish or undo this stroke first; the master shows whole strokes."
-		return
+		return "Finish or undo this stroke first; the master shows whole strokes."
 	var strokes = lv.get("sol", "").split(" / ")
 	var ref = Sim.new_state(lv.rows, Data.base_stats(lv), rules)
 	for k in range(min(s.turn, strokes.size())):
 		_play_tokens(ref, strokes[k], false)
 		Sim.end_stroke(ref)
 	if s.turn >= strokes.size() or ref.status != "play" or not _same_board(ref, s):
-		hint_msg = "The master's line begins at the first stroke. Restart (R) to follow it."
-		return
+		return "The master's line begins at the first stroke. Restart (R) to follow it."
 	hint_path = [s.hero]
 	_play_tokens(s.duplicate(true), strokes[s.turn], true)
 	if hint_path.size() == 1 and hint_marks.is_empty():
-		hint_msg = "The master waits. Sheathe the brush without moving."
+		return "The master waits. Sheathe the brush without moving."
+	return ""
+
+func _hint():
+	if done:
+		return
+	hint_msg = _master_line()
 	main.sfx("click")
+
+# While guiding, say what to do next in plain words.
+func _guide_update():
+	guide_msg = ""
+	if not guide or done:
+		return
+	if s.visited.size() == 1 and s.ink == s.ink_max:
+		var why = _master_line()
+		if why == "":
+			guide_msg = "Paint the dotted stroke: click or drag from tile to tile, or use the arrow keys."
+		elif why.begins_with("The master waits"):
+			guide_msg = "Here the master waits. Sheathe the brush without moving: Space, or 納刀."
+		else:
+			guide_msg = "You have left the master's line. Carry on, or restart (R) to see it again."
+		return
+	if hint_path.size() > 1 and s.hero == hint_path.back():
+		guide_msg = "Now sheathe the brush to end the stroke: Space, or 納刀. The yokai move after you."
+	elif hint_path.size() > 1:
+		guide_msg = "Follow the dots to the ring. Right-click or Z takes a step back."
 
 func _dir(d):
 	if done:
 		return
-	_clear_hint()
+	if not guide:
+		_clear_hint()
 	_push()
 	if mode == "leap":
 		_after(Sim.act_leap(s, d))
@@ -217,7 +246,8 @@ func _dir(d):
 func _katsu():
 	if done:
 		return
-	_clear_hint()
+	if not guide:
+		_clear_hint()
 	_push()
 	_after(Sim.act_katsu(s))
 
@@ -547,6 +577,8 @@ func _draw():
 			Ink.text(self, f, c + Vector2(-28, -40 - 20 * u), "喝", 56, Ink.a(Ink.SHU, 1.0 - u))
 
 	_panel(f)
+	if guide_msg != "":
+		Ink.text(self, f, Vector2(ORG.x, 713), "手本  " + guide_msg, 15, Ink.SHU)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if flash > 0.0:
 		draw_rect(Rect2(0, 0, 1280, 720), Ink.a(Ink.SHU, flash * 0.35))
