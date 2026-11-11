@@ -497,7 +497,7 @@
   "after": [
    [
     "Kuzunoha",
-    "She has gone east. But the road east runs under Mount Ōe, and the oni king Shuten-dōji has shut it. A man named Tsuna keeps watch there. He has history with oni."
+    "She has gone east. But the oni king Shuten-dōji has come down from Mount Ōe and shut the roads out of the capital. A man named Tsuna keeps watch there. He has history with oni."
    ]
   ]
  },
@@ -522,7 +522,7 @@
   "story": [
    [
     "",
-    "Mount Ōe. The road east runs under it, and the road has been shut with a gate of horn and iron."
+    "Mount Ōe. Every road out of the capital is watched from it, and the pass has been shut with a gate of horn and iron."
    ],
    [
     "Tsuna",
@@ -639,7 +639,7 @@
   "story": [
    [
     "Shuten",
-    "A girl with a paintbrush. Raikō brought an army and a lie."
+    "A girl with a paintbrush. Raikō brought five men, a disguise and a lie."
    ],
    [
     "Suzu",
@@ -661,7 +661,7 @@
    ],
    [
     "Tsuna",
-    "The road east is open. The fox went to Nasu, where the grass dies in a ring. Find the monk Gennō. He hits things."
+    "The roads are open. The fox went to Nasu, where the grass dies in a ring. Find the monk Gennō. He hits things."
    ]
   ]
  },
@@ -818,7 +818,7 @@
    ],
    [
     "Tamamo",
-    "I was the jewel of three courts, child. I will move as you move, think as you think, and I have had nine hundred years to practise."
+    "I was the jewel of three courts, child. I will move as you move, think as you think, and I have had two thousand years to practise."
    ],
    [
     "Suzu",
@@ -2134,7 +2134,7 @@
    ],
    [
     "Tessai",
-    "They must be put back the same way. 物には順序. One, then two. Cut the three first and you will only blunt your brush."
+    "They must be put back the same way. 物には順序がある. One, then two. Cut the three first and you will only blunt your brush."
    ],
    [
     "Suzu",
@@ -2181,6 +2181,130 @@
    [
     "Tessai",
     "永字八法. They say the one character 永 holds all eight strokes there are. You will get to it. Start with the ones that are straight lines."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "誘い",
+  "name": "The Lure",
+  "hint": "Here both are in play: an offering draws the walking yokai, and a plank you have crossed falls with whoever is standing on it. Arrange things so that the way to the food is over the bridge.",
+  "story": [
+   [
+    "",
+    "A river again, and on the near bank a tray of dumplings that someone has left at a wayside shrine."
+   ],
+   [
+    "Tessai",
+    "You know what each does. Now make them work for each other. 一石二鳥."
+   ],
+   [
+    "Suzu",
+    "That is not what the offering was left for."
+   ],
+   [
+    "Tessai",
+    "No. Leave another on your way back."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "海老で鯛を釣る. A shrimp for a sea bream. The oldest trade there is."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "嵐",
+  "name": "The Storm",
+  "hint": "Wind, a bell and the sickle weasel together. The wind carries lanterns, umbrellas and ghosts a tile each turn. The bell, once, holds every yokai still, but it does not hold the wind.",
+  "story": [
+   [
+    "",
+    "The sky goes the colour of a bruise. Lanterns tear loose from their poles, and something low and quick is running in the grass."
+   ],
+   [
+    "Tessai",
+    "野分. The field-parting wind of autumn. Everything light will move whether it wants to or not. The weasel will move because it wants to."
+   ],
+   [
+    "Suzu",
+    "And the bell?"
+   ],
+   [
+    "Tessai",
+    "The bell stops what has legs. It does not stop weather."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "雨降って地固まる. After the rain the ground is firmer. So are you."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "結び目",
+  "name": "The Knot",
+  "hint": "Seals and webs together: only the lowest number can be harmed, and a web ends your stroke. Later an offering joins them. Plan the order first, and the stops second.",
+  "story": [
+   [
+    "",
+    "The numbered ones again, standing among the webs like washing on a line."
+   ],
+   [
+    "Suzu",
+    "Everything here is about what I may not do."
+   ],
+   [
+    "Tessai",
+    "急がば回れ. If you are in a hurry, go round. Today that is not advice. It is the map."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "A knot is only a rope that knows its order. Well tied."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "筆",
+  "name": "The Brush",
+  "hint": "More characters, and now the strokes slant. A slanting stroke is painted as steps, and the tiles between are yours to cross or leave. The yokai, as ever, will not wait.",
+  "story": [
+   [
+    "",
+    "Tessai sets out a second sheet. The grey strokes on this one lean and sweep."
+   ],
+   [
+    "Tessai",
+    "人. A person: two strokes leaning on each other. They say that is why it is written so."
+   ],
+   [
+    "Suzu",
+    "Is that true?"
+   ],
+   [
+    "Tessai",
+    "No. It is a picture of someone standing. But it is the better story, and you will remember it."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "習うより慣れろ. Rather than being taught, get used to it. On to the next sheet."
    ]
   ],
   "par": 1,

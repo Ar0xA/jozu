@@ -10,19 +10,11 @@ func setup():
 	btn(Rect2(940, 444, 290, 58), "Continue the road" if has else "Take up the brush", main.show_map, "旅")
 	b_new = btn(Rect2(940, 516, 290, 50), "Begin anew", _anew, "新")
 	b_new.show = has
-	b_snd = btn(Rect2(940, 588, 290, 44), "", _sound, "音")
-	_sound_label()
+	b_snd = btn(Rect2(940, 588, 290, 44), "Settings", main.show_settings, "設")
 	if OS.has_feature("web"):  # a browser tab is closed by the browser; offer the whole screen instead
 		btn(Rect2(940, 646, 290, 44), "Full screen", main.toggle_fullscreen, "全")
 	else:
 		btn(Rect2(940, 646, 290, 44), "Leave", func(): get_tree().quit(), "去")
-
-func _sound():
-	main.toggle_sound()
-	_sound_label()
-
-func _sound_label():
-	b_snd.label = "Sound: on  [M]" if main.data.sound else "Sound: off  [M]"
 
 func _anew():
 	if not armed:

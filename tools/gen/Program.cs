@@ -58,19 +58,20 @@ sealed class Sim
     readonly char[][] rows; readonly int w, h;
     readonly bool rKoan, rWet, rEnso, rGarden, rGate, rNocut, rStone, rShiki, rRain;
     readonly int windX, windY;
-    readonly bool rOrder, rWrite, hasChg;
+    readonly bool rOrder, rWrite, hasChg, slowKama;
     readonly int marks;
     readonly List<(int x, int y)> offers = new();
     readonly int open;
     public St start;
 
-    public Sim(string[] src, int ink, int ki, bool leap, bool ward, bool katsu, string[] rules = null, bool bell = false)
+    public Sim(string[] src, int ink, int ki, bool leap, bool ward, bool katsu, string[] rules = null, bool bell = false, bool slowKama = false)
     {
         rules ??= Array.Empty<string>();
         rKoan = rules.Contains("koan"); rWet = rules.Contains("wet"); rEnso = rules.Contains("enso");
         rGarden = rules.Contains("garden"); rGate = rules.Contains("gate"); rNocut = rules.Contains("nocut"); rStone = rules.Contains("stone");
         rShiki = rules.Contains("shiki"); rRain = rules.Contains("rain");
         rOrder = rules.Contains("order"); rWrite = rules.Contains("write");
+        this.slowKama = slowKama;
         bool snow = rules.Contains("snow");
         foreach (var r in rules)
             if (r.StartsWith("wind:")) { int d = Array.IndexOf(TAG, r.Substring(5)); windX = DX[d]; windY = DY[d]; }
@@ -338,7 +339,7 @@ sealed class Sim
                 if (dist < far) { far = dist; gx = ox; gy = oy; }
             }
         }
-        int steps = k == "kamaitachi" ? 3 : 1;
+        int steps = k == "kamaitachi" && !slowKama ? 3 : 1;
         for (int st = 0; st < steps; st++)
         {
             if (st > 0 && (Math.Abs(s.hx - s.yx[i]) + Math.Abs(s.hy - s.yy[i]) == 1 || Eating(s, i))) return;
@@ -563,6 +564,7 @@ sealed class Sim
         return r;
     }
 
+    public int Beam = 0;   // writing stages only: how many positions to carry from stroke to stroke (0 = all, exact)
     public Result Solve(int cap, int maxDepth = 12, double seconds = 1e9)
     {
         var res = new Result();
@@ -598,7 +600,7 @@ sealed class Sim
                     if (seen.Add(kv.Key)) { kv.Value.parent = s; next.Add(kv.Value); layer.Add(kv.Key); ways[kv.Key] = ws; }
                     else if (layer.Contains(kv.Key)) ways[kv.Key] += ws;
                 }
-                if (seen.Count > cap || clock.Elapsed.TotalSeconds > seconds) { res.states = seen.Count; res.capped = true; return res; }
+                if ((seen.Count > cap && !(rWrite && Beam > 0)) || clock.Elapsed.TotalSeconds > seconds) { res.states = seen.Count; res.capped = true; return res; }
             }
             res.states = seen.Count;
             if (W > 0)
@@ -610,7 +612,12 @@ sealed class Sim
                 return res;
             }
             if (next.Count == 0) return res;
-            if (seen.Count > cap) { res.capped = true; return res; }
+            if (rWrite && Beam > 0)
+            {
+                // a character can be painted in very many orders: keep the positions with the most painted
+                if (next.Count > Beam) next = next.OrderByDescending(x => BitOperations.PopCount(x.inked)).Take(Beam).ToList();
+            }
+            else if (seen.Count > cap) { res.capped = true; return res; }
             frontier = next;
         }
         return res;
@@ -638,6 +645,7 @@ static class Gen
     static Result SolveRows(string[] rows, string[] waza, int cap, string[] rules = null, int ink = 4)
     {
         var sim = new Sim(rows, ink <= 0 ? 4 : ink, 3, waza.Contains("leap"), waza.Contains("ward"), waza.Contains("katsu"), rules, waza.Contains("bell"));
+        if (rules != null && rules.Contains("write")) sim.Beam = 1200;
         return rules != null && (rules.Contains("koan") || rules.Contains("garden")) ? sim.SolveKoan(20_000_000) : sim.Solve(cap);
     }
 
@@ -716,13 +724,48 @@ static class Gen
         ("丁|Block", new[] { "xxxxxxx", "...x...", "...x...", "...x...", "...x...", "...x...", "..xx..." }),
         ("回|Turn", new[] { "xxxxxxx", "x.....x", "x.xxx.x", "x.x.x.x", "x.xxx.x", "x.....x", "xxxxxxx" }),
         ("円|Circle", new[] { "xxxxxxx", "x..x..x", "x..x..x", "xxxxxxx", "x.....x", "x.....x", "x.....x" }),
+        // from here on the strokes slant: the second writing chapter
+        ("人|Person", new[] { "...x...", "...x...", "...x...", "..x.x..", "..x.x..", ".x...x.", "x.....x" }),
+        ("入|Enter", new[] { "..xx...", "...x...", "...x...", "..x.x..", "..x.x..", ".x...x.", "x.....x" }),
+        ("大|Great", new[] { "...x...", "...x...", "xxxxxxx", "...x...", "..x.x..", ".x...x.", "x.....x" }),
+        ("木|Tree", new[] { "...x...", "xxxxxxx", "...x...", "..xxx..", ".x.x.x.", "x..x..x", "...x..." }),
+        ("本|Root", new[] { "...x...", "xxxxxxx", "..xxx..", ".x.x.x.", "x..x..x", "..xxx..", "...x..." }),
+        ("小|Small", new[] { "...x...", "...x...", ".x.x.x.", ".x.x.x.", "x..x..x", "...x...", "..xx..." }),
+        ("月|Moon", new[] { ".xxxxx.", ".x...x.", ".xxxxx.", ".x...x.", ".xxxxx.", ".x...x.", "x...xx." }),
+        ("目|Eye", new[] { ".xxxxx.", ".x...x.", ".xxxxx.", ".x...x.", ".xxxxx.", ".x...x.", ".xxxxx." }),
+        ("門|Gate", new[] { "xxx.xxx", "x.x.x.x", "xxx.xxx", "x.....x", "x.....x", "x.....x", "x....xx" }),
+        ("井|Well", new[] { "..x.x..", "..x.x..", "xxxxxxx", "..x.x..", "xxxxxxx", "..x.x..", ".x..x.." }),
+        ("士|Samurai", new[] { "...x...", "...x...", "xxxxxxx", "...x...", "...x...", "...x...", ".xxxxx." }),
+        ("千|Thousand", new[] { "....xx.", ".xxx...", "...x...", "xxxxxxx", "...x...", "...x...", "...x..." }),
+        ("天|Heaven", new[] { ".xxxxx.", "...x...", "xxxxxxx", "...x...", "..x.x..", ".x...x.", "x.....x" }),
+        ("火|Fire", new[] { "...x...", ".x.x.x.", ".x.x.x.", "...x...", "..x.x..", ".x...x.", "x.....x" }),
+        ("出|Go Out", new[] { "...x...", ".x.x.x.", ".xxxxx.", "...x...", "x..x..x", "x..x..x", "xxxxxxx" }),
+        ("古|Old", new[] { "...x...", "xxxxxxx", "...x...", ".xxxxx.", ".x...x.", ".x...x.", ".xxxxx." }),
+        ("半|Half", new[] { ".x.x.x.", "..xxx..", ".xxxxx.", "...x...", "xxxxxxx", "...x...", "...x..." }),
+        ("甲|Armour", new[] { ".xxxxx.", ".x.x.x.", ".xxxxx.", ".x.x.x.", ".xxxxx.", "...x...", "...x..." }),
+        ("由|Reason", new[] { "...x...", ".xxxxx.", ".x.x.x.", ".xxxxx.", ".x.x.x.", ".xxxxx.", "......." }),
+        ("申|Say", new[] { "...x...", ".xxxxx.", ".x.x.x.", ".xxxxx.", ".x.x.x.", ".xxxxx.", "...x..." }),
+        ("旦|Dawn", new[] { ".xxxxx.", ".x...x.", ".xxxxx.", ".x...x.", ".xxxxx.", ".......", "xxxxxxx" }),
+        ("白|White", new[] { "...x...", ".xxxxx.", ".x...x.", ".xxxxx.", ".x...x.", ".x...x.", ".xxxxx." }),
+        ("百|Hundred", new[] { "xxxxxxx", "...x...", ".xxxxx.", ".x...x.", ".xxxxx.", ".x...x.", ".xxxxx." }),
+        ("凸|Convex", new[] { "..xxx..", "..x.x..", "..x.x..", "xxx.xxx", "x.....x", "x.....x", "xxxxxxx" }),
+        ("凹|Concave", new[] { "xxx.xxx", "x.x.x.x", "x.x.x.x", "x.xxx.x", "x.....x", "x.....x", "xxxxxxx" }),
+        ("力|Strength", new[] { "...x...", "xxxxxx.", "...x.x.", "...x.x.", "..x..x.", ".x...x.", "x..xxx." }),
+        ("刀|Sword", new[] { "xxxxxx.", "...x.x.", "...x.x.", "...x.x.", "..x..x.", ".x...x.", "x..xxx." }),
+        ("文|Letters", new[] { "...x...", "xxxxxxx", ".x...x.", "..x.x..", "...x...", "..x.x..", "xx...xx" }),
+        ("米|Rice", new[] { "x..x..x", ".x.x.x.", "xxxxxxx", "..xxx..", ".x.x.x.", "x..x..x", "...x..." }),
+        ("玉|Jewel", new[] { "xxxxxxx", "...x...", "...x...", ".xxxxx.", "...x.x.", "...x...", "xxxxxxx" }),
+        ("主|Master", new[] { "...x...", "xxxxxxx", "...x...", ".xxxxx.", "...x...", "...x...", "xxxxxxx" }),
+        ("生|Life", new[] { ".x.x...", ".xxxxxx", "x..x...", ".xxxxx.", "...x...", "...x...", "xxxxxxx" }),
+        ("手|Hand", new[] { "..xxxx.", "...x...", ".xxxxx.", "...x...", "xxxxxxx", "...x...", "..xx..." }),
     };
+    const int STRAIGHT = 20;   // how many of the characters above are made of straight strokes only
     [ThreadStatic] static string lastName;
 
     // A character to be written: its tiles marked, Suzu and a few yokai on the blank paper around it.
     static string[] MakeWrite(Random r, Seg g)
     {
-        var (name, src) = KANJI[r.Next(KANJI.Length)];
+        var (name, src) = g.rules.Contains("+brush") ? KANJI[r.Next(STRAIGHT, KANJI.Length)] : KANJI[r.Next(STRAIGHT)];
         var b = new char[7, 7];
         for (int y = 0; y < 7; y++) for (int x = 0; x < 7; x++) b[y, x] = src[y][x];
         for (int k = r.Next(0, 3); k > 0; k--) { int x = r.Next(7), y = r.Next(7); if (b[y, x] == '.') b[y, x] = '#'; }
@@ -950,15 +993,27 @@ static class Gen
             // The Spider: a web ends the stroke
             new(29, 0, 4, none, "ccoo", "o", 3, 4, 3, 5, 0.2, 0, 0, "+web"),
             new(29, 1, 4, new[] { "", "leap", "katsu" }, "coOtu", "", 4, 6, 4, 7, 0.3, 0, 0, "+web"),
-            // Kamaitachi: three tiles a turn
-            new(30, 0, 4, new[] { "", "leap" }, "Kcc", "K", 2, 4, 2, 5, 0.3, 0, 0),
-            new(30, 1, 4, new[] { "", "leap", "ward", "katsu" }, "KKoctu", "K", 4, 6, 3, 7, 0.4, 0.2, 0),
+            // Kamaitachi: three tiles a turn, and the three must matter
+            new(30, 0, 4, new[] { "", "leap" }, "Kco", "K", 3, 4, 3, 5, 0.3, 0, 0),
+            new(30, 1, 4, new[] { "", "leap", "ward", "katsu" }, "KKoctu", "KK", 4, 6, 4, 7, 0.4, 0.2, 0),
             // The Seals: only the first yokai left, in reading order, can be harmed
             new(31, 0, 4, none, "ccco", "", 3, 4, 3, 5, 0.2, 0, 0, "order"),
             new(31, 1, 4, new[] { "", "leap", "katsu" }, "ccoOtn", "", 4, 6, 4, 7, 0.3, 0.2, 0, "order"),
             // The Character: paint every marked tile
             new(32, 0, 4, none, "co", "", 1, 2, 2, 5, 0, 0, 0, "write", 6, 8),
             new(32, 1, 4, new[] { "", "leap" }, "coOuty", "", 2, 4, 3, 8, 0, 0, 0, "write", 5, 7),
+            // The Lure: an offering on the far side of a plank
+            new(33, 0, 4, none, "ooO", "o", 2, 4, 3, 5, 0, 0, 0, "+offer,+bridge"),
+            new(33, 1, 4, new[] { "", "leap", "katsu" }, "oOSu", "S", 3, 5, 4, 7, 0, 0, 0, "+offer,+bridge"),
+            // The Storm: wind, the bell, and the weasel that rides the wind
+            new(34, 0, 4, none, "ccuyK", "Kc", 3, 5, 3, 5, 0.2, 0, 0, "wind,+bell"),
+            new(34, 1, 4, new[] { "", "leap" }, "ccuyKoO", "Kcu", 5, 7, 4, 7, 0.3, 0.2, 0, "wind,+bell"),
+            // The Knot: seals among webs, and then offerings as well
+            new(35, 0, 4, none, "ccoo", "", 3, 4, 4, 6, 0.2, 0, 0, "order,+web"),
+            new(35, 1, 4, new[] { "", "leap", "katsu" }, "coOKt", "", 4, 6, 5, 8, 0.3, 0, 0, "order,+web,+offer"),
+            // The Brush: characters whose strokes slant
+            new(36, 0, 4, none, "co", "", 1, 2, 3, 6, 0, 0, 0, "write,+brush", 5, 6),
+            new(36, 1, 4, new[] { "", "leap" }, "coOuK", "", 2, 3, 4, 9, 0, 0, 0, "write,+brush", 5, 6),
         };
         var jopt = new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
         var all = File.Exists(outPath) ? JsonSerializer.Deserialize<List<LevelOut>>(File.ReadAllText(outPath)) : new List<LevelOut>();
@@ -982,7 +1037,7 @@ static class Gen
                     if (rows == null) return;
                     string kanjiName = lastName;
                     var waza = g.wazaSets[r.Next(g.wazaSets.Length)].Split(',', StringSplitOptions.RemoveEmptyEntries);
-                    var feats = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith("+")).ToArray();
+                    var feats = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith("+") && x != "+brush").ToArray();
                     if (feats.Contains("+bell")) waza = waza.Append("bell").ToArray();
                     var rules = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => !x.StartsWith("+"))
                         .Select(x => x == "wind" ? "wind:" + "RLDU"[r.Next(4)] : x).ToArray();
@@ -1007,10 +1062,18 @@ static class Gen
                     else
                     {
                         if (sim.Danger(sim.start, sim.start.hx, sim.start.hy)) return;
-                        res = sim.Solve(rules.Contains("enso") ? 25_000 : 120_000, g.parHi, 10);
+                        if (g.rules.Contains("+brush")) sim.Beam = 1200;
+                        res = sim.Solve(rules.Contains("enso") ? 25_000 : 120_000, g.parHi, sim.Beam > 0 ? 40 : 10);
                         if (rules.Contains("stone") && res.par > 0 && !res.trace.Split('/').Any(x => x.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).Length > 4)) return;   // must spend banked ink
                         if (res.par < g.parLo || res.par > g.parHi) return;
                         if (rules.Contains("shiki") && !res.trace.Contains("shiki")) return;   // a familiar must actually be set
+                        if (B && !res.trace.Contains("BELL")) return;   // a bell that is never rung is not a bell stage
+                        if (g.palette.Contains('K') && feats.Length == 0 && rules.Length == 0)
+                        {
+                            // the weasel's three steps must change the answer
+                            var slow = new Sim(rows, ink, 3, L, Wd, K, rules, B, true).Solve(120_000, g.parHi + 2, 10);
+                            if (slow.capped || slow.par == res.par) return;
+                        }
                         if (weather)
                         {
                             // the weather must change the answer, for better or worse

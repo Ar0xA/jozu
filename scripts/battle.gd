@@ -15,6 +15,11 @@ var disp = {}
 var hdisp = Vector2.ZERO
 var fx = []
 var shake = 0.0
+var walk = []          # the yokai's turn, played out a step at a time: [{id, to, at}]
+var walk_t = 0.0
+var aim = {}           # where each yokai is being drawn towards while it walks
+var later = []         # sounds waiting for their moment: [{at, nm}]
+var last_inked = 0
 var flash = 0.0
 var last_drag = Vector2i(-9, -9)
 var done = false
@@ -155,27 +160,71 @@ func _after(ok, quiet = "step"):
 		s.spent += 1
 	var heard = false
 	for e in s.events:
-		if ["kill", "cut", "hit", "katsu", "ward", "leap", "bell"].has(e.t):
+		if ["kill", "cut", "hit", "katsu", "ward", "leap", "bell"].has(e.t) and not (ending and e.t == "kill" and e.dmg == 0):
 			main.sfx(e.t)
 			heard = true
 	if not heard:
 		main.sfx(quiet)
+	if quiet == "step":
+		if Sim.ter(s, s.hero) == "w" and s.ink == 0:
+			main.sfx("web")
+		if s.inked != last_inked:
+			main.sfx("ink")
+	last_inked = s.inked
+	# the yokai's turn is shown one mover after another; what happens after they move waits for them
+	walk = []
+	aim = {}
+	walk_t = 0.0
+	later = []
+	var cursor = 0.0
+	if ending and main.data.opts.motion:
+		var moves = s.events.filter(func(e): return e.t == "move")
+		var gap = min(0.16, 1.1 / max(1, moves.size()))
+		var sung = {}
+		for e in s.events:
+			if e.t == "move":
+				if not aim.has(e.id):
+					aim[e.id] = disp.get(e.id, Vector2(e.to))
+				walk.append({"id": e.id, "to": Vector2(e.to), "at": cursor})
+				if e.kind == "kamaitachi" and not sung.has(e.id):
+					sung[e.id] = true
+					later.append({"at": cursor, "nm": "kama"})
+				cursor += gap
+			elif e.t == "eat":
+				later.append({"at": cursor, "nm": "eat"})
+			elif e.t == "fall":
+				cursor += 0.12
+				later.append({"at": cursor, "nm": "splash"})
+	else:
+		for e in s.events:
+			if e.t == "eat" or e.t == "fall":
+				main.sfx("eat" if e.t == "eat" else "splash")
+				break
+	var seen_move = false
+	var wait = 0.0
 	for e in s.events:
+		if e.t == "move":
+			seen_move = true
+			continue
+		if ending and seen_move:
+			wait = cursor
 		if e.t == "kill":
-			fx.append({"k": "kill", "pos": Vector2(e.pos), "life": 0.8, "max": 0.8})
+			fx.append({"k": "kill", "pos": Vector2(e.pos), "life": 0.8, "max": 0.8, "wait": wait})
 		elif e.t == "cut":
 			fx.append({"k": "cut", "pos": Vector2(e.pos), "life": 0.4, "max": 0.4, "n": e.dmg})
 		elif e.t == "hit":
 			fx.append({"k": "hit", "pos": Vector2(e.src), "life": 0.5, "max": 0.5})
-			shake = 0.35
-			flash = 0.5
+			if main.data.opts.motion:
+				shake = 0.35
+				flash = 0.5
 		elif e.t == "katsu":
 			fx.append({"k": "katsu", "pos": Vector2(e.pos), "life": 0.6, "max": 0.6})
-			shake = 0.2
+			if main.data.opts.motion:
+				shake = 0.2
 		elif e.t == "bell":
 			fx.append({"k": "bell", "pos": Vector2(e.pos), "life": 1.4, "max": 1.4})
 		elif e.t == "fall" or e.t == "eat":
-			fx.append({"k": "kill", "pos": Vector2(e.pos), "life": 0.5, "max": 0.5, "quiet": true})
+			fx.append({"k": "kill", "pos": Vector2(e.pos), "life": 0.5, "max": 0.5, "quiet": true, "wait": wait})
 	if s.status != "play":
 		_finish()
 	_sync()
@@ -342,8 +391,11 @@ func _finish():
 		seal_mask = (1 if grade == "jouzu" else 0) | (2 if grade == "jouzu" and undos == 0 else 0) | (4 if s.hits == 0 and s.spent <= master else 0)
 		if custom != null:
 			var nxt2 = on_win.call(grade, seal_mask, s.turn)   # returns where "Onward" leads
-			extra.append(btn(Rect2(250, 470, 200, 50), "Onward", nxt2 if nxt2 is Callable else back, "進"))
-			if kind_of != "henro":
+			extra.append(btn(Rect2(250, 470, 200, 50), "Onward" if kind_of != "random" else "Another", nxt2 if nxt2 is Callable else back, "進"))
+			if lv.has("code"):
+				extra.append(btn(Rect2(160, 526, 170, 44), "Try again", _restart))
+				extra.append(btn(Rect2(346, 526, 196, 44), "Copy its code", func(): DisplayServer.clipboard_set(lv.code), "写"))
+			elif kind_of != "henro":
 				extra.append(btn(Rect2(250, 526, 200, 44), "Try again", _restart))
 			return
 		main.record(idx, grade, my_paths, seal_mask)
@@ -355,6 +407,8 @@ func _finish():
 	else:
 		grade = "lost"
 		main.sfx("lose")
+		if kind_of == "daily":
+			main.daily_fail(lv.get("day", main.today()))
 		if kind_of == "henro":
 			extra.append(btn(Rect2(250, 440, 200, 54), "Rise", on_fail, "起"))
 			return
@@ -421,14 +475,28 @@ func on_key(code):
 func tick(dt):
 	var k = 1.0 - exp(-dt * 18.0)
 	hdisp = hdisp.lerp(Vector2(s.hero), k)
+	walk_t += dt
+	while not walk.is_empty() and walk[0].at <= walk_t:
+		aim[walk[0].id] = walk[0].to
+		walk.pop_front()
+	if walk.is_empty():
+		aim = {}
+	for snd in later:
+		if snd.at <= walk_t:
+			main.sfx(snd.nm)
+	later = later.filter(func(snd): return snd.at > walk_t)
+	var kk = 1.0 - exp(-dt * (26.0 if not aim.is_empty() else 18.0))
 	for y in s.yokai:
 		if not disp.has(y.id):
 			disp[y.id] = Vector2(y.pos)
-		disp[y.id] = disp[y.id].lerp(Vector2(y.pos), k)
+		disp[y.id] = disp[y.id].lerp(aim.get(y.id, Vector2(y.pos)), kk)
 	shake = max(0.0, shake - dt)
 	flash = max(0.0, flash - dt)
 	for e in fx:
-		e.life -= dt
+		if e.get("wait", 0.0) > 0.0:
+			e.wait -= dt
+		else:
+			e.life -= dt
 	fx = fx.filter(func(e): return e.life > 0.0)
 
 func ctr(p):
@@ -531,7 +599,12 @@ func _draw():
 				for k in range(3):
 					draw_circle(r.position + Vector2(TS * (0.3 + 0.2 * k), TS * (0.4 + 0.12 * ((x + y + k) % 3))), 1.6, Ink.a(Ink.SUMI, 0.35))
 			if dng.has(p) and ch != "f" and (lit.is_empty() or lit.has(p)):
-				Ink.blot(self, r.get_center(), TS * 0.66, TS * 0.66, Ink.SHU, 0.52 + 0.08 * sin(time * 4.0))
+				Ink.blot(self, r.get_center(), TS * 0.66, TS * 0.66, Ink.SHU, 0.52 + (0.08 * sin(time * 4.0) if main.data.opts.motion else 0.0))
+				if main.data.opts.pattern:
+					# a mark that does not depend on telling red from the paper
+					var cc = r.get_center()
+					draw_line(cc + Vector2(-TS * 0.2, -TS * 0.2), cc + Vector2(TS * 0.2, TS * 0.2), Ink.a(Ink.SUMI, 0.75), 4.0, true)
+					draw_line(cc + Vector2(TS * 0.2, -TS * 0.2), cc + Vector2(-TS * 0.2, TS * 0.2), Ink.a(Ink.SUMI, 0.75), 4.0, true)
 			if not lit.is_empty() and not lit.has(p):
 				draw_rect(r, Color(0.06, 0.06, 0.12, 0.62))
 	for i in range(s.w + 1):
@@ -654,6 +727,8 @@ func _draw():
 	_weather(br)
 
 	for e in fx:
+		if e.get("wait", 0.0) > 0.0:
+			continue
 		var u = 1.0 - e.life / e.max
 		var c = ctr(e.pos)
 		if e.k == "bell":

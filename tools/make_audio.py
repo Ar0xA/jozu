@@ -222,3 +222,23 @@ sakura()
 piece('battle', 84, 48, 7, False)
 piece('boss', 128, 48, 11, True)
 sfx()
+
+def late_sfx():
+    """Sounds added after the first set; made last so the earlier files come out unchanged."""
+    def one(name, parts, length):
+        m = Mix(length)
+        for t, s in parts:
+            m.add(t, s)
+        m.save(name, length, peak=0.8)
+    # a yokai eating: two soft knocks of a wooden bowl
+    one('eat', [(0, rim(0.09, 0.5)), (0.11, pluck(hz('G2'), 0.3, 0.15, 0.96, 0.4)), (0.24, rim(0.08, 0.4)), (0.33, pluck(hz('E2'), 0.3, 0.15, 0.96, 0.35))], 0.7)
+    # planks into the river
+    one('splash', [(0, rim(0.12, 0.8)), (0.05, taiko(0.5, 90, 40, 0.7)), (0.06, swish(0.55, 3800, 500, 0.9, False)), (0.3, swish(0.5, 1500, 300, 0.4, False))], 1.0)
+    # caught in a web: a string pulled tight
+    one('web', [(0, pluck(hz('E5'), 0.5, 0.9, 0.985, 0.5)), (0.05, pluck(hz('F5'), 0.5, 0.9, 0.985, 0.4)), (0.02, swish(0.18, 5000, 2500, 0.25, False))], 0.6)
+    # the sickle weasel: a quick rising wind and a blade
+    one('kama', [(0, swish(0.22, 700, 5200, 0.8)), (0.16, swish(0.1, 6000, 3000, 0.5, False)), (0.2, rim(0.05, 0.3))], 0.4)
+    # a tile of the character painted: one wet touch of the brush
+    one('ink', [(0, swish(0.2, 500, 1400, 0.6)), (0.03, pluck(hz('A3'), 0.3, 0.1, 0.96, 0.2))], 0.3)
+
+late_sfx()

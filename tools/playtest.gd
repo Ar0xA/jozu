@@ -315,14 +315,100 @@ func other_roads():
 		bad("a board outside the story changed the story's record")
 	main.data.daily.day -= 1     # as if that had been yesterday
 	main.data.daily.last -= 1
-	main._daily_won("jouzu", 7, 1)
+	main._daily_won("jouzu", 7, 1, main.today(), Callable())
 	if int(main.data.daily.streak) != 2:
 		bad("answering on the next day does not lengthen the streak")
 	main.data.daily.day -= 3
 	main.data.daily.last -= 3
-	main._daily_won("jouzu", 7, 1)
+	main._daily_won("jouzu", 7, 1, main.today(), Callable())
 	if int(main.data.daily.streak) != 1 or int(main.data.daily.best) != 2:
 		bad("a missed day does not reset the streak")
+
+	# days gone by: yesterday's koan, failed once and then answered
+	var streak0 = int(main.data.daily.streak)
+	main.show_calendar()
+	await frames(2)
+	if kind() != "daily":
+		bad("the calendar does not open")
+	else:
+		var yday = main.today() - 1
+		main.cur.on_click(main.cur._cell(yday).get_center(), MOUSE_BUTTON_LEFT)
+		await frames(2)
+		b = main.cur
+		if kind() != "battle" or b.kind_of != "daily" or int(b.lv.day) != yday:
+			bad("clicking a past day does not open its koan")
+		else:
+			b.on_key(KEY_SPACE)
+			if int(main.data.tries.get(str(yday), 0)) != 1:
+				bad("a failed attempt at a daily koan was not counted")
+			b.on_key(KEY_R)
+			await play(-1, false, b.lv)
+			await frames(2)
+			if int(main.data.days.get(str(yday), 0)) != 2:
+				bad("a past day answered on the second attempt should record 2")
+			if int(main.data.daily.streak) != streak0:
+				bad("a past day changed the run of days")
+			b.extra[0].cb.call()
+			await frames(2)
+			if kind() != "daily":
+				bad("a past day does not lead back to the calendar")
+		if not main.daily_line(main.today()).contains("daily kōan") or main.daily_line(main.today() - 20) != "":
+			bad("the daily result line is wrong")
+
+	# the unmapped road: one board from each bracket, and its code
+	for br in range(4):
+		main.show_random(br)
+		await frames(2)
+		b = main.cur
+		if kind() != "battle" or b.kind_of != "random":
+			bad("the unmapped road does not open (bracket %d)" % br)
+			continue
+		var back2 = main.board_from_code(b.lv.code)
+		if back2.is_empty() or back2.rows != b.lv.rows or back2.rules != b.lv.rules or int(back2.ink) != int(b.lv.ink):
+			bad("an unmapped board's code does not read back (bracket %d)" % br)
+		await play(-1, br % 2 == 0, b.lv)
+		await frames(2)
+		if b.grade != "jouzu":
+			bad("an unmapped board's stored answer graded '%s' (bracket %d)" % [b.grade, br])
+			continue
+		b.extra[0].cb.call()
+		await frames(2)
+		if kind() != "battle" or main.cur == b:
+			bad("'Another' does not deal another board")
+		if int(main.data.rand.get(str(br), 0)) != 1:
+			bad("an unmapped clear was not counted")
+
+	# settings
+	main.show_settings(main.show_hub)
+	await frames(2)
+	if kind() != "settings":
+		bad("settings do not open")
+	else:
+		for k in ["music", "motion", "pattern", "filter"]:
+			var was = main.data.opts[k]
+			main.cur.rows[k].cb.call()
+			if main.data.opts[k] == was:
+				bad("the %s setting does not change" % k)
+		if main.paint_rect.visible:
+			bad("turning the painted look off leaves the filter on")
+		main.load_save()
+		if main.data.opts.motion or not main.data.opts.pattern:
+			bad("settings did not survive a reload")
+		# a stage plays through with motion off and the cross on
+		main.show_battle(1)
+		await frames(2)
+		await play(1, false)
+		await frames(2)
+		if main.cur.grade != "jouzu":
+			bad("a stage does not play with motion off")
+		main.show_settings(main.show_hub)
+		await frames(2)
+		for k in ["music", "motion", "pattern", "filter"]:
+			main.cur.rows[k].cb.call()
+		main.cur.on_key(KEY_ESCAPE)
+		await frames(2)
+		if kind() != "hub" or not main.data.opts.motion:
+			bad("leaving settings misbehaves")
 
 	# the pilgrimage: losing staffs
 	main.show_henro()

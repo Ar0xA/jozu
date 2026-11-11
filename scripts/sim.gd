@@ -476,7 +476,10 @@ static func _chase(s, y):
 	for step in range(3 if y.kind == "kamaitachi" else 1):
 		if step > 0 and (abs(s.hero.x - y.pos.x) + abs(s.hero.y - y.pos.y) == 1 or eating(s, y)):
 			return
+		var was = y.pos
 		_step(s, y, goal)
+		if y.pos != was:
+			s.events.append({"t": "move", "id": y.id, "to": y.pos, "kind": y.kind})
 
 static func _step(s, y, goal):
 	var dx = goal.x - y.pos.x
@@ -577,6 +580,7 @@ static func end_stroke(s):
 		for y in s.yokai:
 			if LIGHT.has(y.kind) and can_stand(s, y.kind, y.pos + s.wind):
 				y.pos += s.wind
+				s.events.append({"t": "move", "id": y.id, "to": y.pos, "kind": "wind"})
 	s.wet = []
 	s.stun = false
 	# the planks Suzu crossed this stroke give way, and take whatever stands on them

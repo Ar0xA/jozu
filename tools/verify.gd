@@ -18,7 +18,7 @@ func _init():
 			print("FAIL %3d %s  %s" % [i + 1, lv.kanji, why])
 	print("%d stages checked, %d failed" % [Data.LEVELS.size(), bad])
 	var seen = {}
-	for set in [["daily", Extra.DAILY], ["temple", Extra.HENRO]]:
+	for set in [["daily", Extra.DAILY], ["temple", Extra.HENRO], ["unmapped", Extra.RANDOM]]:
 		var wrong = 0
 		for i in range(set[1].size()):
 			var lv = set[1][i]

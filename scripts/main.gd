@@ -13,6 +13,7 @@ var fibers = []
 var art = {}
 var touch = false   # a phone or tablet: no hover, no right-click, fingers not pointers
 var turn_note
+var paint_rect
 var music
 var music_name = ""
 var sfx_pool = []
@@ -41,6 +42,7 @@ func _ready():
 	mat.shader = load("res://shaders/paint.gdshader")
 	cr.material = mat
 	layer.add_child(cr)
+	paint_rect = cr
 	# a phone held upright shows the game too small to play: ask for it to be turned
 	var top = CanvasLayer.new()
 	top.layer = 20
@@ -89,15 +91,16 @@ func _setup_audio():
 	AudioServer.add_bus_effect(0, rv)
 	music = AudioStreamPlayer.new()
 	add_child(music)
-	music.finished.connect(func(): music.play())
+	music.finished.connect(func(): if data.opts.music: music.play())
 	for i in range(6):
 		var p = AudioStreamPlayer.new()
 		add_child(p)
 		sfx_pool.append(p)
-	for nm in ["title", "battle", "boss", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell"]:
+	for nm in ["title", "battle", "boss", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink"]:
 		streams[nm] = load("res://audio/%s.wav" % nm)
 	streams["story"] = load("res://audio/story.ogg")
 	AudioServer.set_bus_mute(0, not data.sound)
+	apply_opts()
 
 func play_music(nm):
 	if nm == music_name:
@@ -106,8 +109,24 @@ func play_music(nm):
 	music.stop()
 	music.stream = streams.get(nm)
 	music.volume_db = MUSIC_DB.get(nm, -9.0)
-	if music.stream:
+	if music.stream and data.opts.music:
 		music.play()
+
+# the settings a player can change (scripts/settings.gd)
+const OPTS = {"music": true, "motion": true, "pattern": false, "filter": true}
+
+func apply_opts():
+	paint_rect.visible = data.opts.filter
+	if not data.opts.music:
+		music.stop()
+	elif music.stream and not music.playing:
+		music.play()
+
+func show_settings(back = Callable()):
+	play_music("title")
+	var scr = load("res://scripts/settings.gd").new()
+	scr.back = back if back.is_valid() else show_title
+	go(scr)
 
 func sfx(nm):
 	var st = streams.get(nm)
@@ -221,7 +240,7 @@ func _draw():
 
 func fresh():
 	return {"cleared": {}, "scroll": {}, "seals": {}, "daily": {"day": -1, "last": -1, "streak": 0, "best": 0},
-		"henro": {"at": 0, "staffs": 3, "best": 0, "done": 0}, "mine": "", "sound": true, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
+		"henro": {"at": 0, "staffs": 3, "best": 0, "done": 0}, "mine": "", "sound": true, "opts": OPTS.duplicate(), "days": {}, "tries": {}, "rand": {}, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
 
 func load_save():
 	data = fresh()
@@ -240,6 +259,14 @@ func load_save():
 							data[grp][k] = int(j[grp][k])
 			if j.has("mine"):
 				data.mine = str(j.mine)
+			if j.has("opts") and typeof(j.opts) == TYPE_DICTIONARY:
+				for k in data.opts:
+					if j.opts.has(k):
+						data.opts[k] = bool(j.opts[k])
+			for grp in ["days", "tries", "rand"]:
+				if j.has(grp) and typeof(j[grp]) == TYPE_DICTIONARY:
+					for k in j[grp]:
+						data[grp][k] = int(j[grp][k])
 			if j.has("seals") and typeof(j.seals) == TYPE_DICTIONARY:
 				for k in j.seals:
 					data.seals[k] = int(j.seals[k])
@@ -256,8 +283,10 @@ func write_save():
 
 func erase_save():
 	var snd = data.get("sound", true)
+	var opts = data.get("opts", OPTS.duplicate())
 	data = fresh()
 	data.sound = snd
+	data.opts = opts
 	write_save()
 
 func grade_of(i):
@@ -378,37 +407,101 @@ func show_custom(lv, kind, label, on_win, on_fail, back):
 func today():
 	return int(Time.get_unix_time_from_system() / 86400.0)
 
-func daily_level():
+func daily_level(day = -1):
+	if day < 0:
+		day = today()
 	var bank = Extra.DAILY
-	var day = today()
 	var weekday = (day + 3) % 7              # day 0 was a Thursday; 0 = Monday
 	var slice = bank.size() / 7
 	var lv = bank[weekday * slice + (day / 7) % slice].duplicate(true)
-	var d = Time.get_date_dict_from_unix_time(day * 86400)
 	lv["kanji"] = "日課"
-	lv["name"] = "%d-%02d-%02d" % [d.year, d.month, d.day]
-	lv["hint"] = "Today's kōan. One stroke, and only one. It is the same board for everyone today."
+	lv["name"] = day_name(day)
+	lv["hint"] = "Today's kōan. One stroke, and only one. It is the same board for everyone today." if day == today() else "The kōan of a day gone by. One stroke, and only one."
 	lv["story"] = []
 	lv["after"] = []
 	lv["say"] = []
+	lv["day"] = day
 	return lv
 
-func daily_done():
-	return int(data.daily.day) == today()
+func day_name(day):
+	var d = Time.get_date_dict_from_unix_time(day * 86400)
+	return "%d-%02d-%02d" % [d.year, d.month, d.day]
 
-func show_daily():
+func daily_done(day = -1):
+	return data.days.has(str(today() if day < 0 else day)) or (day < 0 and int(data.daily.day) == today())
+
+func show_daily(day = -1, back = Callable()):
+	if day < 0:
+		day = today()
 	var names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-	show_custom(daily_level(), "daily", names[(today() + 3) % 7] + "'s kōan", _daily_won, Callable(), show_hub)
+	show_custom(daily_level(day), "daily", names[(day + 3) % 7] + "'s kōan", _daily_won.bind(day, back), Callable(), back if back.is_valid() else show_hub)
 
-func _daily_won(_grade, _mask, _turns):
+func show_calendar():
+	play_music("title")
+	go(load("res://scripts/daily.gd").new())
+
+# a failed attempt at a day's koan is counted, so the result line can say how many it took
+func daily_fail(day):
+	if not data.days.has(str(day)):
+		data.tries[str(day)] = int(data.tries.get(str(day), 0)) + 1
+		write_save()
+
+func _daily_won(_grade, _mask, _turns, day, back):
+	if not data.days.has(str(day)):
+		data.days[str(day)] = int(data.tries.get(str(day), 0)) + 1
 	var d = data.daily
-	if int(d.day) != today():
+	if day == today() and int(d.day) != today():
 		d.streak = int(d.streak) + 1 if int(d.last) == today() - 1 else 1
 		d.last = today()
 		d.day = today()
 		d.best = max(int(d.best), int(d.streak))
-		write_save()
-	return show_hub
+	write_save()
+	return back if back.is_valid() else show_hub
+
+# one line to pass on: the day, how many attempts it took, and the run of days
+func daily_line(day):
+	var n = int(data.days.get(str(day), 0))
+	if n <= 0:
+		return ""
+	var names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+	var how = "at the first stroke" if n == 1 else "on attempt %d" % n
+	var line = "Jōzu 上手 · daily kōan %s (%s) · answered %s" % [day_name(day), names[(day + 3) % 7], how]
+	if day == today() and int(data.daily.streak) > 1:
+		line += " · %d days running" % int(data.daily.streak)
+	return line + " · https://ar0xa.github.io/jozu/"
+
+# ---------------------------------------------------------------- the unmapped road
+# A board drawn at random from the proven boards the story never used, by how hard it is.
+
+const BRACKETS = [["易", "Gentle"], ["中", "Even"], ["難", "Hard"], ["極", "Master"]]
+var last_random = -1
+
+func show_random(br):
+	var bank = Extra.RANDOM
+	var n = bank.size() / 4
+	var lo = br * n
+	var hi = bank.size() if br == 3 else lo + n
+	var i = lo + randi() % max(1, hi - lo)
+	if i == last_random:
+		i = lo + (i - lo + 1) % max(1, hi - lo)
+	last_random = i
+	var lv = bank[i].duplicate(true)
+	lv["code"] = board_code(lv)
+	lv["kanji"] = "乱"
+	lv["name"] = "Off the map: %s" % BRACKETS[br][1].to_lower()
+	lv["hint"] = "A board from off the map, number %d of %d. Mastery asks %d stroke%s. Clear it and you can copy its code to pass on." % [i + 1, bank.size(), int(lv.par), "" if int(lv.par) == 1 else "s"]
+	lv["story"] = []
+	lv["after"] = []
+	lv["say"] = []
+	show_custom(lv, "random", "The Unmapped Road", _random_won.bind(br), Callable(), show_hub)
+
+func _random_won(grade, _mask, _turns, br):
+	var k = str(br)
+	data.rand[k] = int(data.rand.get(k, 0)) + 1
+	if grade == "jouzu":
+		data.rand["m" + k] = int(data.rand.get("m" + k, 0)) + 1
+	write_save()
+	return show_random.bind(br)
 
 # ---------------------------------------------------------------- the 88 temples
 # A pilgrimage of 88 boards with no stroke taken back. Three staffs: a temple lost or given

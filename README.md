@@ -20,8 +20,9 @@ Music: a 1920s shakuhachi recording of *Shika no Tōne* under the story, *Sakura
 koto for the title and road, and original koto, shamisen and taiko pieces in the miyako-bushi scale for
 the stages. Press `M` to mute.
 
-514 stations in thirty-three chapters. Ten chapters tell the story; twenty-three more each explore one
-puzzle style, yokai, kind of weather or piece of ground in a rising ladder of eighteen boards. The story stages are hand-made;
+586 stations in thirty-seven chapters. Ten chapters tell the story; twenty-seven more each explore one
+puzzle style, yokai, kind of weather or piece of ground, or a mixture of them, in a rising ladder of
+eighteen boards. The story stages are hand-made;
 the rest come from a generator (`tools/gen`, C#) that builds candidate boards, solves them exactly,
 scores their difficulty and keeps an evenly climbing run. `tools/verify.gd` replays every stored
 solution through the real rules, so each station is proven masterable at base stats, and
@@ -55,10 +56,16 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   the temple bell 鐘, rung once, which stills every yokai for a turn; plank bridges 橋 that fall in behind
   you with whatever followed; spider webs 巣 that end your stroke; the kamaitachi 鎌鼬, which runs three
   tiles a turn; numbered seals 封, so that yokai can only be felled in order; and writing 書, where the
-  board is a character and you paint every tile of it.
+  board is a character and you paint every tile of it (fifty-odd characters over two chapters, ending
+  on 上 and 手). Three chapters mix them: the lure (offerings and bridges), the storm (wind, bell and
+  weasel) and the knot (seals among webs).
 - **Other roads** 別 (from the map): a **daily kōan**, the same board for everyone, gentle on Monday and
-  hardest on Sunday; the **88 temples**, a pilgrimage with no undo, no hints and three staffs; and the
+  hardest on Sunday, with a calendar of past days and a result line to copy; the **88 temples**, a pilgrimage with no undo, no hints and three staffs; and the
   **workshop**, where you lay out a board, clear it, and get a short code anyone can paste to play it.
+  The **unmapped road** deals a random board from some 1,500 proven boards the story never used, in
+  four brackets of difficulty, each with a code to pass on.
+- **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, and the
+  painted look.
 - **Three seals a station:** 上手 mastery, 潔 no stroke taken back, 惜墨 sparing of ink. Seals earn the
   kyū and dan ranks, from 10th kyū to meijin.
 - **Ask the master** (`H`) shows the next stroke of a known solution. **Your scroll** 巻 keeps the strokes
