@@ -487,7 +487,7 @@ func show_random(br):
 	else:
 		show_random_banked(br)
 
-func show_random_banked(br):
+func show_random_banked(br, why = ""):
 	var bank = Extra.RANDOM
 	var n = bank.size() / 4
 	var lo = br * n
@@ -497,7 +497,7 @@ func show_random_banked(br):
 		i = lo + (i - lo + 1) % max(1, hi - lo)
 	last_random = i
 	var lv = bank[i].duplicate(true)
-	lv["hint"] = "A board from off the map, number %d of %d on the shelf. Mastery asks %d stroke%s. Clear it and you can copy its code to pass on." % [i + 1, bank.size(), int(lv.par), "" if int(lv.par) == 1 else "s"]
+	lv["hint"] = why + "A board from off the map, number %d of %d on the shelf. Mastery asks %d stroke%s. Clear it and you can copy its code to pass on." % [i + 1, bank.size(), int(lv.par), "" if int(lv.par) == 1 else "s"]
 	_play_random(lv, br)
 
 func _play_random(lv, br):
