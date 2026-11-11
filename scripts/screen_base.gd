@@ -58,6 +58,8 @@ func draw_btns():
 			pts.append(Vector2(lerp(r.position.x + 2.0, r.end.x - 2.0, k / 10.0), r.end.y - 5.0 + sin(k * 1.3 + r.position.x) * 1.3))
 		Ink.brush(self, pts, 6.0 if hot else 4.0, Ink.a(Ink.SHU if hot else Ink.SUMI, 0.9 * al))
 		var ts = min(22.0, r.size.y * 0.46)
+		if b.kanji == "" and b.label != "" and b.label.unicode_at(0) >= 0x2E80:
+			ts = min(ts, (r.size.x - 6.0) / b.label.length())  # a narrow tab still shows its whole name
 		var base = r.position.y + r.size.y * 0.5 + ts * 0.30
 		if b.kanji != "":
 			var kw = ts * 1.2 * b.kanji.length() + 14

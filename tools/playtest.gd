@@ -40,7 +40,7 @@ func skip_story():
 func play(i, use_mouse):
 	var lv = Data.LEVELS[i]
 	var b = main.cur
-	var trace = sols.get(lv.kanji + "|" + "".join(lv.rows), "")
+	var trace = lv.get("sol", "")
 	var strokes = trace.split(" / ")
 	for k in range(strokes.size()):
 		for tok in strokes[k].split(" ", false):
@@ -71,7 +71,6 @@ func play(i, use_mouse):
 
 func _run():
 	await frames(3)
-	sols = JSON.parse_string(FileAccess.get_file_as_string("res://tools/solutions.json"))
 	main.erase_save()
 	if kind() != "title":
 		bad("did not start on the title screen")
@@ -174,6 +173,18 @@ func _run():
 			continue
 		b = main.cur
 		var first = main.grade_of(i) != "jouzu"
+		# the master's hint must show the solution's first stroke from a fresh board
+		b.on_key(KEY_H)
+		if b.hint_msg != "" and not b.hint_msg.begins_with("The master waits"):
+			bad("stage %d: hint refused on a fresh board: %s" % [i + 1, b.hint_msg])
+		elif b.hint_path.size() < 2 and b.hint_marks.is_empty() and b.hint_msg == "":
+			bad("stage %d: hint shows nothing" % (i + 1))
+		await frames()
+		if lv.get("rules", []).has("koan") or lv.get("rules", []).has("garden"):
+			b.on_key(KEY_SPACE)
+			if b.grade != "lost":
+				bad("stage %d: sheathing a one-stroke stage unfinished should fail" % (i + 1))
+			b.on_key(KEY_R)
 		await play(i, i % 2 == 1)
 		await frames(2)
 		if not b.done or b.grade != "jouzu":
@@ -181,6 +192,8 @@ func _run():
 			continue
 		if main.grade_of(i) != "jouzu":
 			bad("stage %d: mastery was not saved" % (i + 1))
+		if not main.data.scroll.has(str(i)) or main.data.scroll[str(i)].size() != lv.par:
+			bad("stage %d: the scroll did not keep %d strokes" % [i + 1, lv.par])
 		if b.b_undo.on:
 			bad("stage %d: undo still enabled after winning" % (i + 1))
 		b.extra[0].cb.call()   # Onward
@@ -201,6 +214,19 @@ func _run():
 		bad("progress did not survive a save and reload")
 	if main.points_total() != 2 * Data.LEVELS.size():
 		bad("expected %d points after mastering everything, got %d" % [2 * Data.LEVELS.size(), main.points_total()])
+
+	# ---- the scroll gallery, every chapter
+	main.show_scroll()
+	await frames(2)
+	if kind() != "scroll":
+		bad("the scroll gallery does not open")
+	else:
+		for c in range(Data.CHAPTERS.size()):
+			main.cur._page(c)
+			await frames()
+	main.load_save()
+	if main.data.scroll.size() != Data.LEVELS.size():
+		bad("the scroll did not survive a reload")
 
 	# ---- training
 	main.show_dojo()

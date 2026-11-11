@@ -27,24 +27,35 @@ var b_end
 var b_undo
 var b_restart
 var b_road
+var b_hint
 var extra = []
+var rules = []
+var my_paths = []
+var hint_path = []
+var hint_marks = []
+var hint_msg = ""
+var ending = false
 
 func setup():
 	lv = Data.LEVELS[idx]
-	b_leap = btn(Rect2(PX, 478, 172, 50), "Leap [1]", _mode.bind("leap"), "縮地")
-	b_ward = btn(Rect2(PX + 184, 478, 172, 50), "Ward [2]", _mode.bind("ward"), "結界")
-	b_katsu = btn(Rect2(PX + 368, 478, 172, 50), "Shout [3]", _katsu, "喝")
-	b_end = btn(Rect2(PX, 542, 264, 56), "Sheathe  [Space]", _end, "納刀")
-	b_undo = btn(Rect2(PX + 276, 542, 264, 56), "Undo  [Z]", _undo, "戻")
-	b_restart = btn(Rect2(PX, 640, 264, 46), "Restart  [R]", _restart)
-	b_road = btn(Rect2(PX + 276, 640, 264, 46), "Back to the road", main.show_map)
+	rules = lv.get("rules", [])
+	b_leap = btn(Rect2(PX, 470, 172, 46), "Leap [1]", _mode.bind("leap"), "縮地")
+	b_ward = btn(Rect2(PX + 184, 470, 172, 46), "Ward [2]", _mode.bind("ward"), "結界")
+	b_katsu = btn(Rect2(PX + 368, 470, 172, 46), "Shout [3]", _katsu, "喝")
+	b_end = btn(Rect2(PX, 526, 264, 50), "Sheathe  [Space]", _end, "納刀")
+	b_undo = btn(Rect2(PX + 276, 526, 264, 50), "Undo  [Z]", _undo, "戻")
+	b_hint = btn(Rect2(PX, 586, 264, 42), "Ask the master  [H]", _hint, "師")
+	b_restart = btn(Rect2(PX, 642, 264, 44), "Restart  [R]", _restart)
+	b_road = btn(Rect2(PX + 276, 642, 264, 44), "Back to the road", main.show_map)
 	_restart()
 	for y in s.yokai:
 		if not kinds.has(y.kind):
 			kinds.append(y.kind)
 
 func _restart():
-	s = Sim.new_state(lv.rows, main.stats_for(idx))
+	s = Sim.new_state(lv.rows, main.stats_for(idx), rules)
+	s["paths"] = []
+	_clear_hint()
 	hist = []
 	mode = ""
 	done = false
@@ -68,6 +79,7 @@ func _sync():
 	b_leap.sel = mode == "leap"
 	b_ward.sel = mode == "ward"
 	b_end.on = not done
+	b_hint.on = not done
 	b_undo.on = not hist.is_empty() and grade != "jouzu" and grade != "ka"
 	b_restart.on = true
 
@@ -106,9 +118,70 @@ func _after(ok, quiet = "step"):
 		_finish()
 	_sync()
 
+func _clear_hint():
+	hint_path = []
+	hint_marks = []
+	hint_msg = ""
+
+func _same_board(a, b):
+	if a.hero != b.hero or a.yokai.size() != b.yokai.size() or a.wards != b.wards:
+		return false
+	for i in range(a.yokai.size()):
+		if a.yokai[i].ch != b.yokai[i].ch or a.yokai[i].pos != b.yokai[i].pos or a.yokai[i].hp != b.yokai[i].hp:
+			return false
+	return true
+
+func _play_tokens(st, stroke, track):
+	for tok in stroke.split(" ", false):
+		var d = Vector2i.ZERO
+		if tok != "KATSU":
+			d = {"R": Vector2i(1, 0), "L": Vector2i(-1, 0), "D": Vector2i(0, 1), "U": Vector2i(0, -1)}[tok.right(1)]
+		if tok == "KATSU":
+			Sim.act_katsu(st)
+			if track:
+				hint_marks.append([st.hero, "喝"])
+		elif tok.begins_with("leap"):
+			Sim.act_leap(st, d)
+			if track:
+				hint_marks.append([st.hero, "縮"])
+		elif tok.begins_with("ward"):
+			Sim.act_ward(st, d)
+			if track:
+				hint_marks.append([st.hero + d, "結"])
+		else:
+			var before = st.hero
+			Sim.act_move(st, d)
+			if track and st.hero == before:
+				hint_marks.append([before + d, "斬"])
+		if track and hint_path.back() != st.hero:
+			hint_path.append(st.hero)
+
+# The master shows the next stroke of a known solution, if you are still on its line.
+func _hint():
+	if done:
+		return
+	_clear_hint()
+	if s.visited.size() > 1 or s.ink != s.ink_max:
+		hint_msg = "Finish or undo this stroke first; the master shows whole strokes."
+		return
+	var strokes = lv.get("sol", "").split(" / ")
+	var ref = Sim.new_state(lv.rows, Data.base_stats(lv), rules)
+	for k in range(min(s.turn, strokes.size())):
+		_play_tokens(ref, strokes[k], false)
+		Sim.end_stroke(ref)
+	if s.turn >= strokes.size() or ref.status != "play" or not _same_board(ref, s):
+		hint_msg = "The master's line begins at the first stroke. Restart (R) to follow it."
+		return
+	hint_path = [s.hero]
+	_play_tokens(s.duplicate(true), strokes[s.turn], true)
+	if hint_path.size() == 1 and hint_marks.is_empty():
+		hint_msg = "The master waits. Sheathe the brush without moving."
+	main.sfx("click")
+
 func _dir(d):
 	if done:
 		return
+	_clear_hint()
 	_push()
 	if mode == "leap":
 		_after(Sim.act_leap(s, d))
@@ -120,21 +193,27 @@ func _dir(d):
 func _katsu():
 	if done:
 		return
+	_clear_hint()
 	_push()
 	_after(Sim.act_katsu(s))
 
 func _end():
 	if done:
 		return
+	_clear_hint()
 	_push()
+	s.paths.append(s.visited.duplicate())
 	Sim.end_stroke(s)
+	ending = true
 	_after(true, "sheathe")
+	ending = false
 
 func _undo():
 	if hist.is_empty() or grade == "jouzu" or grade == "ka":
 		return
 	s = hist.pop_back()
 	mode = ""
+	_clear_hint()
 	if done:
 		done = false
 		grade = ""
@@ -149,12 +228,15 @@ func _finish():
 		grade = "jouzu" if (s.hits == 0 and s.turn <= lv.par) else "ka"
 		main.sfx("win")
 		var first = main.grade_of(idx) == ""
-		main.record(idx, grade)
+		my_paths = s.paths.duplicate()
+		if not ending:
+			my_paths.append(s.visited.duplicate())
+		main.record(idx, grade, my_paths)
 		var nxt = main.show_map
 		if first:
 			nxt = main.show_story.bind(lv.after, main.show_map)
-		extra.append(btn(Rect2(250, 440, 200, 54), "Onward", nxt, "進"))
-		extra.append(btn(Rect2(250, 506, 200, 46), "Try again", _restart))
+		extra.append(btn(Rect2(250, 452, 200, 54), "Onward", nxt, "進"))
+		extra.append(btn(Rect2(250, 516, 200, 46), "Try again", _restart))
 	else:
 		grade = "lost"
 		main.sfx("lose")
@@ -201,6 +283,7 @@ func on_key(code):
 		KEY_SPACE, KEY_ENTER: _end()
 		KEY_Z, KEY_BACKSPACE: _undo()
 		KEY_R: _restart()
+		KEY_H: _hint()
 		KEY_1:
 			if b_leap.show and b_leap.on: _mode("leap")
 		KEY_2:
@@ -241,6 +324,23 @@ func _draw():
 	Ink.text(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI)
 	Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 48), "Station %d" % (idx + 1), 16, Ink.a(Ink.SUMI, 0.6))
 	Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 72), lv.name, 22, Ink.SUMI)
+	var rl = []
+	if rules.has("koan"):
+		rl.append("公案 one stroke only")
+	if rules.has("wet"):
+		rl.append("墨 your last stroke is a wall")
+	if rules.has("enso"):
+		rl.append("円相 close a circle to bind")
+	if rules.has("garden"):
+		rl.append("石庭 rake every tile in one stroke  (%d left)" % max(0, s.open - s.visited.size()))
+	if rules.has("gate"):
+		rl.append("鳥居 reach the gate")
+	if rules.has("nocut"):
+		rl.append("無刀 no cutting")
+	if rules.has("stone"):
+		rl.append("硯 unspent ink is kept (to %d)" % Sim.INK_CAP)
+	if not rl.is_empty():
+		Ink.text(self, f, Vector2(124, 96), "  ·  ".join(rl), 14, Ink.SHU)
 
 	# board
 	var br = Rect2(ORG, Vector2(s.w, s.h) * TS)
@@ -261,6 +361,12 @@ func _draw():
 				Ink.ice(self, r)
 			elif ch == "f":
 				Ink.fire(self, r, time + x + y)
+			elif ch == "g":
+				Ink.torii(self, r)
+			if s.r_garden and (ch == "." or ch == "i") and not s.visited.has(p):
+				# gravel not yet raked
+				for k in range(3):
+					draw_circle(r.position + Vector2(TS * (0.3 + 0.2 * k), TS * (0.4 + 0.12 * ((x + y + k) % 3))), 1.6, Ink.a(Ink.SUMI, 0.35))
 			if dng.has(p) and ch != "f":
 				Ink.blot(self, r.get_center(), TS * 0.66, TS * 0.66, Ink.SHU, 0.52 + 0.08 * sin(time * 4.0))
 	for i in range(s.w + 1):
@@ -289,6 +395,34 @@ func _draw():
 				Ink.text(self, f, c + Vector2(TS * 0.2, -TS * 0.24), str(Sim.cut_power(s, d)), 22, Ink.SHU)
 			elif yi < 0 and ((mode == "ward" and Sim.ter(s, t) == "." and not s.wards.has(t)) or (mode != "ward" and Sim.walk(s, t) and not s.visited.has(t))):
 				draw_circle(ctr(t), 7.0 if dist == 1 else 10.0, Ink.a(Ink.AI if mode != "" else Ink.SUMI, 0.45))
+
+	# the stroke before this one, drying
+	if not s.paths.is_empty() and not done:
+		var old = []
+		for v in s.paths.back():
+			old.append(ctr(v))
+		if old.size() > 1:
+			Ink.brush(self, old, 18.0, Ink.a(Ink.AI if rules.has("wet") else Ink.SUMI, 0.16))
+
+	# the master's line
+	if hint_path.size() > 1:
+		for i in range(1, hint_path.size()):
+			var a = ctr(hint_path[i - 1])
+			var b = ctr(hint_path[i])
+			var n = int(a.distance_to(b) / 14.0)
+			for k in range(n + 1):
+				draw_circle(a.lerp(b, k / float(max(1, n))), 3.5, Ink.a(Ink.SHU, 0.75))
+		Ink.enso(self, ctr(hint_path.back()), TS * 0.2, 4.0, Ink.SHU)
+	for m in hint_marks:
+		Ink.text(self, f, ctr(m[0]) + Vector2(-TS * 0.5, -TS * 0.12), m[1], 22, Ink.SHU, HORIZONTAL_ALIGNMENT_CENTER, TS)
+
+	# a closing circle shows what it would bind
+	var bound = Sim.enso_bound(s)
+	if not bound.is_empty() and not done:
+		var lp = [ctr(s.visited.back()), ctr(s.visited[0])]
+		draw_line(lp[0], lp[1], Ink.a(Ink.KIN, 0.9), 6.0, true)
+		for i in bound:
+			Ink.enso(self, ctr(s.yokai[i].pos), TS * 0.46, 7.0, Ink.KIN)
 
 	# the stroke so far
 	var trail = []
@@ -345,17 +479,20 @@ func _pips(f, y, kanji, label, n, mx, col):
 	Ink.text(self, f, Vector2(PX, y), kanji, 26, Ink.SUMI)
 	Ink.text(self, f, Vector2(PX + 36, y - 2), label, 17, Ink.a(Ink.SUMI, 0.7))
 	for i in range(mx):
-		var c = Vector2(PX + 150 + i * 30, y - 9)
+		# long brushes wrap onto a tighter row so they never run into the text beside them
+		var step = 30.0 if mx <= 8 else 240.0 / mx
+		var c = Vector2(PX + 150 + i * step, y - 9)
+		var rad = min(10.0, step * 0.36)
 		if i < n:
-			draw_circle(c, 10, col)
-		draw_arc(c, 10, 0, TAU, 20, Ink.SUMI, 1.8, true)
+			draw_circle(c, rad, col)
+		draw_arc(c, rad, 0, TAU, 20, Ink.SUMI, 1.8, true)
 
 func _panel(f):
 	Ink.brush(self, [Vector2(PX - 22, 30), Vector2(PX - 23, 250), Vector2(PX - 21, 470), Vector2(PX - 22, 690)], 4.0, Ink.a(Ink.SUMI, 0.45))
 	Ink.text(self, f, Vector2(PX, 52), "Stroke %d" % (s.turn + (0 if done else 1)), 26, Ink.SUMI)
 	Ink.text(self, f, Vector2(PX + 150, 52), "上手 mastery: within %d, unharmed" % lv.par, 17, Ink.SHU if (s.turn < lv.par and s.hits == 0) else Ink.a(Ink.SUMI, 0.5))
 	_pips(f, 96, "気", "Ki", s.ki, s.ki + s.hits, Ink.SHU)
-	_pips(f, 134, "墨", "Ink", s.ink, s.ink_max, Ink.SUMI)
+	_pips(f, 134, "墨", "Ink", s.ink, Sim.INK_CAP if s.r_stone else max(s.ink_max, s.ink), Ink.SUMI)
 	_pips(f, 172, "勢", "Momentum", min(2, s.mom), 2, Ink.AI)
 	Ink.text(self, f, Vector2(PX + 230, 170), "a straight cut now deals %d" % min(3, 1 + s.mom), 16, Ink.a(Ink.SUMI, 0.7))
 	var wz = ""
@@ -381,23 +518,50 @@ func _panel(f):
 		hint = "縮地 — choose a direction to leap two tiles. Esc cancels."
 	elif mode == "ward":
 		hint = "結界 — choose a tile beside you for the ward. Esc cancels."
-	Ink.para(self, f, Vector2(PX, max(y + 26.0, 396.0)), hint, 15, Ink.a(Ink.AI, 0.95), 545)
-	Ink.text(self, f, Vector2(PX, 624), "Click, drag or arrow keys to paint · right-click undoes", 14, Ink.a(Ink.SUMI, 0.55))
+	if hint_msg != "":
+		hint = hint_msg
+	var hy = max(y + 24.0, 388.0)
+	var say = lv.get("say", [])
+	if hint == "" and say.size() == 3:
+		# a stage with no lesson of its own carries an old saying instead
+		hy = max(y + 30.0, 372.0)
+		Ink.text(self, f, Vector2(PX, hy), say[0], 22 if say[0].length() <= 14 else 17, Ink.SUMI)
+		Ink.text(self, f, Vector2(PX, hy + 21), say[1], 13, Ink.a(Ink.SUMI, 0.55))
+		Ink.para(self, f, Vector2(PX, hy + 44), say[2], 15, Ink.a(Ink.AI, 0.95), 545)
+	else:
+		Ink.para(self, f, Vector2(PX, hy), hint, 15, Ink.a(Ink.SHU if hint_msg != "" else Ink.AI, 0.95), 545)
+	Ink.text(self, f, Vector2(PX + 282, 604), "click, drag or arrows to paint", 13, Ink.a(Ink.SUMI, 0.55))
+	Ink.text(self, f, Vector2(PX + 282, 622), "right-click undoes", 13, Ink.a(Ink.SUMI, 0.55))
 
 func _result(f):
 	var box = Rect2(150, 200, 400, 380)
 	draw_rect(box, Ink.a(Ink.PAPER, 0.9))
 	Ink.slip(self, box, 5.0)
 	if grade == "jouzu":
-		Ink.seal(self, f, Vector2(350, 290), 62, "上手")
-		Ink.text(self, f, Vector2(150, 392), "Mastered in %d strokes, unharmed." % s.turn, 19, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
+		Ink.seal(self, f, Vector2(232, 296), 50, "上手")
+		_my_scroll()
+		Ink.text(self, f, Vector2(150, 408), "Mastered in %d stroke%s, unharmed." % [s.turn, "" if s.turn == 1 else "s"], 19, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
 	elif grade == "ka":
-		Ink.seal(self, f, Vector2(350, 290), 70, "可", Ink.AI)
+		Ink.seal(self, f, Vector2(232, 290), 58, "可", Ink.AI)
+		_my_scroll()
 		var why = "%d strokes; mastery asks %d." % [s.turn, lv.par]
 		if s.hits > 0:
 			why = "%d strokes, %d blow%s taken." % [s.turn, s.hits, "" if s.hits == 1 else "s"]
-		Ink.text(self, f, Vector2(150, 380), "Passed. " + why, 18, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
-		Ink.text(self, f, Vector2(150, 406), "上手 needs %d strokes and no blows." % lv.par, 15, Ink.a(Ink.SUMI, 0.7), HORIZONTAL_ALIGNMENT_CENTER, 400)
+		Ink.text(self, f, Vector2(150, 400), "Passed. " + why, 18, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
+		Ink.text(self, f, Vector2(150, 424), "上手 needs %d strokes and no blows." % lv.par, 15, Ink.a(Ink.SUMI, 0.7), HORIZONTAL_ALIGNMENT_CENTER, 400)
 	else:
 		Ink.text(self, f, Vector2(150, 320), "無念", 84, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
-		Ink.text(self, f, Vector2(150, 384), "The ink runs. Nothing is lost but a stroke.", 18, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
+		var why = "The ink runs. Nothing is lost but a stroke."
+		if rules.has("koan"):
+			why = "A kōan has no second stroke. Begin again."
+		elif rules.has("garden"):
+			why = "The garden is not yet raked. Begin again."
+		Ink.text(self, f, Vector2(150, 384), why, 18, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
+		Ink.text(self, f, Vector2(150, 416), "七転び八起き  —  fall seven times, rise eight", 15, Ink.a(Ink.SHU, 0.9), HORIZONTAL_ALIGNMENT_CENTER, 400)
+
+# what you painted to clear this stage, as it will hang in the scroll
+func _my_scroll():
+	var r = Rect2(318, 222, 196, 160)
+	draw_rect(r, Ink.a(Ink.GOFUN, 0.9))
+	Ink.frame(self, r, 2.5, Ink.a(Ink.SUMI, 0.7))
+	Ink.calligraphy(self, r.grow(-10), my_paths, s.w, s.h)

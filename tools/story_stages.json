@@ -28,6 +28,10 @@
     "Take the brush-blade. Every stroke you draw is at once a step and a cut. Paint them back where they belong."
    ],
    [
+    "Tessai",
+    "千里の道も一歩から. A road of a thousand ri begins with one step. Yours begins with one stroke."
+   ],
+   [
     "Suzu",
     "And if my hand shakes, Master?"
    ],
@@ -40,6 +44,10 @@
    [
     "Tessai",
     "Two lanterns, two strokes. The paper remembers them already. Go on to the gate."
+   ],
+   [
+    "Tessai",
+    "And when your hand does slip — it will — remember 弘法も筆の誤り. Even Kōbō Daishi's brush made mistakes. Take the stroke back and paint it again."
    ]
   ]
  },
@@ -84,6 +92,10 @@
    [
     "Tessai",
     "That is the whole of swordsmanship. The rest is footnotes."
+   ],
+   [
+    "Tessai",
+    "急がば回れ, Suzu. If you are in a hurry, go the long way round."
    ]
   ]
  },
@@ -156,6 +168,10 @@
    [
     "",
     "The oni thins to a wash of ink, then to a line, then to a place on the scroll that had been waiting for him."
+   ],
+   [
+    "Tessai",
+    "鬼の目にも涙, they say: even an oni's eye can hold a tear. I think he was glad to stop."
    ],
    [
     "Tessai",
@@ -318,6 +334,10 @@
    [
     "Sōjōbō",
     "Go south to Shinoda. The white fox there owes the court of painters a favour. And child — foxes do not fight. They agree with you until you lose."
+   ],
+   [
+    "Sōjōbō",
+    "One more thing. When a person grows conceited, your people say 天狗になる: he has 'become a tengu'. I resent the phrase. See that you do not earn it."
    ]
   ]
  },
@@ -396,6 +416,10 @@
    [
     "Kuzunoha",
     "You see it now. Every wall is a hand that holds your enemy still."
+   ],
+   [
+    "Kuzunoha",
+    "They have a saying for how you looked an hour ago: 狐につままれる. Pinched by a fox. You are learning to pinch back."
    ]
   ]
  },
@@ -633,6 +657,10 @@
    ],
    [
     "Tsuna",
+    "鬼に金棒, an iron club in an oni's hand: nothing stronger, we say. You never let him swing it."
+   ],
+   [
+    "Tsuna",
     "The road east is open. The fox went to Nasu, where the grass dies in a ring. Find the monk Gennō. He hits things."
    ]
   ]
@@ -805,6 +833,10 @@
    [
     "",
     "Nine tails fold into nine lines of ink. In the scroll's crowd a fox in court robes is, very slightly, smiling."
+   ],
+   [
+    "Tessai",
+    "覆水盆に返らず. Spilled water does not return to the tray. Ink, it seems, can."
    ],
    [
     "Tessai",
@@ -995,6 +1027,10 @@
     "Snow falls onto the paper and stays. Between two pines there is now a woman, looking out."
    ],
    [
+    "Suzu",
+    "石の上にも三年. Three years on a stone and even the stone grows warm. She has waited longer than that."
+   ],
+   [
     "Tessai",
     "South again. The river spirits have noticed the scroll filling and gone to ground. Or rather, to water."
    ]
@@ -1167,6 +1203,10 @@
   ],
   "after": [
    [
+    "Kappa",
+    "河童の川流れ. Even a kappa is carried off by the river, they say. I had hoped never to be the example."
+   ],
+   [
     "",
     "The pool goes clear. On the scroll, a river fills in from source to sea, and four hundred small green heads bob in it."
    ],
@@ -1238,6 +1278,10 @@
   "story": [
    [
     "Tessai",
+    "壁に耳あり、障子に目あり. The walls have ears and the paper doors have eyes. Here, it is literally so."
+   ],
+   [
+    "Tessai",
     "They have built themselves a checkpoint. Wind behind walls."
    ],
    [
@@ -1296,6 +1340,10 @@
   "after": [
    [
     "Tessai",
+    "勝って兜の緒を締めよ. After the victory, tighten your helmet cord."
+   ],
+   [
+    "Tessai",
     "One left. It has been walking behind the parade this whole time, picking up what fell."
    ]
   ]
@@ -1341,6 +1389,10 @@
    [
     "",
     "The bones come apart gently, like a held breath let go, and lie down in the last blank hand-width as a field of white grass."
+   ],
+   [
+    "",
+    "夏草や 兵どもが 夢の跡. Summer grasses: all that is left of the warriors' dreams."
    ],
    [
     "",
@@ -1414,5 +1466,237 @@
    ]
   ],
   "after": []
+ },
+ {
+  "kanji": "公案",
+  "name": "The Kōan",
+  "par": 1,
+  "waza": [],
+  "rows": [],
+  "hint": "Kōan 公案: one stroke, and only one. Nothing moves but you, and whatever copies you. Sheathe the brush with anything left standing and you begin again.",
+  "story": [
+   [
+    "",
+    "The scroll is whole and hangs again in its temple. Tessai looks at it for a long time, then takes down a single sheet of blank paper."
+   ],
+   [
+    "Tessai",
+    "You can end a hundred demons in five strokes each. Now end them in one."
+   ],
+   [
+    "Tessai",
+    "Master Hakuin asked: you know the sound of two hands clapping. What is the sound of one? 隻手の声. I am asking you the same thing with a brush."
+   ],
+   [
+    "Suzu",
+    "One stroke for all of them?"
+   ],
+   [
+    "Tessai",
+    "One stroke is all anyone ever really has. The rest is correction."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "Hm. No correction needed."
+   ]
+  ]
+ },
+ {
+  "kanji": "墨染",
+  "name": "Wet Ink",
+  "par": 1,
+  "waza": [],
+  "rows": [],
+  "hint": "Wet ink 墨: the stroke you just painted stays wet for one turn. No yokai can cross it and no wind passes it. Paint your own walls.",
+  "story": [
+   [
+    "Tessai",
+    "You have always thought of the stroke as where you went. Think of it as what you left."
+   ],
+   [
+    "Suzu",
+    "The ink stays."
+   ],
+   [
+    "Tessai",
+    "For a breath. Long enough to matter."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "You hid behind your own handwriting. Good."
+   ],
+   [
+    "Tessai",
+    "余白の美. The beauty of what is left blank. You are beginning to choose it on purpose."
+   ]
+  ]
+ },
+ {
+  "kanji": "円相",
+  "name": "Ensō",
+  "par": 1,
+  "waza": [],
+  "rows": [],
+  "hint": "Ensō 円相: with the long brush (7 ink), end a stroke beside the tile where it began and the circle closes. Any yokai inside it is bound at once, however strong.",
+  "story": [
+   [
+    "",
+    "A circle, drawn in one breath. The monks say it shows the mind of whoever drew it. Tessai's is slightly flat on one side."
+   ],
+   [
+    "Tessai",
+    "吾唯足知, it says on the basin at Ryōan-ji. I know only what is enough. A circle is exactly enough."
+   ],
+   [
+    "Tessai",
+    "Take the long brush. Do not cut this one. Go around it."
+   ],
+   [
+    "Suzu",
+    "And when I come back to where I began?"
+   ],
+   [
+    "Tessai",
+    "Then there is nothing left inside to fight."
+   ]
+  ],
+  "after": [
+   [
+    "Suzu",
+    "It did not even struggle."
+   ],
+   [
+    "Tessai",
+    "There was nowhere for it to go that was not you."
+   ]
+  ]
+ },
+ {
+  "kanji": "石庭",
+  "name": "The Stone Garden",
+  "par": 1,
+  "waza": [],
+  "rows": [],
+  "hint": "Garden 石庭: there are no yokai here. Rake every open tile in one stroke, never crossing your own line. The stones stay where they are.",
+  "story": [
+   [
+    "",
+    "Behind the temple is a garden of raked gravel and fifteen stones. It is said that from wherever you sit, one of the fifteen is always hidden."
+   ],
+   [
+    "Tessai",
+    "Rake it."
+   ],
+   [
+    "Suzu",
+    "Is that a lesson?"
+   ],
+   [
+    "Tessai",
+    "It is a garden, and it needs raking. 一に掃除、二に信心. First sweep; then believe."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "Not a stone moved, not a line crossed. The monks will think a monk did it."
+   ]
+  ]
+ },
+ {
+  "kanji": "鳥居",
+  "name": "The Gate",
+  "par": 1,
+  "waza": [],
+  "rows": [],
+  "hint": "Gate 鳥居: you need not fight. Reach the torii and the stage is won, however many yokai are left behind you.",
+  "story": [
+   [
+    "Tessai",
+    "Today you will not cut anything at all."
+   ],
+   [
+    "Suzu",
+    "Then how do I win?"
+   ],
+   [
+    "Tessai",
+    "By arriving. 三十六計逃げるに如かず: of the thirty-six stratagems, the best is to run."
+   ]
+  ],
+  "after": [
+   [
+    "Suzu",
+    "They are all still there."
+   ],
+   [
+    "Tessai",
+    "And you are here. Which of you won?"
+   ]
+  ]
+ },
+ {
+  "kanji": "硯",
+  "name": "The Ink Stone",
+  "par": 1,
+  "waza": [],
+  "rows": [],
+  "hint": "Ink stone 硯: ink you do not spend is kept for the next stroke, up to 8. Stand still to grind; then paint the long line, even a circle (7 ink).",
+  "story": [
+   [
+    "",
+    "Tessai takes back the long brush and hands her the old short one, and a worn black stone with a hollow in it."
+   ],
+   [
+    "Tessai",
+    "墨を磨るは病夫の如く. Grind the ink like an invalid: slowly, with no strength at all."
+   ],
+   [
+    "Suzu",
+    "And then?"
+   ],
+   [
+    "Tessai",
+    "Then wield the brush like a warrior. But the grinding comes first."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "You waited. Most never learn that the waiting is part of the stroke."
+   ]
+  ]
+ },
+ {
+  "kanji": "無刀",
+  "name": "No Sword",
+  "par": 1,
+  "waza": [],
+  "rows": [],
+  "hint": "No sword 無刀: your brush will not cut here. Bind with the circle, drown or break with the shout, or simply go around.",
+  "story": [
+   [
+    "Tessai",
+    "Yagyū Muneyoshi once stood before Tokugawa Ieyasu with empty hands and took the wooden sword out of his grip. 無刀取り. Ieyasu made the Yagyū his teachers that day."
+   ],
+   [
+    "Suzu",
+    "You are taking my blade away."
+   ],
+   [
+    "Tessai",
+    "I am telling you that you never needed it."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "無手勝流. The school of winning with no hands. Old Bokuden would have approved."
+   ]
+  ]
  }
 ]

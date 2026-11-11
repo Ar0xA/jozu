@@ -1,0 +1,731 @@
+[
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "一筆",
+    "rows": [
+      ".......",
+      "..c....",
+      ".......",
+      "...H...",
+      ".......",
+      "....c..",
+      "......."
+    ],
+    "waza": [],
+    "par": 3,
+    "ways": 122,
+    "states": 123,
+    "score": 32.05748549466076,
+    "trace": "R / D D L L / U U U U"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "間合",
+    "rows": [
+      ".......",
+      ".#...#.",
+      ".......",
+      "H....o.",
+      ".......",
+      ".#...#.",
+      "......."
+    ],
+    "waza": [],
+    "par": 2,
+    "ways": 12,
+    "states": 52,
+    "score": 24.79956028185891,
+    "trace": " / R R R R"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "挟撃",
+    "rows": [
+      ".......",
+      ".#...#.",
+      ".......",
+      "o..H..o",
+      ".......",
+      ".#...#.",
+      "......."
+    ],
+    "waza": [],
+    "par": 3,
+    "ways": 302,
+    "states": 833,
+    "score": 31,
+    "trace": " / R R / L L L"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "茨木",
+    "rows": [
+      "c.....c",
+      ".#...#.",
+      ".......",
+      "...O...",
+      ".......",
+      ".#...#.",
+      "...H..."
+    ],
+    "waza": [],
+    "par": 4,
+    "ways": 6,
+    "states": 1487,
+    "score": 46.692645077942394,
+    "trace": "U U U / R R R U / U U L L / L L L L"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "松風",
+    "rows": [
+      "...t...",
+      ".......",
+      ".#.#.#.",
+      ".......",
+      "c.....c",
+      "..#.#..",
+      "...H..."
+    ],
+    "waza": [],
+    "par": 5,
+    "ways": 16,
+    "states": 236,
+    "score": 55.41253715874966,
+    "trace": "R R R / U U L L / L L L L / R R U / U U R U"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "縮地",
+    "rows": [
+      "T..~...",
+      "...~.c.",
+      "~~~~...",
+      ".......",
+      "..o....",
+      ".......",
+      "H......"
+    ],
+    "waza": [
+      "leap"
+    ],
+    "par": 4,
+    "ways": 8,
+    "states": 1248,
+    "score": 46.33007499855769,
+    "trace": "R R R U / U U R R / U U U L / leapL U L L"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "団扇",
+    "rows": [
+      "t.....t",
+      ".......",
+      "..#.#..",
+      "~~.c.~~",
+      "..#.#..",
+      ".......",
+      "...H..."
+    ],
+    "waza": [
+      "leap"
+    ],
+    "par": 5,
+    "ways": 324,
+    "states": 181,
+    "score": 51.5,
+    "trace": "R U L / U U R leapU / R U R D / L L L / L L L U"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "僧正",
+    "rows": [
+      "t.#.#.t",
+      ".......",
+      "~~~.~~~",
+      ".......",
+      ".#.O.#.",
+      ".......",
+      "...H..."
+    ],
+    "waza": [
+      "leap"
+    ],
+    "par": 5,
+    "ways": 576,
+    "states": 2243,
+    "score": 51.5,
+    "trace": "R R U L / U U U U / R R leapU U / L D L L / L L L U"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "狐火",
+    "rows": [
+      ".......",
+      ".#.....",
+      "....k..",
+      ".......",
+      "..#....",
+      ".......",
+      "H......"
+    ],
+    "waza": [],
+    "par": 3,
+    "ways": 14,
+    "states": 245,
+    "score": 34.593109404391484,
+    "trace": "R R R R / R R U U / U U U U"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "葛の葉",
+    "rows": [
+      "#T#....",
+      "#.#.k..",
+      "#.#....",
+      "#.#..#.",
+      ".......",
+      "..#....",
+      "H......"
+    ],
+    "waza": [
+      "ward"
+    ],
+    "par": 6,
+    "ways": 201,
+    "states": 23568,
+    "score": 61.341788517248204,
+    "trace": "R R R U / U L L wardU / U U U U / D / D D D R / R R R R"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "化かし",
+    "rows": [
+      "k.....k",
+      ".#.#.#.",
+      ".......",
+      "...o...",
+      ".......",
+      ".#.#.#.",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward"
+    ],
+    "par": 4,
+    "ways": 18456,
+    "states": 1337989,
+    "score": 41.5,
+    "trace": "R / R leapU L L / L L L U / U U U R"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "信太",
+    "rows": [
+      "t......",
+      ".#.k.#.",
+      ".......",
+      "..o....",
+      ".......",
+      ".#...#.",
+      "...H..k"
+    ],
+    "waza": [
+      "leap",
+      "ward"
+    ],
+    "par": -1,
+    "ways": 0,
+    "states": 424839,
+    "score": 0,
+    "trace": "CAPPED"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "鬼の門",
+    "rows": [
+      ".o.O.o.",
+      ".......",
+      ".#...#.",
+      "...#...",
+      ".......",
+      ".#...#.",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward"
+    ],
+    "par": 3,
+    "ways": 21,
+    "states": 38525,
+    "score": 35.040568381362704,
+    "trace": "R U L U / leapU U L wardR / U U R R"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "谷風",
+    "rows": [
+      "T..~..o",
+      "...~...",
+      ".#.~.#.",
+      ".......",
+      "o..#...",
+      ".......",
+      "...H..c"
+    ],
+    "waza": [
+      "leap",
+      "ward"
+    ],
+    "par": 5,
+    "ways": 1960,
+    "states": 418867,
+    "score": 52,
+    "trace": " / R R R U / U U U leapL / D L L L / L U U U"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "酒宴",
+    "rows": [
+      "c..k..c",
+      ".......",
+      ".o.#.o.",
+      ".......",
+      ".#...#.",
+      ".......",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward"
+    ],
+    "par": 4,
+    "ways": 4,
+    "states": 1144018,
+    "score": 48.17807190511264,
+    "trace": "R U U U / U U U wardL / R R U L / leapL L L L"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "酒呑童子",
+    "rows": [
+      "c..S..c",
+      ".......",
+      ".#...#.",
+      "o.....o",
+      ".#...#.",
+      ".......",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward"
+    ],
+    "par": -1,
+    "ways": 0,
+    "states": 734497,
+    "score": 0,
+    "trace": "CAPPED"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "殺生石",
+    "rows": [
+      "y..#..y",
+      "...#...",
+      ".#...#.",
+      "...H...",
+      ".#...#.",
+      "...#...",
+      "...y..."
+    ],
+    "waza": [
+      "leap",
+      "ward"
+    ],
+    "par": 4,
+    "ways": 37492,
+    "states": 165720,
+    "score": 41.5,
+    "trace": " /  / wardR D R U / U R leapL U"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "喝",
+    "rows": [
+      "..~.~..",
+      ".c~.~c.",
+      "..~.~..",
+      ".~OHO~.",
+      ".......",
+      "..#y#..",
+      "......."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": -1,
+    "ways": 0,
+    "states": 1118521,
+    "score": 0,
+    "trace": "CAPPED"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "怨霊",
+    "rows": [
+      "y.~.~.y",
+      "..~.~..",
+      ".O...O.",
+      ".......",
+      "..y.y..",
+      "..#.#..",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": -1,
+    "ways": 0,
+    "states": 664396,
+    "score": 0,
+    "trace": "CAPPED"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "玉藻前",
+    "rows": [
+      "c..Q..c",
+      ".......",
+      ".#...#.",
+      "k.....k",
+      ".#...#.",
+      ".......",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": -1,
+    "ways": 0,
+    "states": 867047,
+    "score": 0,
+    "trace": "CAPPED"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "薄氷",
+    "rows": [
+      "...O...",
+      "...i...",
+      "...i...",
+      ".#.i.#.",
+      "...i...",
+      "o.....o",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": 3,
+    "ways": 378,
+    "states": 237706,
+    "score": 31.5,
+    "trace": "R R / U U U leapL / D D R U"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "傘",
+    "rows": [
+      "u.....u",
+      ".......",
+      "..iii..",
+      "..iii..",
+      "..iii..",
+      ".......",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": 2,
+    "ways": 130,
+    "states": 7108,
+    "score": 21.96657699846255,
+    "trace": "R wardR U U / leapL U R R"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "吹雪",
+    "rows": [
+      "T.iii.u",
+      "..#i#..",
+      "...i...",
+      "o.iii..",
+      "...i...",
+      "..#.#..",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": 3,
+    "ways": 518,
+    "states": 88169,
+    "score": 31.5,
+    "trace": " / U U L L / R D D leapR"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "雪女",
+    "rows": [
+      "u..W..u",
+      ".iiiii.",
+      ".i#i#i.",
+      ".iiiii.",
+      ".i#i#i.",
+      ".iiiii.",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": 2,
+    "ways": 80,
+    "states": 7535,
+    "score": 23.160149997115376,
+    "trace": "leapR U wardL R / L L L L"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "河童",
+    "rows": [
+      "...c...",
+      ".~~~~~.",
+      ".~...~.",
+      ".p.c.p.",
+      ".~...~.",
+      ".~~.~~.",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": 3,
+    "ways": 24,
+    "states": 53706,
+    "score": 35.35614381022528,
+    "trace": "wardR U U U / R R U L / L L leapU R"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "相撲",
+    "rows": [
+      "~~~.~~~",
+      "~p...p~",
+      "~..O..~",
+      ".......",
+      ".#...#.",
+      "o.....o",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": -1,
+    "ways": 0,
+    "states": 316131,
+    "score": 0,
+    "trace": "CAPPED"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "瀬",
+    "rows": [
+      "t..~..k",
+      "...~...",
+      "~~p~~~~",
+      ".......",
+      ".o...u.",
+      ".......",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": -1,
+    "ways": 0,
+    "states": 438043,
+    "score": 0,
+    "trace": "CAPPED"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "河伯",
+    "rows": [
+      "u.....u",
+      "~~~P~~~",
+      "~.....~",
+      "p.....p",
+      "~.....~",
+      "~~~.~~~",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": 4,
+    "ways": 977,
+    "states": 1741913,
+    "score": 42.5,
+    "trace": "R R wardR leapU / R R L U / U U U U / L L L L"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "狐火",
+    "rows": [
+      "..n.n..",
+      ".......",
+      ".f.o.f.",
+      ".......",
+      ".#.f.#.",
+      ".......",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": 3,
+    "ways": 624,
+    "states": 120908,
+    "score": 31.5,
+    "trace": "R wardR U leapU / U U U U / L L L"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "関",
+    "rows": [
+      "T.n...y",
+      "..f....",
+      ".#.n.#.",
+      "...f...",
+      "o..#..u",
+      ".......",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": -1,
+    "ways": 0,
+    "states": 2523139,
+    "score": 0,
+    "trace": "CAPPED"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "百鬼",
+    "rows": [
+      "c.k.O.c",
+      ".f...f.",
+      "~~.n.~~",
+      "p.....p",
+      "~~.i.~~",
+      ".u.i.y.",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": -1,
+    "ways": 0,
+    "states": 2268002,
+    "score": 0,
+    "trace": "CAPPED"
+  },
+  {
+    "chapter": 0,
+    "seg": 0,
+    "name": "餓者髑髏",
+    "rows": [
+      "f..G..f",
+      ".......",
+      ".#.i.#.",
+      "n..i..n",
+      ".#.i.#.",
+      ".......",
+      "...H..."
+    ],
+    "waza": [
+      "leap",
+      "ward",
+      "katsu"
+    ],
+    "par": -1,
+    "ways": 0,
+    "states": 677475,
+    "score": 0,
+    "trace": "CAPPED"
+  }
+]

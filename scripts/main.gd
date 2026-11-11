@@ -173,7 +173,7 @@ func _draw():
 # ---------------------------------------------------------------- save
 
 func fresh():
-	return {"cleared": {}, "sound": true, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
+	return {"cleared": {}, "scroll": {}, "sound": true, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
 
 func load_save():
 	data = fresh()
@@ -183,6 +183,8 @@ func load_save():
 		if typeof(j) == TYPE_DICTIONARY and j.has("cleared") and j.has("up"):
 			if j.has("sound"):
 				data.sound = bool(j.sound)
+			if j.has("scroll") and typeof(j.scroll) == TYPE_DICTIONARY:
+				data.scroll = j.scroll
 			for k in j.cleared:
 				data.cleared[k] = str(j.cleared[k])
 			for k in data.up:
@@ -195,7 +197,7 @@ func write_save():
 		f.store_string(JSON.stringify(data))
 
 func erase_save():
-	var snd = data.sound
+	var snd = data.get("sound", true)
 	data = fresh()
 	data.sound = snd
 	write_save()
@@ -206,10 +208,20 @@ func grade_of(i):
 func unlocked(i):
 	return i == 0 or grade_of(i - 1) != ""
 
-func record(i, grade):
-	if grade_of(i) != "jouzu":
+func record(i, grade, paths = null):
+	var better = grade_of(i) != "jouzu"
+	if better:
 		data.cleared[str(i)] = grade
-		write_save()
+	# keep the strokes of the best clear for the scroll gallery
+	if paths != null and (better or not data.scroll.has(str(i))):
+		var out = []
+		for path in paths:
+			var line = []
+			for v in path:
+				line.append([v.x, v.y])
+			out.append(line)
+		data.scroll[str(i)] = out
+	write_save()
 
 func up_cost(key):
 	return 2 + int(data.up[key])
@@ -232,7 +244,9 @@ func points():
 
 func stats_for(i):
 	var st = Data.base_stats(Data.LEVELS[i])
-	st.ink += int(data.up.ink)
+	var rl = Data.LEVELS[i].get("rules", [])
+	if not (rl.has("koan") or rl.has("garden")):
+		st.ink += int(data.up.ink)  # a koan is answered with the brush it was set for
 	st.ki += int(data.up.ki)
 	for k in ["leap", "ward", "katsu"]:
 		if st[k] > 0:
@@ -255,6 +269,10 @@ func show_title():
 func show_map():
 	play_music("title")
 	go(load("res://scripts/map.gd").new())
+
+func show_scroll():
+	play_music("title")
+	go(load("res://scripts/scroll.gd").new())
 
 func show_dojo():
 	go(load("res://scripts/dojo.gd").new())

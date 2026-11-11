@@ -8,11 +8,10 @@ const Data = preload("res://scripts/data.gd")
 const DIR = {"R": Vector2i(1, 0), "L": Vector2i(-1, 0), "D": Vector2i(0, 1), "U": Vector2i(0, -1)}
 
 func _init():
-	var sols = JSON.parse_string(FileAccess.get_file_as_string("res://tools/solutions.json"))
 	var bad = 0
 	for i in range(Data.LEVELS.size()):
 		var lv = Data.LEVELS[i]
-		var why = check(lv, sols.get(lv.kanji + "|" + "".join(lv.rows), ""))
+		var why = check(lv, lv.get("sol", ""))
 		if why != "":
 			bad += 1
 			print("FAIL %3d %s  %s" % [i + 1, lv.kanji, why])
@@ -22,7 +21,7 @@ func _init():
 func check(lv, trace):
 	if trace == "":
 		return "no stored solution"
-	var s = Sim.new_state(lv.rows, Data.base_stats(lv))
+	var s = Sim.new_state(lv.rows, Data.base_stats(lv), lv.get("rules", []))
 	var strokes = trace.split(" / ")
 	for k in range(strokes.size()):
 		for tok in strokes[k].split(" ", false):

@@ -236,6 +236,32 @@ static func water(ci, r, t):
 			for k in range(3):
 				ci.draw_arc(c, s * (0.16 - k * 0.05), PI, TAU, 12, a(AI, 0.8 - k * 0.15), 2.0 - k * 0.4, true)
 
+# The strokes that cleared a stage, with the board taken away: what is left is handwriting.
+# A stroke that never moved is a single dot.
+static func calligraphy(ci, r, paths, w, h):
+	var cell = min(r.size.x / w, r.size.y / h)
+	var org = r.position + (r.size - Vector2(w, h) * cell) * 0.5
+	for path in paths:
+		var pts = []
+		for v in path:
+			var q = Vector2(v.x, v.y) if v is Vector2i else Vector2(v[0], v[1])
+			pts.append(org + (q + Vector2(0.5, 0.5)) * cell)
+		if pts.size() == 1:
+			ci.draw_circle(pts[0], cell * 0.15, a(SUMI, 0.85))
+		else:
+			brush(ci, pts, cell * 0.42, a(SUMI, 0.88))
+
+# torii: two posts, two lintels, vermilion
+static func torii(ci, r):
+	var c = r.get_center()
+	var s = r.size.x
+	blot(ci, c, s * 0.5, s * 0.5, KIN, 0.4)
+	for sx in [-1.0, 1.0]:
+		brush(ci, [c + Vector2(sx * s * 0.22, s * 0.36), c + Vector2(sx * s * 0.20, 0), c + Vector2(sx * s * 0.19, -s * 0.24)], s * 0.10, SHU)
+	brush(ci, [c + Vector2(-s * 0.40, -s * 0.27), c + Vector2(0, -s * 0.31), c + Vector2(s * 0.40, -s * 0.27)], s * 0.12, SHU)
+	ci.draw_line(c + Vector2(-s * 0.36, -s * 0.33), c + Vector2(s * 0.36, -s * 0.33), SUMI, 3.0, true)
+	ci.draw_line(c + Vector2(-s * 0.27, -s * 0.10), c + Vector2(s * 0.27, -s * 0.10), SHU, s * 0.06, true)
+
 # ice: a pale glaze with a few skate-marks of light
 static func ice(ci, r):
 	ci.draw_rect(r.grow(-1), Color(0.78, 0.87, 0.92, 0.8))

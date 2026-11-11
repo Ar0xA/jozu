@@ -12,7 +12,8 @@ func setup():
 	b_new.show = has
 	b_snd = btn(Rect2(940, 588, 290, 44), "", _sound, "音")
 	_sound_label()
-	btn(Rect2(940, 646, 290, 44), "Leave", func(): get_tree().quit(), "去")
+	if not OS.has_feature("web"):  # a browser tab is closed by the browser
+		btn(Rect2(940, 646, 290, 44), "Leave", func(): get_tree().quit(), "去")
 
 func _sound():
 	main.toggle_sound()

@@ -9,8 +9,9 @@ var page = 0
 var tabs = []
 
 func setup():
-	btn(Rect2(40, 648, 210, 50), "Training", main.show_dojo, "修練")
-	btn(Rect2(270, 648, 150, 50), "Title", main.show_title, "題")
+	btn(Rect2(40, 648, 180, 50), "Training", main.show_dojo, "修練")
+	btn(Rect2(232, 648, 128, 50), "Scroll", main.show_scroll, "巻")
+	btn(Rect2(372, 648, 110, 50), "Title", main.show_title, "題")
 	page = _chapter_of(_next_open())
 	var n = Data.CHAPTERS.size()
 	var tw = 1200.0 / n
@@ -75,7 +76,7 @@ func on_motion(pos, _held):
 	hover_st = -1
 	var rg = _range(page)
 	for i in range(rg[0], rg[1]):
-		if pos.distance_to(st_pos(i)) < 30:
+		if pos.distance_to(st_pos(i)) < (30 if rg[1] - rg[0] <= 11 else 24):
 			hover_st = i
 
 func on_click(pos, button):
@@ -107,6 +108,14 @@ func _draw():
 	draw_rect(Rect2(BAND.position.x, BAND.position.y - 3, BAND.size.x, 3), Ink.KIN)
 	draw_rect(Rect2(BAND.position.x, BAND.end.y, BAND.size.x, 3), Ink.KIN)
 
+	# a line of history about this place
+	var note = ch.get("note", "")
+	if note != "":
+		var nr = Rect2(BAND.position.x + 14, BAND.end.y - 78, 700, 64)
+		draw_rect(nr, Ink.a(Ink.PAPER, 0.86))
+		Ink.frame(self, nr, 2.0, Ink.a(Ink.SUMI, 0.6))
+		Ink.para(self, f, nr.position + Vector2(12, 20), note, 14, Ink.SUMI, nr.size.x - 24)
+
 	# the road through this chapter
 	var rg = _range(page)
 	var road = []
@@ -119,15 +128,16 @@ func _draw():
 		var p = st_pos(i)
 		var open = main.unlocked(i)
 		var g = main.grade_of(i)
-		var r = 26.0 + (2.5 * sin(time * 3.0) if (open and g == "") else 0.0)
+		var small = rg[1] - rg[0] > 11
+		var r = (20.0 if small else 26.0) + (2.5 * sin(time * 3.0) if (open and g == "") else 0.0)
 		draw_circle(p, r, Ink.PAPER)
 		Ink.enso(self, p, r, 6.0 if open else 3.5, Ink.SHU if (i == hover_st and open) else Ink.a(Ink.SUMI, 1.0 if open else 0.35), -1.9 + i)
 		if g == "jouzu":
-			Ink.seal(self, f, p, 17, "上手")
+			Ink.seal(self, f, p, 13 if small else 17, "上手")
 		elif g != "":
-			Ink.seal(self, f, p, 22, "可", Ink.AI)
+			Ink.seal(self, f, p, 17 if small else 22, "可", Ink.AI)
 		else:
-			Ink.text(self, f, Vector2(p.x - 30, p.y + 8), str(i + 1), 22, Ink.a(Ink.SUMI, 1.0 if open else 0.35), HORIZONTAL_ALIGNMENT_CENTER, 60)
+			Ink.text(self, f, Vector2(p.x - 30, p.y + (6 if small else 8)), str(i + 1), 17 if small else 22, Ink.a(Ink.SUMI, 1.0 if open else 0.35), HORIZONTAL_ALIGNMENT_CENTER, 60)
 		if Data.BOSSES.has(i):
 			Ink.text(self, f, Vector2(p.x - 30, p.y - 34), "主", 16, Ink.a(Ink.SHU, 1.0 if open else 0.4), HORIZONTAL_ALIGNMENT_CENTER, 60)
 
@@ -153,6 +163,6 @@ func _draw():
 			done += 1
 		if main.grade_of(i) == "jouzu":
 			best += 1
-	Ink.text(self, f, Vector2(460, 674), "Stations %d / %d     上手 seals %d     Training points %d" % [done, Data.LEVELS.size(), best, main.points()], 20, Ink.SUMI)
-	Ink.text(self, f, Vector2(460, 700), "Clear a station for 1 point. Master it for 2.  ← → turn chapters.", 15, Ink.a(Ink.SUMI, 0.6))
+	Ink.text(self, f, Vector2(504, 674), "Stations %d / %d     上手 seals %d     Training points %d" % [done, Data.LEVELS.size(), best, main.points()], 20, Ink.SUMI)
+	Ink.text(self, f, Vector2(504, 700), "Clear a station for 1 point. Master it for 2.  ← → turn chapters.", 15, Ink.a(Ink.SUMI, 0.6))
 	draw_btns()

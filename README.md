@@ -11,7 +11,8 @@ Kyōsai oni, Sōjōbō the tengu, the fox and ghost of the *Bakemono no e* scrol
 and Sekien's lantern ghost. The board and UI are brushed in code and passed through a paint shader that adds ink bleed,
 dry-brush breakup and paper grain.
 
-Open the folder in **Godot 4.3+** (built and tested on 4.7.2) and press Play, or run:
+Open the folder in **Godot 4.3+** (built and tested on 4.7.2) and press Play, or run the line below.
+Export presets for a single Windows executable and for the web are included.
 
     godot --path .
 
@@ -19,10 +20,16 @@ Music: a 1920s shakuhachi recording of *Shika no Tōne* under the story, *Sakura
 koto for the title and road, and original koto, shamisen and taiko pieces in the miyako-bushi scale for
 the stages. Press `M` to mute.
 
-One hundred stations in ten chapters. The story stages are hand-made; the rest are produced by a
-generator (`tools/gen`, C#) that builds candidate boards for each chapter, solves them exactly and keeps
-a rising run of them. `tools/verify.gd` then replays every stored solution through the real rules, so
-each station is proven masterable at base stats.
+226 stations in seventeen chapters. Ten chapters tell the story; seven more each explore one puzzle
+style in a rising ladder of eighteen boards. The story stages are hand-made; the rest come from a
+generator (`tools/gen`, C#) that builds candidate boards, solves them exactly, scores their difficulty
+and keeps an evenly climbing run. `tools/verify.gd` replays every stored solution through the real
+rules, so each station is proven masterable at base stats, and `tools/playtest.gd` drives the real
+screens through the whole game.
+
+Stages without story carry a traditional saying chosen to fit their own board and answer: proverbs,
+Zen phrases and kōan, haiku, and words from Buddhist teachers, samurai and the old chronicles. Each
+chapter has a line of history about its place on the road map.
 
 ## How it plays
 
@@ -33,6 +40,12 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
 - **Later chapters** add ice (you slide until stopped, gathering momentum), fire (burns if you rest on it),
   umbrella yokai that hop two tiles, kappa that hunt from the water, wall yokai that must be broken,
   and a skeleton that strikes all eight tiles around it.
+- **Style chapters:** kōan 公案 (one stroke only), stone garden 石庭 (rake every tile in one stroke),
+  the gate 鳥居 (arrive; nothing need be cut), wet ink 墨 (your last stroke is a wall for one turn),
+  ensō 円相 (close a circle to bind what is inside), ink stone 硯 (unspent ink is kept) and
+  no sword 無刀 (the brush cannot cut).
+- **Ask the master** (`H`) shows the next stroke of a known solution. **Your scroll** 巻 keeps the strokes
+  that cleared each station, with the board taken away.
 - **Red tiles** — where you would be struck if you sheathed the brush there.
 - **Waza** learned on the road: 縮地 leap over a tile, 結界 paste a ward, 喝 shout yokai away (into water, they are gone).
 - **上手 seal** — clear a station unharmed within the mastery stroke count. Always possible with no upgrades.
@@ -43,12 +56,14 @@ Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-clic
 ## Files
 
 - `scripts/sim.gd` — the rules, pure and deterministic
-- `scripts/data.gd` — the hundred stations, story and text (generated file; edit the sources in `tools/`)
+- `scripts/data.gd` — every station, story and text (generated file; edit the sources in `tools/`)
 - `scripts/ink.gd` — brushwork drawn in code
 - `shaders/paint.gdshader` — ink bleed, dry brush and paper grain over the whole frame
 - `art/`, `fonts/` — public-domain paintings and the bundled typeface
 - `tools/make_audio.py` — regenerates the synthesised music and sound effects (needs numpy)
 - `tools/gen/` — level generator and exact solver; `tools/build_levels.py` assembles `scripts/data.gd` from
-  `tools/story_stages.json` (hand-written stages) and `tools/generated.json`
+  `tools/story_stages.json` (hand-written stages), `tools/generated.json` and `tools/pool.json` (boards the
+  style chapters' ladders are drawn from)
+- `tools/playtest.gd` — automated playthrough of the real screens: `godot --headless --path . -s tools/playtest.gd`
 - `tools/verify.gd` — replays every stage's stored solution: `godot --headless --path . -s tools/verify.gd`
 - `tools/solve.gd` — headless checker that proves each station solvable: `godot --headless --path . -s tools/solve.gd`
