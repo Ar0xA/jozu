@@ -12,7 +12,9 @@ func setup():
 	b_new.show = has
 	b_snd = btn(Rect2(940, 588, 290, 44), "", _sound, "音")
 	_sound_label()
-	if not OS.has_feature("web"):  # a browser tab is closed by the browser
+	if OS.has_feature("web"):  # a browser tab is closed by the browser; offer the whole screen instead
+		btn(Rect2(940, 646, 290, 44), "Full screen", main.toggle_fullscreen, "全")
+	else:
 		btn(Rect2(940, 646, 290, 44), "Leave", func(): get_tree().quit(), "去")
 
 func _sound():

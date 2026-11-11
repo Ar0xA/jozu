@@ -69,6 +69,8 @@ Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-clic
 - `scripts/ink.gd` — brushwork drawn in code
 - `shaders/paint.gdshader` — ink bleed, dry brush and paper grain over the whole frame
 - `art/`, `fonts/` — public-domain paintings and the bundled typeface
+- `tools/build_web.sh` — builds the web version into `build/web` (re-trims the font first); `tools/publish_pages.sh` pushes it to GitHub Pages
+- `tools/subset_font.py` — trims the typeface to the characters the game uses (the full font is in `fonts/src/`)
 - `tools/make_audio.py` — regenerates the synthesised music and sound effects (needs numpy)
 - `tools/gen/` — level generator and exact solver; `tools/build_levels.py` assembles `scripts/data.gd` from
   `tools/story_stages.json` (hand-written stages), `tools/generated.json` and `tools/pool.json` (boards the

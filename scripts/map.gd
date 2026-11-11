@@ -77,7 +77,7 @@ func on_motion(pos, _held):
 	hover_st = -1
 	var rg = _range(page)
 	for i in range(rg[0], rg[1]):
-		if pos.distance_to(st_pos(i)) < (30 if rg[1] - rg[0] <= 11 else 24):
+		if pos.distance_to(st_pos(i)) < (30 if rg[1] - rg[0] <= 11 else 24) + (6 if main.touch else 0):
 			hover_st = i
 
 func on_click(pos, button):

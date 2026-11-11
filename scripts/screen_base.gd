@@ -73,18 +73,26 @@ func _gui_input(ev):
 		mouse = ev.position
 		hover_btn = -1
 		for i in range(btns.size()):
-			if btns[i].on and btns[i].show and btns[i].rect.has_point(mouse):
+			if btns[i].on and btns[i].show and _hit(btns[i]).has_point(mouse):
 				hover_btn = i
 		on_motion(mouse, (ev.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0)
 	elif ev is InputEventMouseButton and ev.pressed:
 		mouse = ev.position
 		if ev.button_index == MOUSE_BUTTON_LEFT:
+			# on a touch screen take the button nearest the finger, with a little grace around each
+			var best = null
 			for b in btns:
-				if b.on and b.show and b.rect.has_point(mouse):
+				if b.on and b.show and _hit(b).has_point(mouse) and (best == null or b.rect.get_center().distance_to(mouse) < best.rect.get_center().distance_to(mouse)):
+					best = b
+			for b in btns:
+				if b == best:
 					main.sfx("click")
 					b.cb.call()
 					return
 		on_click(mouse, ev.button_index)
+
+func _hit(b):
+	return b.rect.grow(9.0) if main.touch else b.rect
 
 func _unhandled_input(ev):
 	if ev is InputEventKey and ev.pressed and not ev.echo:

@@ -10,6 +10,8 @@ var data = {}
 var cur = null
 var fibers = []
 var art = {}
+var touch = false   # a phone or tablet: no hover, no right-click, fingers not pointers
+var turn_note
 var music
 var music_name = ""
 var sfx_pool = []
@@ -26,6 +28,7 @@ func _ready():
 	if ff:
 		ff.fallbacks = [sysf]
 		font = ff
+	touch = DisplayServer.is_touchscreen_available()
 	# everything on screen passes through the paint shader
 	var layer = CanvasLayer.new()
 	layer.layer = 10
@@ -37,6 +40,25 @@ func _ready():
 	mat.shader = load("res://shaders/paint.gdshader")
 	cr.material = mat
 	layer.add_child(cr)
+	# a phone held upright shows the game too small to play: ask for it to be turned
+	var top = CanvasLayer.new()
+	top.layer = 20
+	add_child(top)
+	turn_note = ColorRect.new()
+	turn_note.color = Ink.PAPER
+	turn_note.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	turn_note.visible = false
+	var lb = Label.new()
+	lb.text = "横向きに
+Turn your phone sideways"
+	lb.add_theme_font_override("font", font)
+	lb.add_theme_font_size_override("font_size", 84)
+	lb.add_theme_color_override("font_color", Ink.SUMI)
+	lb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lb.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lb.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	turn_note.add_child(lb)
+	top.add_child(turn_note)
 	var rng = RandomNumberGenerator.new()
 	rng.seed = 1185
 	for i in range(420):
@@ -101,9 +123,20 @@ func toggle_sound():
 	AudioServer.set_bus_mute(0, not data.sound)
 	write_save()
 
+func _process(_dt):
+	var ws = get_window().size
+	turn_note.visible = ws.y > ws.x * 1.1
+
+func toggle_fullscreen():
+	var full = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_FULLSCREEN)
+
 func _unhandled_input(ev):
-	if ev is InputEventKey and ev.pressed and not ev.echo and ev.keycode == KEY_M:
-		toggle_sound()
+	if ev is InputEventKey and ev.pressed and not ev.echo:
+		if ev.keycode == KEY_M:
+			toggle_sound()
+		elif ev.keycode == KEY_F11:
+			toggle_fullscreen()
 
 # A board piece: a figure lifted from an old painting (see art/CREDITS.md).
 # On the board it stands on its tile and may rise above it; flat = centred, for the legend.
