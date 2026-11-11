@@ -28,6 +28,8 @@ func check(lv, trace):
 			var ok = false
 			if tok == "KATSU":
 				ok = Sim.act_katsu(s)
+			elif tok.begins_with("shiki"):
+				ok = Sim.act_shiki(s, DIR[tok.substr(5)])
 			elif tok.begins_with("leap"):
 				ok = Sim.act_leap(s, DIR[tok.substr(4)])
 			elif tok.begins_with("ward"):

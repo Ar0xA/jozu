@@ -20,7 +20,7 @@ MAX_PER_STYLE = 18   # the most stages a style chapter may hold
 STYLE_FROM = 10      # chapters from here on are single-style ladders
 
 def n_yokai(g):
-    return sum(ch in 'coOStTkyQupPnWG' for r in g['rows'] for ch in r)
+    return sum(ch in 'coOStTkyQupPnWGdaAeX' for r in g['rows'] for ch in r)
 
 def difficulty(g):
     """How hard a board is to master. Strokes needed count most; then how much there is to search
@@ -62,7 +62,12 @@ CHAPTERS = [
     ('羅生門', 'Rashōmon'), ('鞍馬山', 'Kurama'), ('信太の森', 'Shinoda'), ('大江山', 'Mount Ōe'), ('那須野', 'Nasu'),
     ('雪国', 'Snow Country'), ('河童淵', 'Kappa Pool'), ('化野', 'Adashino'), ('恐山', 'Mount Osore'), ('百鬼夜行', 'Night Parade'),
     ('禅寺', 'Zen Temple'), ('石庭', 'Stone Garden'), ('鳥居', 'The Gate'), ('墨染', 'Wet Ink'), ('円相', 'Ensō'), ('硯', 'Ink Stone'), ('無刀', 'No Sword'),
+    ('達磨', 'Daruma'), ('狸', 'Tanuki'), ('赤い糸', 'Red Thread'), ('風', 'Wind'), ('雨', 'Rain'), ('雪', 'Deep Snow'), ('夜', 'Night'),
+    ('式神', 'Shikigami'), ('死神', 'Shinigami'),
 ]
+
+# The order the chapters are played in (the shinigami comes before the shikigami, which ends the game).
+ORDER = list(range(24)) + [25, 24]
 
 # H = a hand-made board; G = the next generated board of that segment
 LAYOUT = {
@@ -91,6 +96,7 @@ STORY_ON = {
     (6, 0): '河童', (6, 1): '相撲', (6, 2): '瀬', (6, 3): '河伯',
     (7, 0): '鬼火', (7, 1): '関', (8, 0): '恐山', (9, 0): '行列', (9, 2): '百鬼', (9, 3): '餓者髑髏',
     (10, 0): '公案', (11, 0): '石庭', (12, 0): '鳥居', (13, 0): '墨染', (14, 0): '円相', (15, 0): '硯', (16, 0): '無刀',
+    (17, 0): '達磨', (18, 0): '狸', (19, 0): '赤い糸', (20, 0): '風', (21, 0): '雨', (22, 0): '雪', (23, 0): '夜', (24, 0): '式神', (25, 0): '死神',
 }
 
 NAMES = {
@@ -204,7 +210,6 @@ SAY = [
     ('旅に病んで夢は枯野をかけ廻る', 'Tabi ni yande / yume wa kareno o / kakemeguru', 'Sick on a journey, my dreams go wandering over withered fields. — Bashō, his last poem', [4], []),
     ('一寸先は闇', 'Issun saki wa yami', 'One inch ahead, all is darkness.', [4], []),
     ('敵に塩を送る', 'Teki ni shio o okuru', 'To send salt to your enemy, as Uesugi Kenshin did for Takeda Shingen: wars are won with swords, not hunger.', [5], []),
-    ('七転び八起き', 'Nana korobi ya oki', 'Fall seven times; rise eight. Said of Daruma, who sat nine years facing a wall.', [5], []),
     ('諸行無常', 'Shogyō mujō', 'All things are impermanent: the first mark of existence in Buddhist teaching.', [7], []),
     ('因果応報', 'Inga ōhō', 'Cause and effect, answered in kind: what is done returns.', [7], []),
     ('夏草や兵どもが夢の跡', 'Natsukusa ya / tsuwamono-domo ga / yume no ato', "Summer grasses: all that is left of the warriors' dreams. — Bashō, at Hiraizumi where Yoshitsune died", [7, 9], []),
@@ -298,6 +303,77 @@ SAY = [
     ('剣は心なり', 'Ken wa kokoro nari', 'The sword is the mind. If the mind is not right, the sword cannot be. — Shimada Toranosuke', [], ['nocut']),
     ('仏の顔も三度', 'Hotoke no kao mo sando', "Even a Buddha's patience lasts only three times.", [], ['nocut']),
     ('情けは人の為ならず', 'Nasake wa hito no tame narazu', "Kindness is not only for the other's sake: it comes back.", [], ['nocut']),
+    # ---- daruma
+    ('七転び八起き', 'Nana korobi ya oki', 'Fall seven times; rise eight.', [], ['daruma']),
+    ('面壁九年', 'Menpeki kunen', 'Nine years facing the wall: Bodhidharma at Shaolin, and any long, single-minded effort since.', [], ['daruma']),
+    ('達磨さんが転んだ', 'Daruma-san ga koronda', "'Daruma fell down': the children's game where you may move only while the caller's back is turned.", [], ['daruma']),
+    ('不識', 'Fushiki', "The emperor asked: who is it that stands before me? Bodhidharma said: I don't know.", [], ['daruma']),
+    ('廓然無聖', 'Kakunen mushō', 'What is the first principle of the holy teaching? Vast emptiness, and nothing holy. — Bodhidharma', [], ['daruma']),
+    ('不立文字', 'Furyū monji', 'No reliance on words and letters: the Zen that Bodhidharma carried.', [], ['daruma']),
+    ('直指人心', 'Jikishi ninshin', 'Pointing directly at the human mind.', [], ['daruma']),
+    ('見性成仏', 'Kenshō jōbutsu', 'See your own nature, and become Buddha.', [], ['daruma']),
+    # ---- tanuki
+    ('捕らぬ狸の皮算用', "Toranu tanuki no kawazan'yō", 'Counting the pelts of tanuki you have not yet caught.', [], ['tanuki']),
+    ('狸寝入り', 'Tanuki neiri', 'Tanuki sleep: pretending to be asleep.', [], ['tanuki']),
+    ('化けの皮が剥がれる', 'Bake no kawa ga hagareru', 'The skin of the disguise peels away.', [], ['tanuki']),
+    ('同じ穴の狢', 'Onaji ana no mujina', 'Badgers of the same hole: they are in it together.', [], ['tanuki']),
+    ('狐と狸の化かし合い', 'Kitsune to tanuki no bakashiai', 'A fox and a tanuki trying to out-trick each other.', [], ['tanuki', 'kitsune']),
+    ('人は見かけによらぬもの', 'Hito wa mikake ni yoranu mono', 'People are not what they appear.', [], ['tanuki']),
+    ('分福茶釜', 'Bunbuku chagama', 'The tea kettle that grew a tail: a tanuki who repaid a kindness by turning himself into a kettle for the temple Morin-ji.', [], ['tanuki']),
+    # ---- soul-flames and the red thread
+    ('運命の赤い糸', 'Unmei no akai ito', 'The red thread of fate, tied between two who are meant to meet.', [], ['hitodama']),
+    ('一蓮托生', 'Ichiren takushō', 'To be reborn together on one lotus: to share a fate, whatever it is.', [], ['hitodama']),
+    ('比翼連理', 'Hiyoku renri', 'Birds that share a wing; trees whose branches have grown together.', [], ['hitodama']),
+    ('縁は異なもの味なもの', 'En wa ina mono, aji na mono', 'The ties between people are strange things, and delightful ones.', [], ['hitodama']),
+    ('会うは別れの始め', 'Au wa wakare no hajime', 'To meet is the beginning of parting.', [], ['hitodama']),
+    ('腐れ縁', 'Kusare-en', 'A bond that has gone bad and still will not break.', [], ['hitodama']),
+    # ---- the death god
+    ('生者必滅', 'Shōja hitsumetsu', 'All that lives must perish.', [], ['shinigami']),
+    ('会者定離', 'Esha jōri', 'Those who meet must part.', [], ['shinigami']),
+    ('九死に一生を得る', 'Kyūshi ni isshō o eru', 'Nine deaths and one life: the narrowest of escapes.', [], ['shinigami']),
+    ('命あっての物種', 'Inochi atte no monodane', 'Life is the seed of everything: while you have it, the rest can follow.', [], ['shinigami']),
+    ('散る桜残る桜も散る桜', 'Chiru sakura / nokoru sakura mo / chiru sakura', 'Falling blossoms. Those still on the branch are falling blossoms too. — Ryōkan', [], ['shinigami']),
+    ('無常迅速', 'Mujō jinsoku', 'Impermanence is swift.', [], ['shinigami']),
+    ('一寸の虫にも五分の魂', 'Issun no mushi ni mo gobu no tamashii', 'Even an inch-long insect has half an inch of soul.', [], ['shinigami']),
+    ('虎は死して皮を留め人は死して名を残す', 'Tora wa shishite kawa o todome, hito wa shishite na o nokosu', 'A tiger dies and leaves its skin; a man dies and leaves his name.', [], ['shinigami']),
+    # ---- wind
+    ('風前の灯火', 'Fūzen no tomoshibi', 'A lamp before the wind.', [], ['wind', 'chochin']),
+    ('神風', 'Kamikaze', 'The divine wind: the typhoons that wrecked the Mongol fleets in 1274 and 1281.', [], ['wind']),
+    ('疾風に勁草を知る', 'Shippū ni keisō o shiru', 'In a gale you learn which grass is strong.', [], ['wind']),
+    ('順風満帆', 'Junpū manpan', 'A fair wind and a full sail.', [], ['wind']),
+    ('馬耳東風', 'Baji tōfū', "The east wind in a horse's ear.", [], ['wind']),
+    ('風が吹けば桶屋が儲かる', 'Kaze ga fukeba okeya ga mōkaru', 'When the wind blows, the cooper profits: everything is connected, at some remove.', [], ['wind']),
+    ('物言えば唇寒し秋の風', 'Mono ieba / kuchibiru samushi / aki no kaze', 'When I speak, my lips are cold: the autumn wind. — Bashō', [], ['wind']),
+    # ---- rain
+    ('雨降って地固まる', 'Ame futte ji katamaru', 'After the rain, the ground is firmer.', [], ['rain']),
+    ('五月雨を集めて早し最上川', 'Samidare o / atsumete hayashi / Mogami-gawa', 'Gathering all the rains of early summer, how swift it runs: the Mogami river. — Bashō', [], ['rain']),
+    ('晴耕雨読', 'Seikō udoku', 'Plough when it is fine; read when it rains.', [], ['rain']),
+    ('雨後の筍', 'Ugo no takenoko', 'Bamboo shoots after rain: one thing after another, all at once.', [], ['rain']),
+    ('遣らずの雨', 'Yarazu no ame', 'The rain that will not let a guest leave.', [], ['rain']),
+    ('干天の慈雨', 'Kanten no jiu', 'Merciful rain from a dry sky.', [], ['rain']),
+    ('春雨じゃ、濡れて参ろう', 'Harusame ja, nurete mairō', 'It is spring rain. Let us go and get wet. — the swordsman Tsukigata Hanpeita, on the stage', [], ['rain']),
+    # ---- snow
+    ('柳に雪折れなし', 'Yanagi ni yukiore nashi', 'The willow is never broken by snow.', [], ['snow']),
+    ('是がまあつひの栖か雪五尺', 'Kore ga maa / tsui no sumika ka / yuki goshaku', 'So this is to be my last home? Five feet of snow. — Issa', [], ['snow']),
+    ('初雪や水仙の葉のたわむまで', 'Hatsuyuki ya / suisen no ha no / tawamu made', 'First snow: just enough to bend the leaves of the narcissus. — Bashō', [], ['snow']),
+    ('蛍雪の功', 'Keisetsu no kō', 'What is won by study in the light of fireflies and of snow.', [], ['snow']),
+    ('雪月花', 'Setsugetsuka', 'Snow, moon, flowers: the three beauties of the turning year.', [], ['snow']),
+    ('雪中の松柏', 'Setchū no shōhaku', 'Pine and cypress in the snow: constancy shows in hard weather.', [], ['snow']),
+    # ---- night
+    ('闇夜の提灯', 'Yamiyo no chōchin', 'A lantern on a dark night: help when you most wanted it.', [], ['night', 'chochin']),
+    ('月夜に提灯', 'Tsukiyo ni chōchin', 'A lantern on a moonlit night: something you did not need.', [], ['night', 'chochin']),
+    ('闇夜に鉄砲', 'Yamiyo ni teppō', 'A gun fired on a dark night: a shot at nothing.', [], ['night']),
+    ('明けない夜はない', 'Akenai yoru wa nai', 'There is no night that does not end.', [], ['night']),
+    ('名月を取ってくれろと泣く子かな', 'Meigetsu o / totte kurero to / naku ko kana', 'Fetch me the harvest moon! cries the child. — Issa', [], ['night']),
+    ('夜目遠目笠の内', 'Yome tōme kasa no uchi', 'Seen by night, from far off, or under a hat: everything looks fairer.', [], ['night']),
+    # ---- shikigami
+    ('毒を以て毒を制す', 'Doku o motte doku o seisu', 'Use poison to master poison.', [], ['shiki']),
+    ('昨日の敵は今日の友', 'Kinō no teki wa kyō no tomo', "Yesterday's enemy is today's friend.", [], ['shiki']),
+    ('急急如律令', 'Kyūkyū nyo ritsuryō', 'Swiftly, as the law commands: the words that close an onmyōji\'s spell.', [], ['shiki']),
+    ('適材適所', 'Tekizai tekisho', 'The right timber in the right place.', [], ['shiki']),
+    ('餅は餅屋', 'Mochi wa mochiya', 'For rice cakes, go to the rice-cake maker.', [], ['shiki']),
+    ('虎の威を借る狐', 'Tora no i o karu kitsune', "The fox who borrows the tiger's majesty.", [], ['shiki']),
+    ('飼い犬に手を噛まれる', 'Kaiinu ni te o kamareru', 'To have your hand bitten by your own dog.', [], ['shiki']),
     # ---- wet ink: the brush
     ('弘法も筆の誤り', 'Kōbō mo fude no ayamari', "Even Kōbō Daishi's brush sometimes slips: Kūkai, founder of Shingon and Japan's most revered calligrapher.", [], ['wet']),
     ('余白の美', 'Yohaku no bi', 'The beauty of what is left blank.', [], ['wet']),
@@ -319,10 +395,11 @@ SAY = [
     ('万法一に帰す', 'Manbō ichi ni kisu', 'The ten thousand things return to the one.', [], ['enso', 'crowd']),
     ('朝顔に釣瓶とられてもらい水', 'Asagao ni / tsurube torarete / morai mizu', 'A morning glory has taken my well-bucket. I go to borrow water. — Chiyo-ni', [], ['enso', 'water']),
 ]
-RULE_TAGS = ('koan', 'wet', 'enso', 'garden', 'gate', 'stone', 'nocut')
+RULE_TAGS = ('koan', 'wet', 'enso', 'garden', 'gate', 'stone', 'nocut', 'wind', 'rain', 'snow', 'night', 'shiki')
 # the more particular a stage's rule, the more its own sayings are preferred
-RULE_WEIGHT = {'wet': 4, 'enso': 5, 'koan': 6, 'garden': 6, 'gate': 6, 'stone': 7, 'nocut': 7}
-KINDS = {'c': 'chochin', 'o': 'oni', 'O': 'bigoni', 'S': 'bigoni', 't': 'tengu', 'T': 'tengu', 'k': 'kitsune', 'y': 'yurei',
+RULE_WEIGHT = {'wet': 4, 'enso': 5, 'koan': 6, 'garden': 6, 'gate': 6, 'stone': 7, 'nocut': 7, 'wind': 8, 'rain': 8, 'snow': 8, 'night': 8, 'shiki': 9}
+KINDS = {'d': 'daruma', 'a': 'tanuki', 'A': 'tanuki', 'e': 'hitodama', 'X': 'shinigami',
+         'c': 'chochin', 'o': 'oni', 'O': 'bigoni', 'S': 'bigoni', 't': 'tengu', 'T': 'tengu', 'k': 'kitsune', 'y': 'yurei',
          'u': 'kasa', 'p': 'kappa', 'P': 'kappa', 'n': 'nurikabe', 'W': 'yukionna', 'G': 'gasha', 'Q': 'kitsune'}
 used_says = set()
 
@@ -353,7 +430,7 @@ def features(b, trace):
         f.add('long')
     if b['par'] <= 3:
         f.add('short')
-    f.update(b.get('rules') or [])
+    f.update('wind' if r.startswith('wind') else r for r in (b.get('rules') or []))
     return f
 
 def pick_saying(b, trace, chapter):
@@ -410,11 +487,20 @@ NOTES = [
     'The ensō is a circle brushed in a single movement by Zen monks, both as practice and as a portrait of the mind at that moment.',
     'Brush, ink, paper and inkstone are the Four Treasures of the Study. Ink is a solid stick, ground with water on the stone before each sitting, and the grinding itself was held to settle the mind.',
     'Mutō, no sword, was the pride of the Yagyū Shinkage school: disarming a swordsman with bare hands. Yagyū Muneyoshi showed it to Tokugawa Ieyasu in 1594, and his family became sword teachers to the shoguns.',
+    'Daruma dolls are modelled on Bodhidharma, who carried Zen from India to China and is said to have sat facing a wall for nine years. Weighted to right themselves, they are sold without eyes: one is painted in when a wish is made, the other when it comes true.',
+    'The tanuki, or raccoon dog, is a real animal and a famous shapeshifter of folklore, changing form with a leaf on its head. In the tale Bunbuku Chagama one turns itself into a tea kettle at the temple Morin-ji.',
+    'Hitodama are pale balls of fire said to be souls leaving the body. The red thread of fate, a belief shared across East Asia, joins two people who are destined to meet.',
+    'Typhoons destroyed the Mongol invasion fleets of 1274 and 1281 off Kyushu. The storms were named kamikaze, the divine wind.',
+    'Tsuyu, the plum rains, soak Japan for about six weeks each early summer. Rivers rise, and in the old stories the kappa rise with them.',
+    'The snow country along the Japan Sea can lie under several metres each winter. The poet Issa, who was born and died in it, wrote: so this is my last home? Five feet of snow.',
+    'Before electric light, travellers carried paper lanterns painted with their house crest. In the game Hyakumonogatari a hundred ghost stories were told through the night, and one light put out after each.',
+    'Onmyōdō, the Way of Yin and Yang, was the court science of divination and protection in Heian Japan. Its most famous master, Abe no Seimei (921–1005), is said to have commanded twelve shikigami.',
+    'The shinigami, a spirit that draws people toward death, appears in Edo-period puppet plays about lovers\' suicides and in the 1841 picture book Ehon Hyaku Monogatari.',
 ]
 
 levels, sols, chapters, bosses = [], {}, [], []
 NCH = len(CHAPTERS)
-for c in range(NCH):
+for c in ORDER:
     chapters.append({'kanji': CHAPTERS[c][0], 'name': CHAPTERS[c][1], 'from': len(levels), 'note': NOTES[c]})
     pools = {}
     for g in gen:
@@ -422,7 +508,7 @@ for c in range(NCH):
             pools.setdefault(g['seg'], []).append(g)
     for k in pools:
         pools[k].sort(key=lambda g: (g['par'], g.get('ink', 4), g['score']))
-    names = list(NAMES[c])
+    names = list(NAMES.get(c, []))
     started = set()
     rungs = ladder(c) if c >= STYLE_FROM else []
     slots = ['L%d' % k for k in range(len(rungs))] if c >= STYLE_FROM else LAYOUT[c]
@@ -467,7 +553,7 @@ for c in range(NCH):
         b = {k: b[k] for k in ('kanji', 'name', 'par', 'waza', 'rules', 'ink', 'rows', 'hint', 'say', 'story', 'after', 'sol')}
         sols[b['kanji'] + '|' + ''.join(b['rows'])] = trace
         levels.append(b)
-    if c < 10 or c == NCH - 1:
+    if c < 10 or c == ORDER[-1]:
         bosses.append(len(levels) - 1)
 
 # the last board of all carries the ending
@@ -498,11 +584,11 @@ open(p, 'w', encoding='utf-8').write(head + body)
 json.dump(sols, open(os.path.join(root, 'tools', 'solutions.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
 print('%d stages' % len(levels))
-for c in range(NCH):
-    a = chapters[c]['from']
-    b = chapters[c + 1]['from'] if c < NCH - 1 else len(levels)
+for k, c in enumerate(ORDER):
+    a = chapters[k]['from']
+    b = chapters[k + 1]['from'] if k < NCH - 1 else len(levels)
     pars = [l['par'] for l in levels[a:b]]
-    ny = [sum(ch in 'coOStTkyQupPnWG' for r in l['rows'] for ch in r) for l in levels[a:b]]
+    ny = [sum(ch in 'coOStTkyQupPnWGdaAeX' for r in l['rows'] for ch in r) for l in levels[a:b]]
     if not pars:
         continue
     print('  %-12s pars %s  mean %.1f   yokai mean %.1f' % (CHAPTERS[c][1], pars, sum(pars) / len(pars), sum(ny) / len(ny)))

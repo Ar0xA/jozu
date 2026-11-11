@@ -45,5 +45,8 @@ func _draw():
 	Ink.text(self, f, Vector2(60, 592), "J Ō Z U", 52, Ink.SUMI)
 	Ink.text(self, f, Vector2(64, 628), "the upper hand", 24, Ink.a(Ink.SUMI, 0.8))
 	Ink.text(self, f, Vector2(64, 668), "A puzzle of single strokes. No dice, no luck — only the measure of distance.", 19, Ink.a(Ink.SUMI, 0.75))
+	if not main.data.cleared.is_empty():
+		var rk = main.rank()
+		Ink.text(self, f, Vector2(420, 594), "%s  %s" % [rk[0], rk[1]], 26, Ink.SHU)
 	Ink.text(self, f, Vector2(64, 700), "Paintings: Hasegawa Tōhaku · Sesshū Tōyō · Hyakki Yagyō Emaki", 14, Ink.a(Ink.SUMI, 0.5))
 	draw_btns()

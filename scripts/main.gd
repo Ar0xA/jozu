@@ -46,7 +46,7 @@ func _ready():
 	art["tohaku"] = load("res://art/tohaku.jpg")
 	for nm in ["sesshu", "hyakki"]:
 		art[nm] = [load("res://art/%s_0.jpg" % nm), load("res://art/%s_1.jpg" % nm)]
-	for nm in ["hero", "oni", "oni3", "tengu", "kitsune", "yurei", "tamamo", "chochin", "kasa", "kappa", "nurikabe", "yukionna", "gasha"]:
+	for nm in ["hero", "oni", "oni3", "tengu", "kitsune", "yurei", "tamamo", "chochin", "kasa", "kappa", "nurikabe", "yukionna", "gasha", "daruma", "tanuki"]:
 		var t = load("res://art/pieces/%s.png" % nm)
 		if t:
 			var img = t.get_image()
@@ -108,10 +108,20 @@ func _unhandled_input(ev):
 # A board piece: a figure lifted from an old painting (see art/CREDITS.md).
 # On the board it stands on its tile and may rise above it; flat = centred, for the legend.
 const PIECE_SCALE = {"hero": 1.3, "oni": 1.3, "oni3": 1.25, "tengu": 1.3, "kitsune": 1.12, "yurei": 1.2, "tamamo": 1.3, "chochin": 0.95,
-	"kasa": 1.25, "kappa": 1.0, "nurikabe": 1.1, "yukionna": 1.3, "gasha": 1.15}
+	"kasa": 1.25, "kappa": 1.0, "nurikabe": 1.1, "yukionna": 1.3, "gasha": 1.15,
+	"daruma": 1.05, "tanuki": 1.05}
 
-func piece(ci, kind, c, s, t = 0.0, big = false, flat = false, grow = 1.0):
+func piece(ci, kind, c, s, t = 0.0, big = false, flat = false, grow = 1.0, mod = Color.WHITE):
 	var key = kind
+	if kind == "hitodama":
+		Ink.hitodama(ci, c, s, t)
+		return
+	if kind == "shinigami":
+		# the death god has no portrait: a black seal with one character
+		ci.draw_circle(c, s * 0.40, Ink.a(Ink.SUMI, 0.92 * mod.a))
+		Ink.enso(ci, c, s * 0.44, s * 0.05, Ink.a(Ink.SHU, mod.a))
+		Ink.text(ci, font, Vector2(c.x - s * 0.5, c.y + s * 0.17), "死", s * 0.46, Ink.GOFUN if mod.r > 0.5 else Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, s)
+		return
 	if kind == "oni" and big:
 		key = "oni3"
 	var k = 1.0 if flat else PIECE_SCALE.get(key, 1.0) * grow
@@ -136,7 +146,7 @@ func piece(ci, kind, c, s, t = 0.0, big = false, flat = false, grow = 1.0):
 	var pos = c + off - sz * 0.5
 	if not flat and kind != "chochin" and kind != "kappa":
 		pos.y = c.y + s * 0.47 - sz.y
-	ci.draw_texture_rect(art["p_" + key], Rect2(pos, sz), false)
+	ci.draw_texture_rect(art["p_" + key], Rect2(pos, sz), false, mod)
 
 # Draws a window onto one of the long handscrolls, x pixels along it.
 func band(ci, nm, dest, x):
@@ -173,7 +183,7 @@ func _draw():
 # ---------------------------------------------------------------- save
 
 func fresh():
-	return {"cleared": {}, "scroll": {}, "sound": true, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
+	return {"cleared": {}, "scroll": {}, "seals": {}, "sound": true, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
 
 func load_save():
 	data = fresh()
@@ -185,6 +195,9 @@ func load_save():
 				data.sound = bool(j.sound)
 			if j.has("scroll") and typeof(j.scroll) == TYPE_DICTIONARY:
 				data.scroll = j.scroll
+			if j.has("seals") and typeof(j.seals) == TYPE_DICTIONARY:
+				for k in j.seals:
+					data.seals[k] = int(j.seals[k])
 			for k in j.cleared:
 				data.cleared[k] = str(j.cleared[k])
 			for k in data.up:
@@ -208,10 +221,11 @@ func grade_of(i):
 func unlocked(i):
 	return i == 0 or grade_of(i - 1) != ""
 
-func record(i, grade, paths = null):
+func record(i, grade, paths = null, seal_mask = 0):
 	var better = grade_of(i) != "jouzu"
 	if better:
 		data.cleared[str(i)] = grade
+	data.seals[str(i)] = int(data.seals.get(str(i), 0)) | seal_mask
 	# keep the strokes of the best clear for the scroll gallery
 	if paths != null and (better or not data.scroll.has(str(i))):
 		var out = []
@@ -226,11 +240,39 @@ func record(i, grade, paths = null):
 func up_cost(key):
 	return 2 + int(data.up[key])
 
-func points_total():
+# Three seals can be won on every stage:
+#   1  上手 jozu      within the mastery stroke count, unharmed
+#   2  潔   isagiyoshi  mastery with no stroke taken back
+#   4  惜墨 sekiboku    unharmed, spending no more ink than the master's line
+const SEALS = [[1, "上手", "mastery"], [2, "潔", "no stroke taken back"], [4, "惜墨", "sparing of ink"]]
+const RANKS = [
+	["十級", "10th kyū"], ["九級", "9th kyū"], ["八級", "8th kyū"], ["七級", "7th kyū"], ["六級", "6th kyū"],
+	["五級", "5th kyū"], ["四級", "4th kyū"], ["三級", "3rd kyū"], ["二級", "2nd kyū"], ["一級", "1st kyū"],
+	["初段", "shodan"], ["二段", "2nd dan"], ["三段", "3rd dan"], ["四段", "4th dan"], ["五段", "5th dan"],
+	["六段", "6th dan"], ["七段", "7th dan"], ["八段", "8th dan"], ["九段", "9th dan"], ["名人", "meijin"],
+]
+
+func seals_of(i):
+	return int(data.seals.get(str(i), 0))
+
+func seal_count():
 	var n = 0
-	for k in data.cleared:
-		n += 2 if data.cleared[k] == "jouzu" else 1
+	for k in data.seals:
+		for sl in SEALS:
+			if int(data.seals[k]) & sl[0]:
+				n += 1
 	return n
+
+# kyu and dan, as in go, shogi and the martial arts: earned by seals, not by clearing
+func rank():
+	var total = 3 * Data.LEVELS.size()
+	var n = seal_count()
+	if n >= total:
+		return RANKS[RANKS.size() - 1]
+	return RANKS[min(RANKS.size() - 2, int(float(n) / total * (RANKS.size() - 1)))]
+
+func points_total():
+	return data.cleared.size() + seal_count()
 
 func points_spent():
 	var n = 0

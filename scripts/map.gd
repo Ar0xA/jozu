@@ -14,9 +14,10 @@ func setup():
 	btn(Rect2(372, 648, 110, 50), "Title", main.show_title, "題")
 	page = _chapter_of(_next_open())
 	var n = Data.CHAPTERS.size()
-	var tw = 1200.0 / n
+	var per = int(ceil(n / 2.0)) if n > 17 else n
+	var tw = 1200.0 / per
 	for c in range(n):
-		var b = btn(Rect2(40 + c * tw + 4, 470, tw - 8, 40), Data.CHAPTERS[c].kanji, _page.bind(c))
+		var b = btn(Rect2(40 + (c % per) * tw + 4, 464 + (c / per) * 34 if n > 17 else 470, tw - 8, 30 if n > 17 else 40), Data.CHAPTERS[c].kanji, _page.bind(c))
 		tabs.append(b)
 	_sync()
 
@@ -54,7 +55,7 @@ func st_pos(i):
 	var n = rg[1] - rg[0]
 	var k = i - rg[0]
 	var step = min(118.0, 1080.0 / max(1, n - 1))
-	return Vector2(640 - step * (n - 1) * 0.5 + k * step, 580 + 16 * sin(k * 0.9 + 0.4))
+	return Vector2(640 - step * (n - 1) * 0.5 + k * step, 586 + 14 * sin(k * 0.9 + 0.4))
 
 func _focus():
 	if hover_st >= 0:
@@ -138,6 +139,14 @@ func _draw():
 			Ink.seal(self, f, p, 17 if small else 22, "可", Ink.AI)
 		else:
 			Ink.text(self, f, Vector2(p.x - 30, p.y + (6 if small else 8)), str(i + 1), 17 if small else 22, Ink.a(Ink.SUMI, 1.0 if open else 0.35), HORIZONTAL_ALIGNMENT_CENTER, 60)
+		# the three seals of this station
+		var m = main.seals_of(i)
+		for k in range(3):
+			var q = p + Vector2((k - 1) * 9.0, r + 9.0)
+			if m & main.SEALS[k][0]:
+				draw_circle(q, 3.2, Ink.SHU)
+			elif open:
+				draw_arc(q, 3.0, 0, TAU, 10, Ink.a(Ink.SUMI, 0.35), 1.0, true)
 		if Data.BOSSES.has(i):
 			Ink.text(self, f, Vector2(p.x - 30, p.y - 34), "主", 16, Ink.a(Ink.SHU, 1.0 if open else 0.4), HORIZONTAL_ALIGNMENT_CENTER, 60)
 
@@ -163,6 +172,7 @@ func _draw():
 			done += 1
 		if main.grade_of(i) == "jouzu":
 			best += 1
-	Ink.text(self, f, Vector2(504, 674), "Stations %d / %d     上手 seals %d     Training points %d" % [done, Data.LEVELS.size(), best, main.points()], 20, Ink.SUMI)
-	Ink.text(self, f, Vector2(504, 700), "Clear a station for 1 point. Master it for 2.  ← → turn chapters.", 15, Ink.a(Ink.SUMI, 0.6))
+	var rk = main.rank()
+	Ink.text(self, f, Vector2(504, 674), "%s %s    Stations %d / %d    Seals %d / %d    Points %d" % [rk[0], rk[1], done, Data.LEVELS.size(), main.seal_count(), 3 * Data.LEVELS.size(), main.points()], 19, Ink.SUMI)
+	Ink.text(self, f, Vector2(504, 700), "Three seals a station: 上手 mastery · 潔 no stroke taken back · 惜墨 sparing of ink.", 14, Ink.a(Ink.SUMI, 0.6))
 	draw_btns()

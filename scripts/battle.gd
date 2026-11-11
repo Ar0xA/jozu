@@ -28,6 +28,10 @@ var b_undo
 var b_restart
 var b_road
 var b_hint
+var b_shiki
+var dng = {}
+var undos = 0
+var seal_mask = 0
 var extra = []
 var rules = []
 var my_paths = []
@@ -45,6 +49,7 @@ func setup():
 	b_end = btn(Rect2(PX, 526, 264, 50), "Sheathe  [Space]", _end, "納刀")
 	b_undo = btn(Rect2(PX + 276, 526, 264, 50), "Undo  [Z]", _undo, "戻")
 	b_hint = btn(Rect2(PX, 586, 264, 42), "Ask the master  [H]", _hint, "師")
+	b_shiki = btn(Rect2(PX + 276, 586, 264, 42), "Set  [4]", _mode.bind("shiki"), "式神")
 	b_restart = btn(Rect2(PX, 642, 264, 44), "Restart  [R]", _restart)
 	b_road = btn(Rect2(PX + 276, 642, 264, 44), "Back to the road", main.show_map)
 	_restart()
@@ -55,6 +60,9 @@ func setup():
 func _restart():
 	s = Sim.new_state(lv.rows, main.stats_for(idx), rules)
 	s["paths"] = []
+	s["spent"] = 0
+	undos = 0
+	seal_mask = 0
 	_clear_hint()
 	hist = []
 	mode = ""
@@ -80,6 +88,14 @@ func _sync():
 	b_ward.sel = mode == "ward"
 	b_end.on = not done
 	b_hint.on = not done
+	b_shiki.show = s.r_shiki
+	b_shiki.on = live and not s.hand.is_empty()
+	b_shiki.sel = mode == "shiki"
+	var names = []
+	for k in s.hand:
+		names.append(Data.LEGEND[k][0].substr(0, 1))
+	b_shiki.label = "Set  [4]   " + ("・".join(names) if not names.is_empty() else "—")
+	dng = {} if done else Sim.danger(s)
 	b_undo.on = not hist.is_empty() and grade != "jouzu" and grade != "ka"
 	b_restart.on = true
 
@@ -95,6 +111,8 @@ func _after(ok, quiet = "step"):
 		hist.pop_back()
 		return
 	mode = ""
+	if quiet == "step":
+		s.spent += 1
 	var heard = false
 	for e in s.events:
 		if ["kill", "cut", "hit", "katsu", "ward", "leap"].has(e.t):
@@ -148,6 +166,10 @@ func _play_tokens(st, stroke, track):
 			Sim.act_ward(st, d)
 			if track:
 				hint_marks.append([st.hero + d, "結"])
+		elif tok.begins_with("shiki"):
+			Sim.act_shiki(st, d)
+			if track:
+				hint_marks.append([st.hero + d, "式"])
 		else:
 			var before = st.hero
 			Sim.act_move(st, d)
@@ -187,6 +209,8 @@ func _dir(d):
 		_after(Sim.act_leap(s, d))
 	elif mode == "ward":
 		_after(Sim.act_ward(s, d))
+	elif mode == "shiki":
+		_after(Sim.act_shiki(s, d))
 	else:
 		_after(Sim.act_move(s, d))
 
@@ -212,6 +236,7 @@ func _undo():
 	if hist.is_empty() or grade == "jouzu" or grade == "ka":
 		return
 	s = hist.pop_back()
+	undos += 1
 	mode = ""
 	_clear_hint()
 	if done:
@@ -231,12 +256,16 @@ func _finish():
 		my_paths = s.paths.duplicate()
 		if not ending:
 			my_paths.append(s.visited.duplicate())
-		main.record(idx, grade, my_paths)
+		var master = 0
+		for st in lv.get("sol", "").split("/"):
+			master += st.split(" ", false).size()
+		seal_mask = (1 if grade == "jouzu" else 0) | (2 if grade == "jouzu" and undos == 0 else 0) | (4 if s.hits == 0 and s.spent <= master else 0)
+		main.record(idx, grade, my_paths, seal_mask)
 		var nxt = main.show_map
 		if first:
 			nxt = main.show_story.bind(lv.after, main.show_map)
-		extra.append(btn(Rect2(250, 452, 200, 54), "Onward", nxt, "進"))
-		extra.append(btn(Rect2(250, 516, 200, 46), "Try again", _restart))
+		extra.append(btn(Rect2(250, 470, 200, 50), "Onward", nxt, "進"))
+		extra.append(btn(Rect2(250, 526, 200, 44), "Try again", _restart))
 	else:
 		grade = "lost"
 		main.sfx("lose")
@@ -290,6 +319,8 @@ func on_key(code):
 			if b_ward.show and b_ward.on: _mode("ward")
 		KEY_3:
 			if b_katsu.show and b_katsu.on: _katsu()
+		KEY_4:
+			if b_shiki.show and b_shiki.on: _mode("shiki")
 		KEY_ESCAPE:
 			if mode != "":
 				_mode(mode)
@@ -339,15 +370,29 @@ func _draw():
 		rl.append("無刀 no cutting")
 	if rules.has("stone"):
 		rl.append("硯 unspent ink is kept (to %d)" % Sim.INK_CAP)
+	if rules.has("shiki"):
+		rl.append("式神 what you bind, you may set down")
+	if s.wind != Vector2i.ZERO:
+		rl.append("風 the wind carries lanterns, umbrellas and ghosts " + {Vector2i(1, 0): "→", Vector2i(-1, 0): "←", Vector2i(0, 1): "↓", Vector2i(0, -1): "↑"}[s.wind])
+	if rules.has("rain"):
+		rl.append("雨 lanterns and fire are out; kappa come ashore")
+	if rules.has("snow"):
+		rl.append("雪 all water is ice")
+	if rules.has("night"):
+		rl.append("夜 you see only near yourself and near light")
+	if rl.size() >= 3:
+		# with many rules in force, name each in a word or two so the line stays over the board
+		var brief = {"公": "公案 one stroke", "墨": "墨 wet wall", "円": "円相 circle binds", "石": "石庭 rake all", "鳥": "鳥居 reach it",
+			"無": "無刀 no cut", "硯": "硯 ink kept", "式": "式神 set allies", "風": "風 wind", "雨": "雨 rain", "雪": "雪 ice", "夜": "夜 night"}
+		for k in range(rl.size()):
+			rl[k] = brief.get(rl[k].substr(0, 1), rl[k])
 	if not rl.is_empty():
 		Ink.text(self, f, Vector2(124, 96), "  ·  ".join(rl), 14, Ink.SHU)
 
 	# board
 	var br = Rect2(ORG, Vector2(s.w, s.h) * TS)
 	draw_rect(br, Ink.a(Ink.GOFUN, 0.40))
-	var dng = {}
-	if not done:
-		dng = Sim.danger(s)
+	var lit = _lit()
 	for y in range(s.h):
 		for x in range(s.w):
 			var p = Vector2i(x, y)
@@ -367,8 +412,10 @@ func _draw():
 				# gravel not yet raked
 				for k in range(3):
 					draw_circle(r.position + Vector2(TS * (0.3 + 0.2 * k), TS * (0.4 + 0.12 * ((x + y + k) % 3))), 1.6, Ink.a(Ink.SUMI, 0.35))
-			if dng.has(p) and ch != "f":
+			if dng.has(p) and ch != "f" and (lit.is_empty() or lit.has(p)):
 				Ink.blot(self, r.get_center(), TS * 0.66, TS * 0.66, Ink.SHU, 0.52 + 0.08 * sin(time * 4.0))
+			if not lit.is_empty() and not lit.has(p):
+				draw_rect(r, Color(0.06, 0.06, 0.12, 0.62))
 	for i in range(s.w + 1):
 		draw_line(ORG + Vector2(i * TS, 0), ORG + Vector2(i * TS, s.h * TS), Ink.a(Ink.SUMI, 0.28), 1.2)
 	for i in range(s.h + 1):
@@ -377,6 +424,8 @@ func _draw():
 
 	for w in s.wards:
 		Ink.ward(self, f, ctr(w), TS)
+	for al in s.allies:
+		Ink.shiki(self, f, ctr(al.pos), TS, Data.LEGEND[al.kind][0].substr(0, 1))
 
 	# where the next step may go
 	if not done and s.ink > 0:
@@ -389,11 +438,13 @@ func _draw():
 			if not Sim.inb(s, t):
 				continue
 			var yi = Sim.yokai_at(s, t)
+			if Sim.ally_at(s, t) >= 0 or (yi >= 0 and (Sim.hidden(s.yokai[yi]) or s.r_nocut)):
+				continue
 			if mode == "" and yi >= 0:
 				var c = ctr(t)
 				Ink.enso(self, c, TS * 0.44, 5.0, Ink.a(Ink.SHU, 0.85))
 				Ink.text(self, f, c + Vector2(TS * 0.2, -TS * 0.24), str(Sim.cut_power(s, d)), 22, Ink.SHU)
-			elif yi < 0 and ((mode == "ward" and Sim.ter(s, t) == "." and not s.wards.has(t)) or (mode != "ward" and Sim.walk(s, t) and not s.visited.has(t))):
+			elif yi < 0 and (((mode == "ward" or mode == "shiki") and Sim.ter(s, t) == "." and not s.wards.has(t)) or (mode != "ward" and mode != "shiki" and Sim.walk(s, t) and not s.visited.has(t))):
 				draw_circle(ctr(t), 7.0 if dist == 1 else 10.0, Ink.a(Ink.AI if mode != "" else Ink.SUMI, 0.45))
 
 	# the stroke before this one, drying
@@ -441,13 +492,41 @@ func _draw():
 		var dp = disp.get(y.id, Vector2(y.pos))
 		cast.append([dp.y, y.kind, ORG + (dp + Vector2(0.5, 0.5)) * TS, y])
 	cast.sort_custom(func(p, q): return p[0] < q[0])
+	# the red thread between soul-flames
+	var flames = []
+	for y in s.yokai:
+		if y.kind == "hitodama":
+			flames.append(ORG + (disp.get(y.id, Vector2(y.pos)) + Vector2(0.5, 0.5)) * TS)
+	for i in range(1, flames.size()):
+		var th = []
+		for k in range(13):
+			var u = k / 12.0
+			th.append(flames[i - 1].lerp(flames[i], u) + Vector2(0, sin(u * PI) * 14.0 + sin(time * 2.0 + u * 6.0) * 3.0))
+		Ink.brush(self, th, 3.0, Ink.a(Ink.SHU, 0.9))
 	for e in cast:
 		if e[3] == null:
 			main.piece(self, "hero", e[2], TS)
-		else:
-			main.piece(self, e[1], e[2], TS, time + e[3].id, e[3].max >= 3 or e[3].ch == "T", false, {"S": 1.3, "G": 1.45, "P": 1.25}.get(e[3].ch, 1.0))
+			continue
+		var y = e[3]
+		var dark = not lit.is_empty() and not lit.has(y.pos)
+		if Sim.hidden(y):
+			Ink.rock(self, e[2], TS, y.id * 17 + 5)
+			if not dark:
+				Ink.leaf(self, e[2] + Vector2(0, -TS * 0.30), TS)
+			continue
+		var mod = Color.WHITE
+		if dark:
+			mod = Color(0.05, 0.05, 0.08, 0.85)   # a shape in the dark, nothing more
+		elif y.down:
+			mod = Color(1, 1, 1, 0.4)
+		main.piece(self, e[1], e[2], TS, time + y.id, y.max >= 3 or y.ch == "T", false, {"S": 1.3, "G": 1.45, "P": 1.25}.get(y.ch, 1.0), mod)
+		if y.down:
+			Ink.text(self, f, e[2] + Vector2(-TS * 0.5, TS * 0.1), "倒", 26, Ink.SHU, HORIZONTAL_ALIGNMENT_CENTER, TS)
 	for y in s.yokai:
+		if Sim.hidden(y) or (not lit.is_empty() and not lit.has(y.pos)):
+			continue
 		Ink.hp_pips(self, ORG + (disp.get(y.id, Vector2(y.pos)) + Vector2(0.5, 0.5)) * TS, TS, y.hp, y.max)
+	_weather(br)
 
 	for e in fx:
 		var u = 1.0 - e.life / e.max
@@ -474,6 +553,54 @@ func _draw():
 	if done:
 		_result(f)
 	draw_btns()
+
+# Night: what Suzu can see. Empty when it is not night.
+func _lit():
+	var lit = {}
+	if not s.r_night:
+		return lit
+	var src = [[s.hero, 2]]
+	for y in s.yokai:
+		if y.kind == "chochin" or y.kind == "hitodama":
+			src.append([y.pos, 1])
+	for al in s.allies:
+		src.append([al.pos, 1])
+	for yy in range(s.h):
+		for xx in range(s.w):
+			if s.rows[yy][xx] == "f":
+				src.append([Vector2i(xx, yy), 1])
+	for e in src:
+		for dy in range(-e[1], e[1] + 1):
+			for dx in range(-e[1], e[1] + 1):
+				if abs(dx) + abs(dy) <= e[1]:
+					lit[e[0] + Vector2i(dx, dy)] = true
+	return lit
+
+# rain, snow and wind are painted over the board; they change nothing by themselves
+func _weather(br):
+	var w = br.size.x
+	var h = br.size.y
+	if rules.has("rain"):
+		for k in range(46):
+			var p = br.position + Vector2(fmod(k * 97.0 + time * 60.0, w), fmod(k * 53.0 + time * 420.0, h))
+			draw_line(p, p + Vector2(-5, 18), Ink.a(Ink.AI, 0.38), 1.3, true)
+	if rules.has("snow"):
+		for k in range(40):
+			var p = br.position + Vector2(fmod(k * 83.0 + sin(time * 0.7 + k) * 14.0 + w, w), fmod(k * 61.0 + time * 34.0, h))
+			draw_circle(p, 2.0 + (k % 3), Ink.a(Ink.GOFUN, 0.85))
+	if s.wind != Vector2i.ZERO:
+		var d = Vector2(s.wind)
+		for k in range(9):
+			var along = fmod(k * 131.0 + time * 150.0, w + 160.0) - 80.0
+			var across = fmod(k * 71.0 + 30.0, h)
+			var a = br.position + (Vector2(along, across) if d.x != 0 else Vector2(across, along))
+			if d.x < 0 or d.y < 0:
+				a = br.position + (Vector2(w - along, across) if d.x != 0 else Vector2(across, h - along))
+			var pts = []
+			for j in range(6):
+				pts.append(a + d * j * 14.0 + d.orthogonal() * sin(j * 1.1 + k) * 3.0)
+			if br.grow(-4).has_point(pts[0]) and br.grow(-4).has_point(pts[5]):
+				Ink.brush(self, pts, 3.5, Ink.a(Ink.SUMI, 0.22))
 
 func _pips(f, y, kanji, label, n, mx, col):
 	Ink.text(self, f, Vector2(PX, y), kanji, 26, Ink.SUMI)
@@ -518,6 +645,8 @@ func _panel(f):
 		hint = "縮地 — choose a direction to leap two tiles. Esc cancels."
 	elif mode == "ward":
 		hint = "結界 — choose a tile beside you for the ward. Esc cancels."
+	elif mode == "shiki":
+		hint = "式神 — choose a tile beside you for the shikigami. Esc cancels."
 	if hint_msg != "":
 		hint = hint_msg
 	var hy = max(y + 24.0, 388.0)
@@ -530,8 +659,9 @@ func _panel(f):
 		Ink.para(self, f, Vector2(PX, hy + 44), say[2], 15, Ink.a(Ink.AI, 0.95), 545)
 	else:
 		Ink.para(self, f, Vector2(PX, hy), hint, 15, Ink.a(Ink.SHU if hint_msg != "" else Ink.AI, 0.95), 545)
-	Ink.text(self, f, Vector2(PX + 282, 604), "click, drag or arrows to paint", 13, Ink.a(Ink.SUMI, 0.55))
-	Ink.text(self, f, Vector2(PX + 282, 622), "right-click undoes", 13, Ink.a(Ink.SUMI, 0.55))
+	if not s.r_shiki:
+		Ink.text(self, f, Vector2(PX + 282, 604), "click, drag or arrows to paint", 13, Ink.a(Ink.SUMI, 0.55))
+		Ink.text(self, f, Vector2(PX + 282, 622), "right-click undoes", 13, Ink.a(Ink.SUMI, 0.55))
 
 func _result(f):
 	var box = Rect2(150, 200, 400, 380)
@@ -540,15 +670,17 @@ func _result(f):
 	if grade == "jouzu":
 		Ink.seal(self, f, Vector2(232, 296), 50, "上手")
 		_my_scroll()
+		_seals(f)
 		Ink.text(self, f, Vector2(150, 408), "Mastered in %d stroke%s, unharmed." % [s.turn, "" if s.turn == 1 else "s"], 19, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
 	elif grade == "ka":
 		Ink.seal(self, f, Vector2(232, 290), 58, "可", Ink.AI)
 		_my_scroll()
+		_seals(f)
 		var why = "%d strokes; mastery asks %d." % [s.turn, lv.par]
 		if s.hits > 0:
 			why = "%d strokes, %d blow%s taken." % [s.turn, s.hits, "" if s.hits == 1 else "s"]
-		Ink.text(self, f, Vector2(150, 400), "Passed. " + why, 18, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
-		Ink.text(self, f, Vector2(150, 424), "上手 needs %d strokes and no blows." % lv.par, 15, Ink.a(Ink.SUMI, 0.7), HORIZONTAL_ALIGNMENT_CENTER, 400)
+		Ink.text(self, f, Vector2(150, 402), "Passed. " + why, 17, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
+		Ink.text(self, f, Vector2(150, 422), "上手 needs %d strokes and no blows." % lv.par, 14, Ink.a(Ink.SUMI, 0.7), HORIZONTAL_ALIGNMENT_CENTER, 400)
 	else:
 		Ink.text(self, f, Vector2(150, 320), "無念", 84, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
 		var why = "The ink runs. Nothing is lost but a stroke."
@@ -558,6 +690,16 @@ func _result(f):
 			why = "The garden is not yet raked. Begin again."
 		Ink.text(self, f, Vector2(150, 384), why, 18, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
 		Ink.text(self, f, Vector2(150, 416), "七転び八起き  —  fall seven times, rise eight", 15, Ink.a(Ink.SHU, 0.9), HORIZONTAL_ALIGNMENT_CENTER, 400)
+
+# the three seals, lit if this clear earned them
+func _seals(f):
+	for k in range(main.SEALS.size()):
+		var sl = main.SEALS[k]
+		var c = Vector2(250 + k * 100, 446)
+		if seal_mask & sl[0]:
+			Ink.seal(self, f, c, 11, sl[1])
+		else:
+			Ink.text(self, f, Vector2(c.x - 40, c.y + 6), sl[1], 15, Ink.a(Ink.SUMI, 0.28), HORIZONTAL_ALIGNMENT_CENTER, 80)
 
 # what you painted to clear this stage, as it will hang in the scroll
 func _my_scroll():

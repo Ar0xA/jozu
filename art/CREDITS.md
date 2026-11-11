@@ -24,6 +24,8 @@ Each figure was cropped from the painting and its paper made transparent.
 - `nurikabe.png` - *Nurikabe*, from *Bakemono no e*, c. 1700. Brigham Young University. Public domain.
 - `yukionna.png` - *Yuki-onna*, from *Bakemono no e*, c. 1700. Scan: Brigham Young University, CC BY-SA 4.0.
 - `gasha.png` - Utagawa Kuniyoshi, *Takiyasha the Witch and the Skeleton Spectre*, c. 1844 (detail). Public domain.
+- `daruma.png` - Hakuin Ekaku, *Portrait of Daruma*, 18th century. Metropolitan Museum of Art. Public domain.
+- `tanuki.png` - Katsushika Hokusai, tanuki in a monk's robe beside a tea kettle (*Bunbuku chagama*). Public domain.
 
 ## Sound (`audio/`)
 

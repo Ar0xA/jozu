@@ -21,9 +21,9 @@ func play(strokes, extra):
 			var tok = toks[t]
 			if tok == "KATSU":
 				b._katsu()
-			elif tok.begins_with("leap") or tok.begins_with("ward"):
-				b._mode(tok.substr(0, 4))
-				b._dir(DIR[tok.substr(4)])
+			elif tok.begins_with("leap") or tok.begins_with("ward") or tok.begins_with("shiki"):
+				b._mode(tok.left(tok.length() - 1))
+				b._dir(DIR[tok.right(1)])
 			else:
 				b._dir(DIR[tok])
 		if k == strokes:
@@ -39,16 +39,19 @@ func _initialize():
 	main.erase_save()
 	steps = [
 		["title", func(): main.show_title()],
-		["saying", func(): main.show_battle(first(3) + 1)],
-		["koan", func(): main.show_battle(first(10) + 4)],
-		["garden", func(): main.show_battle(first(11) + 5); play(0, 9)],
-		["gate", func(): main.show_battle(first(12) + 3); main.cur._hint()],
-		["wet", func(): main.show_battle(first(13) + 2); play(1, 2)],
+		["daruma", func(): main.show_battle(first(17) + 3); play(1, 1)],
+		["tanuki", func(): main.show_battle(first(18) + 6)],
+		["thread", func(): main.show_battle(first(19) + 9)],
+		["wind", func(): main.show_battle(first(20) + 8)],
+		["rain", func(): main.show_battle(first(21) + 8)],
+		["snow", func(): main.show_battle(first(22) + 9)],
+		["night", func(): main.show_battle(first(23) + 8)],
+		["shinigami", func(): main.show_battle(first(24) + 9)],
+		["shikigami", func(): main.show_battle(first(25) + 4); play(2, 1)],
 		["enso", func(): main.show_battle(first(14) + 1); play(1, 99)],
-		["stone", func(): main.show_battle(first(15) + 2); play(1, 0)],
-		["muto", func(): main.show_battle(first(16) + 3)],
-		["won", func(): main.show_battle(first(14)); play(99, 99)],
-		["map", func(): main.show_map(); main.cur._page(11)],
+		["garden", func(): main.show_battle(first(11) + 5); play(0, 9)],
+		["won", func(): main.show_battle(first(17)); play(99, 99)],
+		["map", func(): main.show_map(); main.cur._page(20)],
 		["scroll", _fill_scroll],
 	]
 

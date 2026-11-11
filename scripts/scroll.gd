@@ -6,11 +6,12 @@ var page = 0
 var tabs = []
 
 func setup():
-	btn(Rect2(40, 664, 220, 44), "Back to the road", main.show_map, "道")
+	btn(Rect2(40, 672, 220, 40), "Back to the road", main.show_map, "道")
 	var n = Data.CHAPTERS.size()
-	var tw = 1200.0 / n
+	var per = int(ceil(n / 2.0)) if n > 17 else n
+	var tw = 1200.0 / per
 	for c in range(n):
-		tabs.append(btn(Rect2(40 + c * tw + 4, 614, tw - 8, 38), Data.CHAPTERS[c].kanji, _page.bind(c)))
+		tabs.append(btn(Rect2(40 + (c % per) * tw + 4, 606 + (c / per) * 30 if n > 17 else 614, tw - 8, 27 if n > 17 else 38), Data.CHAPTERS[c].kanji, _page.bind(c)))
 	for c in range(n):
 		if main.grade_of(Data.CHAPTERS[c].from) != "":
 			page = c
@@ -49,7 +50,7 @@ func _draw():
 		var cols = 5 if rg[1] - rg[0] <= 10 else 6
 		var rws = 2 if rg[1] - rg[0] <= 10 else 3
 		var cw = 1160.0 / cols
-		var chh = 500.0 / rws
+		var chh = 492.0 / rws
 		var r = Rect2(64 + (k % cols) * cw, 106 + (k / cols) * chh, cw - 20, chh - 18)
 		var lv = Data.LEVELS[i]
 		draw_rect(r, Ink.a(Ink.GOFUN, 0.75))
@@ -66,5 +67,5 @@ func _draw():
 		else:
 			Ink.text(self, f, Vector2(r.position.x, r.position.y + r.size.y * 0.58), str(i + 1), 36, Ink.a(Ink.SUMI, 0.12), HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
 	var total = main.data.scroll.size()
-	Ink.text(self, f, Vector2(290, 692), "%d of %d painted in this chapter   ·   %d of %d in all   ·   ← → turn chapters" % [painted, rg[1] - rg[0], total, Data.LEVELS.size()], 17, Ink.SUMI)
+	Ink.text(self, f, Vector2(290, 700), "%d of %d painted in this chapter   ·   %d of %d in all   ·   ← → turn chapters" % [painted, rg[1] - rg[0], total, Data.LEVELS.size()], 17, Ink.SUMI)
 	draw_btns()

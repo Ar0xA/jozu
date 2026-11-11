@@ -47,11 +47,11 @@ func play(i, use_mouse):
 			var before = b.s.ink
 			if tok == "KATSU":
 				b.on_key(KEY_3)
-			elif tok.begins_with("leap") or tok.begins_with("ward"):
-				var d = tok.substr(4)
-				b.on_key(KEY_1 if tok.begins_with("leap") else KEY_2)
+			elif tok.begins_with("leap") or tok.begins_with("ward") or tok.begins_with("shiki"):
+				var d = tok.right(1)
+				b.on_key(KEY_1 if tok.begins_with("leap") else (KEY_2 if tok.begins_with("ward") else KEY_4))
 				if b.mode == "":
-					bad("stage %d: %s mode did not engage" % [i + 1, tok.substr(0, 4)])
+					bad("stage %d: %s mode did not engage" % [i + 1, tok.left(tok.length() - 1)])
 				if use_mouse:
 					b.on_click(b.ctr(b.s.hero + DIR[d] * (2 if tok.begins_with("leap") else 1)), MOUSE_BUTTON_LEFT)
 				else:
@@ -147,8 +147,8 @@ func _run():
 	await play(0, false)
 	if b.grade != "ka":
 		bad("winning one stroke over par graded '%s', expected 'ka'" % b.grade)
-	if main.grade_of(0) != "ka" or main.points() != 1:
-		bad("a pass should be saved and worth 1 point (grade %s, points %d)" % [main.grade_of(0), main.points()])
+	if main.grade_of(0) != "ka" or main.seals_of(0) & 3 != 0:
+		bad("a pass should be saved without the mastery seals (grade %s, seals %d)" % [main.grade_of(0), main.seals_of(0)])
 
 	# ---- the whole road
 	for i in range(Data.LEVELS.size()):
@@ -192,6 +192,8 @@ func _run():
 			continue
 		if main.grade_of(i) != "jouzu":
 			bad("stage %d: mastery was not saved" % (i + 1))
+		if main.seals_of(i) != 7:
+			bad("stage %d: the master's line without undo should earn all three seals, got %d" % [i + 1, main.seals_of(i)])
 		if not main.data.scroll.has(str(i)) or main.data.scroll[str(i)].size() != lv.par:
 			bad("stage %d: the scroll did not keep %d strokes" % [i + 1, lv.par])
 		if b.b_undo.on:
@@ -212,8 +214,10 @@ func _run():
 	main.load_save()
 	if main.data.cleared != saved or main.data.cleared.size() != Data.LEVELS.size():
 		bad("progress did not survive a save and reload")
-	if main.points_total() != 2 * Data.LEVELS.size():
-		bad("expected %d points after mastering everything, got %d" % [2 * Data.LEVELS.size(), main.points_total()])
+	if main.points_total() != 4 * Data.LEVELS.size():
+		bad("expected %d points after earning every seal, got %d" % [4 * Data.LEVELS.size(), main.points_total()])
+	if main.rank()[0] != "名人":
+		bad("every seal earned should be the rank of meijin, got %s" % main.rank()[0])
 
 	# ---- the scroll gallery, every chapter
 	main.show_scroll()

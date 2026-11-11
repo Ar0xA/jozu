@@ -251,6 +251,31 @@ static func calligraphy(ci, r, paths, w, h):
 		else:
 			brush(ci, pts, cell * 0.42, a(SUMI, 0.88))
 
+# hitodama: a soul leaving, pale blue, with a tail
+static func hitodama(ci, c, s, t):
+	var cc = c + Vector2(sin(t * 1.7) * s * 0.04, cos(t * 2.3) * s * 0.05)
+	blot(ci, cc, s * 0.42, s * 0.42, Color(0.55, 0.78, 0.92), 0.55)
+	var tail = []
+	for k in range(7):
+		var u = k / 6.0
+		tail.append(cc + Vector2(sin(t * 3.0 + u * 4.0) * s * 0.07 * u, -s * 0.40 * u))
+	brush(ci, tail, s * 0.20, Color(0.80, 0.92, 0.98, 0.9))
+	ci.draw_circle(cc, s * 0.14, Color(0.93, 0.98, 1.0))
+	ci.draw_arc(cc, s * 0.14, 0, TAU, 20, a(AI, 0.7), 1.5, true)
+
+# shikigami: a folded paper figure bearing the name of what it was
+static func shiki(ci, font, c, s, kanji):
+	var pts = PackedVector2Array([c + Vector2(0, -s * 0.38), c + Vector2(s * 0.10, -s * 0.26), c + Vector2(s * 0.34, -s * 0.22),
+		c + Vector2(s * 0.30, -s * 0.08), c + Vector2(s * 0.14, -s * 0.06), c + Vector2(s * 0.22, s * 0.36), c + Vector2(-s * 0.22, s * 0.36),
+		c + Vector2(-s * 0.14, -s * 0.06), c + Vector2(-s * 0.30, -s * 0.08), c + Vector2(-s * 0.34, -s * 0.22), c + Vector2(-s * 0.10, -s * 0.26)])
+	blob(ci, pts, GOFUN, 2.0)
+	ci.draw_string(font, Vector2(c.x - s * 0.5, c.y + s * 0.18), kanji, HORIZONTAL_ALIGNMENT_CENTER, s, s * 0.30, SHU)
+
+# the leaf a tanuki wears to change its shape
+static func leaf(ci, c, s):
+	blob(ci, PackedVector2Array([c + Vector2(-s * 0.12, 0), c + Vector2(0, -s * 0.07), c + Vector2(s * 0.13, -s * 0.01), c + Vector2(0, s * 0.06)]), Color(0.36, 0.52, 0.30), 1.5)
+	ci.draw_line(c + Vector2(-s * 0.12, 0), c + Vector2(s * 0.13, -s * 0.01), a(SUMI, 0.6), 1.0, true)
+
 # torii: two posts, two lintels, vermilion
 static func torii(ci, r):
 	var c = r.get_center()

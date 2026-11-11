@@ -20,12 +20,12 @@ Music: a 1920s shakuhachi recording of *Shika no Tōne* under the story, *Sakura
 koto for the title and road, and original koto, shamisen and taiko pieces in the miyako-bushi scale for
 the stages. Press `M` to mute.
 
-226 stations in seventeen chapters. Ten chapters tell the story; seven more each explore one puzzle
-style in a rising ladder of eighteen boards. The story stages are hand-made; the rest come from a
-generator (`tools/gen`, C#) that builds candidate boards, solves them exactly, scores their difficulty
-and keeps an evenly climbing run. `tools/verify.gd` replays every stored solution through the real
-rules, so each station is proven masterable at base stats, and `tools/playtest.gd` drives the real
-screens through the whole game.
+388 stations in twenty-six chapters. Ten chapters tell the story; sixteen more each explore one puzzle
+style, yokai or kind of weather in a rising ladder of eighteen boards. The story stages are hand-made;
+the rest come from a generator (`tools/gen`, C#) that builds candidate boards, solves them exactly,
+scores their difficulty and keeps an evenly climbing run. `tools/verify.gd` replays every stored
+solution through the real rules, so each station is proven masterable at base stats, and
+`tools/playtest.gd` drives the real screens through the whole game.
 
 Stages without story carry a traditional saying chosen to fit their own board and answer: proverbs,
 Zen phrases and kōan, haiku, and words from Buddhist teachers, samurai and the old chronicles. Each
@@ -44,6 +44,15 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   the gate 鳥居 (arrive; nothing need be cut), wet ink 墨 (your last stroke is a wall for one turn),
   ensō 円相 (close a circle to bind what is inside), ink stone 硯 (unspent ink is kept) and
   no sword 無刀 (the brush cannot cut).
+- **More yokai:** daruma 達磨 (a blow only topples it; it rises again), tanuki 狸 (a stone until you rest
+  beside it), hitodama 人魂 (soul-flames on a red thread that relight while one still burns) and the
+  shinigami 死神 (passes through anything; one touch is the end).
+- **Weather and hour:** wind 風 carries light yokai a tile each turn, rain 雨 puts out lanterns and fire and
+  lets kappa ashore, deep snow 雪 freezes all water, and at night 夜 you see only near yourself and near light.
+- **Shikigami 式神:** a yokai bound by your circle goes into your hand and can be set down as an ally that
+  holds its tile and strikes what stands within its reach.
+- **Three seals a station:** 上手 mastery, 潔 no stroke taken back, 惜墨 sparing of ink. Seals earn the
+  kyū and dan ranks, from 10th kyū to meijin.
 - **Ask the master** (`H`) shows the next stroke of a known solution. **Your scroll** 巻 keeps the strokes
   that cleared each station, with the board taken away.
 - **Red tiles** — where you would be struck if you sheathed the brush there.

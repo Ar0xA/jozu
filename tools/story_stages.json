@@ -1698,5 +1698,285 @@
     "無手勝流. The school of winning with no hands. Old Bokuden would have approved."
    ]
   ]
+ },
+ {
+  "kanji": "達磨",
+  "name": "Daruma",
+  "hint": "Daruma 達磨: a blow only topples it, once in a stroke, and it rises again when the turn ends. Strike it in two separate strokes. While it is down it cannot strike you.",
+  "story": [
+   [
+    "",
+    "On the temple shelf sits a row of round red figures with no arms, no legs and a great deal of patience."
+   ],
+   [
+    "Tessai",
+    "Bodhidharma sat facing a wall for nine years, until his legs fell away. 面壁九年. These are his portrait."
+   ],
+   [
+    "Suzu",
+    "They fall over when I touch them."
+   ],
+   [
+    "Tessai",
+    "And get up. 七転び八起き. Fall seven times, rise eight. You will have to knock each one down twice, and mean it both times."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "Good. Now you know what it is to fight something more stubborn than you are."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "狸",
+  "name": "Tanuki",
+  "hint": "Tanuki 狸: it sits as a stone with a leaf on it, and stone cannot be cut. End a stroke on a tile beside it, or startle it with a shout, and it shows itself. After that it is a yokai like any other.",
+  "story": [
+   [
+    "",
+    "One of the garden stones has a leaf on its head. It did not have a leaf yesterday. It was not, strictly speaking, there yesterday."
+   ],
+   [
+    "Suzu",
+    "Master, that stone is breathing."
+   ],
+   [
+    "Tessai",
+    "狸寝入り. Tanuki sleep: pretending, with great commitment. You cannot cut a stone. Go and stand beside it until it is embarrassed."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "化けの皮が剥がれる. The disguise peels off. It always does, if you are willing to wait next to it."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "赤い糸",
+  "name": "The Red Thread",
+  "hint": "Hitodama 人魂: soul-flames joined by a red thread. They do no harm, but one that is put out relights at the end of the turn while any other still burns. Put them all out in a single stroke, or be standing where the fallen one would rise.",
+  "story": [
+   [
+    "",
+    "Two pale flames hang over the graves, and between them, if the light is right, a red thread."
+   ],
+   [
+    "Tessai",
+    "運命の赤い糸. The red thread of fate. Cut one and the other calls it back."
+   ],
+   [
+    "Suzu",
+    "Then both at once."
+   ],
+   [
+    "Tessai",
+    "Both in one stroke. Or neither."
+   ]
+  ],
+  "after": [
+   [
+    "Suzu",
+    "They went out together."
+   ],
+   [
+    "Tessai",
+    "一蓮托生. To share one lotus in the next life. I think that is all they wanted."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "風",
+  "name": "Wind",
+  "hint": "Wind 風: at the end of every turn the wind carries lanterns, umbrellas, ghosts and soul-flames one tile downwind, if the way is clear. Where they burn now is not where they will burn next.",
+  "story": [
+   [
+    "Tessai",
+    "In 1274 and again in 1281 the Mongol fleets came for these islands, and twice a great wind scattered them. 神風. People have trusted the wind ever since. You should not."
+   ],
+   [
+    "Suzu",
+    "It moves the lanterns."
+   ],
+   [
+    "Tessai",
+    "It moves everything light. Read where things will be, not where they are."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "風前の灯火. A lamp before the wind. Today the lamp was theirs."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "雨",
+  "name": "Rain",
+  "hint": "Rain 雨: lanterns and fire are out and burn nothing. But kappa leave the water and walk the land as they please.",
+  "story": [
+   [
+    "",
+    "Rain on the temple roof. The lanterns hiss and go dark, and the river comes up over its banks, thoughtfully."
+   ],
+   [
+    "Suzu",
+    "The fire is out. That helps."
+   ],
+   [
+    "Tessai",
+    "雨降って地固まる. After rain the ground is firmer. During rain, the kappa can walk on it."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "春雨じゃ、濡れて参ろう. It is only spring rain. Let us go and get wet."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "雪",
+  "name": "Deep Snow",
+  "hint": "Deep snow 雪: every water tile is frozen into ice. You can cross it, sliding. Kappa are held fast where they stand, though they still strike what comes beside them.",
+  "story": [
+   [
+    "",
+    "Snow has been falling all night. The pond is a white floor, and something green is frozen into it up to the shoulders, looking annoyed."
+   ],
+   [
+    "Tessai",
+    "柳に雪折れなし. The willow does not break under snow. Be the willow: let the ice carry you instead of fighting it."
+   ]
+  ],
+  "after": [
+   [
+    "Suzu",
+    "The whole pond was a road."
+   ],
+   [
+    "Tessai",
+    "It always was. It only needed the right weather."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "夜",
+  "name": "Night",
+  "hint": "Night 夜: the rules are as ever, but you see only two tiles around yourself and one around any light. Lanterns and fire show you the board. Put out a lantern and you lose what it lit.",
+  "story": [
+   [
+    "Tessai",
+    "一寸先は闇. One inch ahead, darkness."
+   ],
+   [
+    "Suzu",
+    "I cannot see what is past the lanterns."
+   ],
+   [
+    "Tessai",
+    "Then think before you put one out. 闇夜の提灯: a lantern on a dark night is a friend, even when it is trying to burn you."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "明けない夜はない. There is no night that does not end."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "死神",
+  "name": "Shinigami",
+  "hint": "Shinigami 死神: it drifts toward you through stone, water and everything else, and it has three lives. If it is beside you when a stroke ends, the stage is lost at once, however much ki you have.",
+  "story": [
+   [
+    "",
+    "Something thin is standing at the edge of the lamplight. It has been standing there for some time. It is not in the scroll, and never was."
+   ],
+   [
+    "Suzu",
+    "Master. What is that?"
+   ],
+   [
+    "Tessai",
+    "That one is not a yokai. That one comes for everybody. 生者必滅: all that lives must perish. But not tonight, if you keep your distance and your wits."
+   ],
+   [
+    "Suzu",
+    "Can it be cut?"
+   ],
+   [
+    "Tessai",
+    "Three times. From a long way off."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "九死に一生を得る. Nine deaths, and one life kept. It will be back, for both of us. Not today."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
+ },
+ {
+  "kanji": "式神",
+  "name": "Shikigami",
+  "hint": "Shikigami 式神: your brush cannot cut here, but a yokai bound by your circle goes into your hand (up to three). Press 4 and a direction to set the oldest on a tile beside you. It holds that tile, and at the start of every yokai turn it strikes whatever stands within its own reach.",
+  "story": [
+   [
+    "Tessai",
+    "Abe no Seimei, the fox's son, kept twelve spirits folded in paper under the Ichijō bridge and called them out when he had need. 式神."
+   ],
+   [
+    "Suzu",
+    "The ones I bind. I can keep them?"
+   ],
+   [
+    "Tessai",
+    "You can ask them to stand somewhere. 毒を以て毒を制す: use poison to master poison."
+   ],
+   [
+    "Suzu",
+    "And they will fight for me."
+   ],
+   [
+    "Tessai",
+    "昨日の敵は今日の友. Yesterday's enemy, today's friend. Be polite to them."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "急急如律令. Swiftly, as the law commands. That is how Seimei ended every spell."
+   ]
+  ],
+  "par": 1,
+  "waza": [],
+  "rows": []
  }
 ]
