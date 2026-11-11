@@ -1,0 +1,1418 @@
+[
+ {
+  "kanji": "一筆",
+  "name": "The First Stroke",
+  "par": 3,
+  "waza": [],
+  "rows": [
+   ".......",
+   "..c....",
+   ".......",
+   "...H...",
+   ".......",
+   "....c..",
+   "......."
+  ],
+  "hint": "Click or drag beside Suzu to paint a stroke. Stepping into a yokai cuts it. Press Space to sheathe and end the stroke. Never rest on red.",
+  "story": [
+   [
+    "",
+    "Heian-kyō, the hour of the Ox. In the temple at the capital's edge hangs the great scroll that bound the Night Parade of a Hundred Demons. Tonight it hangs blank."
+   ],
+   [
+    "Tessai",
+    "Tamamo-no-Mae has licked the ink from the paper, Suzu. What was painted now walks."
+   ],
+   [
+    "Tessai",
+    "Take the brush-blade. Every stroke you draw is at once a step and a cut. Paint them back where they belong."
+   ],
+   [
+    "Suzu",
+    "And if my hand shakes, Master?"
+   ],
+   [
+    "Tessai",
+    "Then you will be merely strong. Be 上手 — skilled. Strength spills ink. Skill spends none."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "Two lanterns, two strokes. The paper remembers them already. Go on to the gate."
+   ]
+  ]
+ },
+ {
+  "kanji": "間合",
+  "name": "The Measure of Distance",
+  "par": 2,
+  "waza": [],
+  "rows": [
+   ".......",
+   ".#...#.",
+   ".......",
+   "H....o.",
+   ".......",
+   ".#...#.",
+   "......."
+  ],
+  "hint": "Momentum 勢: each step in a straight line adds 1 to the cut that follows it. A standing cut deals 1, a one-step run 2, two steps 3. Let the oni come to the right distance.",
+  "story": [
+   [
+    "",
+    "Beneath the broken beams of Rashōmon something red is breathing."
+   ],
+   [
+    "Tessai",
+    "An oni's hide turns a lazy blade. Do not hack at it. Give your stroke room to run — that room is called ma-ai, 間合."
+   ],
+   [
+    "Suzu",
+    "So I should not rush in."
+   ],
+   [
+    "Tessai",
+    "You should arrive exactly once."
+   ]
+  ],
+  "after": [
+   [
+    "Suzu",
+    "It came to me, and I was already moving."
+   ],
+   [
+    "Tessai",
+    "That is the whole of swordsmanship. The rest is footnotes."
+   ]
+  ]
+ },
+ {
+  "kanji": "挟撃",
+  "name": "The Pincer",
+  "par": 3,
+  "waza": [],
+  "rows": [
+   ".......",
+   ".#...#.",
+   ".......",
+   "o..H..o",
+   ".......",
+   ".#...#.",
+   "......."
+  ],
+  "hint": "Two oni close from both sides. You cannot be at the right distance from both at once — so decide who arrives first.",
+  "story": [
+   [
+    "Tessai",
+    "One enemy is a question of distance. Two enemies are a question of order."
+   ],
+   [
+    "Suzu",
+    "They will reach me together."
+   ],
+   [
+    "Tessai",
+    "Only if you stand still and let them agree on it."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "You made them take turns. Good. The captain of the gate will not be so obliging."
+   ]
+  ]
+ },
+ {
+  "kanji": "茨木",
+  "name": "Ibaraki of the Gate",
+  "par": 4,
+  "waza": [],
+  "rows": [
+   "c.....c",
+   ".#...#.",
+   ".......",
+   "...O...",
+   ".......",
+   ".#...#.",
+   "...H..."
+  ],
+  "hint": "The great oni has three lives. Only a full two-step run cuts it down in one blow.",
+  "story": [
+   [
+    "Ibaraki",
+    "Little painter. A warrior once took my arm at this gate. I took it back. What will you take from me?"
+   ],
+   [
+    "Suzu",
+    "Nothing. I am returning you."
+   ],
+   [
+    "Ibaraki",
+    "Ha! Then come and measure me."
+   ]
+  ],
+  "after": [
+   [
+    "",
+    "The oni thins to a wash of ink, then to a line, then to a place on the scroll that had been waiting for him."
+   ],
+   [
+    "Tessai",
+    "North, now. The tengu of Kurama once taught a boy named Ushiwaka to fight. Ask them, politely, to teach you."
+   ]
+  ]
+ },
+ {
+  "kanji": "松風",
+  "name": "Wind in the Cedars",
+  "par": 5,
+  "waza": [],
+  "rows": [
+   "...t...",
+   ".......",
+   ".#.#.#.",
+   ".......",
+   "c.....c",
+   "..#.#..",
+   "...H..."
+  ],
+  "hint": "A tengu never moves, but its fan sweeps its whole row and column. Stone breaks the wind — and so does any yokai standing in the way.",
+  "story": [
+   [
+    "",
+    "Mount Kurama. The cedars are older than the capital, and the wind in them has opinions."
+   ],
+   [
+    "Sōjōbō",
+    "Another child with a stick. Ushiwaka at least brought rice cakes."
+   ],
+   [
+    "Suzu",
+    "I brought a blank scroll, great tengu, and you are missing from it."
+   ],
+   [
+    "Sōjōbō",
+    "Hm! Then climb. My nephews will fan you off the mountain if you walk in the open."
+   ]
+  ],
+  "after": [
+   [
+    "Sōjōbō",
+    "You used my own cedars against me. Acceptable. I will show you how Ushiwaka crossed the Gojō bridge rail."
+   ],
+   [
+    "",
+    "Suzu learns 縮地 SHUKUCHI — the shrinking of the earth. Once per stage, leap over one tile of anything."
+   ]
+  ]
+ },
+ {
+  "kanji": "縮地",
+  "name": "The Shrinking Earth",
+  "par": 4,
+  "waza": [
+   "leap"
+  ],
+  "rows": [
+   "T..~...",
+   "...~.c.",
+   "~~~~...",
+   ".......",
+   "..o....",
+   ".......",
+   "H......"
+  ],
+  "hint": "Press 1, then a direction, to leap two tiles over water, stone or yokai. A leap counts as a step of run-up.",
+  "story": [
+   [
+    "Sōjōbō",
+    "Shukuchi is not jumping. You fold the ground like paper and step across the crease."
+   ],
+   [
+    "Suzu",
+    "Only once?"
+   ],
+   [
+    "Sōjōbō",
+    "Once is a technique. Twice is a habit. Spend it where nothing else will do."
+   ]
+  ],
+  "after": [
+   [
+    "Sōjōbō",
+    "Hmph. The boy took a month."
+   ]
+  ]
+ },
+ {
+  "kanji": "団扇",
+  "name": "Crossed Fans",
+  "par": 5,
+  "waza": [
+   "leap"
+  ],
+  "rows": [
+   "t.....t",
+   ".......",
+   "..#.#..",
+   "~~.c.~~",
+   "..#.#..",
+   ".......",
+   "...H..."
+  ],
+  "hint": "Two fans sweep the top row and both edges. Cross the stream where the wind cannot follow.",
+  "story": [
+   [
+    "Sōjōbō",
+    "One fan you can hide from. My nephews have learned to stand where their winds cross."
+   ],
+   [
+    "Suzu",
+    "Then somewhere between them is a place neither can see."
+   ],
+   [
+    "Sōjōbō",
+    "Hm. Find it before they find you."
+   ]
+  ],
+  "after": [
+   [
+    "Sōjōbō",
+    "You walked through a crossfire as if it were a garden. One more lesson, then."
+   ]
+  ]
+ },
+ {
+  "kanji": "僧正",
+  "name": "Sōjōbō's Court",
+  "par": 5,
+  "waza": [
+   "leap"
+  ],
+  "rows": [
+   "t.#.#.t",
+   ".......",
+   "~~~.~~~",
+   ".......",
+   ".#.O.#.",
+   ".......",
+   "...H..."
+  ],
+  "hint": "Read the red wash before every stroke. Where can you end safely — and what can stand between you and the wind?",
+  "story": [
+   [
+    "Sōjōbō",
+    "Last lesson. Two fans, one bridge, and a guest from the capital who dislikes you."
+   ],
+   [
+    "Suzu",
+    "You invited an oni?"
+   ],
+   [
+    "Sōjōbō",
+    "I invited a problem. Solve it."
+   ]
+  ],
+  "after": [
+   [
+    "Sōjōbō",
+    "Go south to Shinoda. The white fox there owes the court of painters a favour. And child — foxes do not fight. They agree with you until you lose."
+   ]
+  ]
+ },
+ {
+  "kanji": "狐火",
+  "name": "Fox Fire",
+  "par": 3,
+  "waza": [],
+  "rows": [
+   ".......",
+   ".#.....",
+   "....k..",
+   ".......",
+   "..#....",
+   ".......",
+   "H......"
+  ],
+  "hint": "The fox copies every step you take. Chase it and it flees at your pace — unless something stops it and not you.",
+  "story": [
+   [
+    "",
+    "Shinoda Forest. Pale fires hang between the camphor trees, and one of them has ears."
+   ],
+   [
+    "Suzu",
+    "It moves when I move."
+   ],
+   [
+    "Kuzunoha",
+    "Of course. It is being polite. A fox walks in the footsteps of whoever is watching."
+   ],
+   [
+    "Kuzunoha",
+    "You cannot outrun a mirror, little brush. Find the place where it has no step left."
+   ]
+  ],
+  "after": [
+   [
+    "Kuzunoha",
+    "Good. You stopped chasing and started arranging."
+   ]
+  ]
+ },
+ {
+  "kanji": "葛の葉",
+  "name": "Kuzunoha's Leaves",
+  "par": 6,
+  "waza": [
+   "ward"
+  ],
+  "rows": [
+   "#T#....",
+   "#.#.k..",
+   "#.#....",
+   "#.#..#.",
+   ".......",
+   "..#....",
+   "H......"
+  ],
+  "hint": "Press 2, then a direction, to paste a ward 結界 beside you. No yokai may enter it; you may. A ward is a wall you choose.",
+  "story": [
+   [
+    "Kuzunoha",
+    "My son Seimei wrote wards that could stop a star. Take one of his leaves."
+   ],
+   [
+    "",
+    "Suzu learns 結界 KEKKAI — once per stage, paste a ward on a tile beside you. Yokai cannot enter it and the tengu's wind cannot cross it."
+   ],
+   [
+    "Kuzunoha",
+    "A fox to herd, and a great tengu at the end of a stone lane. There is no cover in that lane but what you bring."
+   ]
+  ],
+  "after": [
+   [
+    "Kuzunoha",
+    "You see it now. Every wall is a hand that holds your enemy still."
+   ]
+  ]
+ },
+ {
+  "kanji": "化かし",
+  "name": "Bewitched",
+  "par": 4,
+  "waza": [
+   "leap",
+   "ward"
+  ],
+  "rows": [
+   "k.....k",
+   ".#.#.#.",
+   ".......",
+   "...o...",
+   ".......",
+   ".#.#.#.",
+   "...H..."
+  ],
+  "hint": "Two foxes mirror every step while an oni walks you down. Each step you take moves three pieces — count all of them.",
+  "story": [
+   [
+    "Kuzunoha",
+    "A fox alone is a riddle. A fox while something chases you is a different animal."
+   ],
+   [
+    "Suzu",
+    "Every step I take to flee, they take too."
+   ],
+   [
+    "Kuzunoha",
+    "Then never flee. Only ever go somewhere."
+   ]
+  ],
+  "after": [
+   [
+    "Kuzunoha",
+    "There. You moved once and three things went where you wanted."
+   ]
+  ]
+ },
+ {
+  "kanji": "信太",
+  "name": "The Shinoda Mirror",
+  "par": 4,
+  "waza": [
+   "leap",
+   "ward"
+  ],
+  "rows": [
+   "t......",
+   ".#.k.#.",
+   ".......",
+   "..o....",
+   ".......",
+   ".#...#.",
+   "...H..k"
+  ],
+  "hint": "A ward also breaks the tengu's wind. One leaf, three uses — choose.",
+  "story": [
+   [
+    "Kuzunoha",
+    "Tamamo-no-Mae is my elder by eight tails. She will copy you perfectly, and smile while she does it."
+   ],
+   [
+    "Suzu",
+    "Then I will give her something worth copying."
+   ],
+   [
+    "Kuzunoha",
+    "Mm. Practise on my cousins first."
+   ]
+  ],
+  "after": [
+   [
+    "Kuzunoha",
+    "She has gone east. But the road east runs under Mount Ōe, and the oni king Shuten-dōji has shut it. A man named Tsuna keeps watch there. He has history with oni."
+   ]
+  ]
+ },
+ {
+  "kanji": "鬼の門",
+  "name": "The Ogres' Gate",
+  "par": 3,
+  "waza": [
+   "leap",
+   "ward"
+  ],
+  "rows": [
+   ".o.O.o.",
+   ".......",
+   ".#...#.",
+   "...#...",
+   ".......",
+   ".#...#.",
+   "...H..."
+  ],
+  "hint": "Three oni, and the great one in front. A ward stops an oni as surely as stone — and a stopped oni is standing at a distance you chose.",
+  "story": [
+   [
+    "",
+    "Mount Ōe. The road east runs under it, and the road has been shut with a gate of horn and iron."
+   ],
+   [
+    "Tsuna",
+    "I am Watanabe no Tsuna. I took an arm from Ibaraki at Rashōmon once. I hear you finished the job."
+   ],
+   [
+    "Tsuna",
+    "His master Shuten-dōji holds this mountain. His gate-wardens come three at a time. Do not let them arrive three at a time."
+   ]
+  ],
+  "after": [
+   [
+    "Tsuna",
+    "Hah! You fight like someone who has read the ending. Come, the path climbs."
+   ]
+  ]
+ },
+ {
+  "kanji": "谷風",
+  "name": "Valley Wind",
+  "par": 5,
+  "waza": [
+   "leap",
+   "ward"
+  ],
+  "rows": [
+   "T..~..o",
+   "...~...",
+   ".#.~.#.",
+   ".......",
+   "o..#...",
+   ".......",
+   "...H..c"
+  ],
+  "hint": "The great tengu watches the whole west bank and its row. The oni do not care about wind. Use one to hide from the other.",
+  "story": [
+   [
+    "Tsuna",
+    "A tengu has taken service with the oni king. It guards the stream; the oni guard the tengu."
+   ],
+   [
+    "Suzu",
+    "Then they stand in each other’s way."
+   ],
+   [
+    "Tsuna",
+    "...I had not thought of it like that."
+   ]
+  ],
+  "after": [
+   [
+    "Tsuna",
+    "You used an oni as a windbreak. I am going to tell that story for years."
+   ]
+  ]
+ },
+ {
+  "kanji": "酒宴",
+  "name": "The Feast",
+  "par": 5,
+  "waza": [
+   "leap",
+   "ward"
+  ],
+  "rows": [
+   "c..k..c",
+   ".......",
+   ".o.#.o.",
+   ".......",
+   ".#...#.",
+   ".......",
+   "...H..."
+  ],
+  "hint": "Lanterns, a fox, two oni. Nothing here is new; everything here is at once.",
+  "story": [
+   [
+    "",
+    "The oni king’s hall. Lanterns sway though there is no wind, and something laughs along with every laugh."
+   ],
+   [
+    "Tsuna",
+    "In the old tale we poisoned his wine. He has stopped accepting gifts."
+   ],
+   [
+    "Suzu",
+    "Then we will have to be good instead of clever."
+   ]
+  ],
+  "after": [
+   [
+    "Tsuna",
+    "The hall is quiet. He will have heard that."
+   ]
+  ]
+ },
+ {
+  "kanji": "酒呑童子",
+  "name": "Shuten-dōji",
+  "par": 6,
+  "waza": [
+   "leap",
+   "ward"
+  ],
+  "rows": [
+   "c..S..c",
+   ".......",
+   ".#...#.",
+   "o.....o",
+   ".#...#.",
+   ".......",
+   "...H..."
+  ],
+  "hint": "The oni king has five lives and walks toward you like any oni. Even a full run cuts only three. You will need two perfect arrivals.",
+  "story": [
+   [
+    "Shuten",
+    "A girl with a paintbrush. Raikō brought an army and a lie."
+   ],
+   [
+    "Suzu",
+    "I brought neither."
+   ],
+   [
+    "Shuten",
+    "Good. I am tired of being beaten by tricks. Come and do it properly."
+   ]
+  ],
+  "after": [
+   [
+    "",
+    "The oni king laughs once, hugely, and is a red line on the scroll, cup still raised."
+   ],
+   [
+    "Tsuna",
+    "The road east is open. The fox went to Nasu, where the grass dies in a ring. Find the monk Gennō. He hits things."
+   ]
+  ]
+ },
+ {
+  "kanji": "殺生石",
+  "name": "The Killing Stone",
+  "par": 4,
+  "waza": [
+   "leap",
+   "ward"
+  ],
+  "rows": [
+   "y..#..y",
+   "...#...",
+   ".#...#.",
+   "...H...",
+   ".#...#.",
+   "...#...",
+   "...y..."
+  ],
+  "hint": "Yūrei pass through stone and water as if they were mist. They cannot pass a ward.",
+  "story": [
+   [
+    "",
+    "Nasu Moor. Birds that cross it fall. In the middle stands a stone, and around the stone, those who came too near."
+   ],
+   [
+    "Gennō",
+    "Don't breathe so deep, girl. The dead here are not angry. They are only cold, and you are warm."
+   ],
+   [
+    "Suzu",
+    "They walk through the rocks."
+   ],
+   [
+    "Gennō",
+    "Rocks are for the living. Stand where they must come to you one at a time."
+   ]
+  ],
+  "after": [
+   [
+    "Gennō",
+    "Clean work. Now let me teach you the only sutra I ever finished."
+   ],
+   [
+    "",
+    "Suzu learns 喝 KATSU — once per stage, a shout that hurls every yokai beside you one tile away. Into water, they are gone. Into a wall, they are hurt."
+   ]
+  ]
+ },
+ {
+  "kanji": "喝",
+  "name": "Gennō's Shout",
+  "par": 5,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "..~.~..",
+   ".c~.~c.",
+   "..~.~..",
+   ".~OHO~.",
+   ".......",
+   "..#y#..",
+   "......."
+  ],
+  "hint": "Press 3 to shout. Everything beside you is thrown one tile. Water swallows yokai whole — let the river do the cutting.",
+  "story": [
+   [
+    "Gennō",
+    "KATSU! — Like that. From the belly."
+   ],
+   [
+    "Suzu",
+    "...Katsu."
+   ],
+   [
+    "Gennō",
+    "That would not frighten a sparrow. Again, when it matters."
+   ]
+  ],
+  "after": [
+   [
+    "Gennō",
+    "There. Even the stone flinched. She is waiting for you beyond the dead grass."
+   ]
+  ]
+ },
+ {
+  "kanji": "怨霊",
+  "name": "Grudges",
+  "par": 4,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "y.~.~.y",
+   "..~.~..",
+   ".O...O.",
+   ".......",
+   "..y.y..",
+   "..#.#..",
+   "...H..."
+  ],
+  "hint": "Ghosts that ignore the river, oni that cannot swim. One shout, one ward, one leap — and each can only be spent once.",
+  "story": [
+   [
+    "Gennō",
+    "Past here she has gathered everything that ever hated anyone."
+   ],
+   [
+    "Suzu",
+    "How many?"
+   ],
+   [
+    "Gennō",
+    "Does it matter? You only ever fight the ones standing next to you."
+   ]
+  ],
+  "after": [
+   [
+    "Gennō",
+    "Mm. Nothing wasted. Go on, then. She is waiting, and she hates waiting."
+   ]
+  ]
+ },
+ {
+  "kanji": "玉藻前",
+  "name": "Tamamo-no-Mae",
+  "par": 5,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "c..Q..c",
+   ".......",
+   ".#...#.",
+   "k.....k",
+   ".#...#.",
+   ".......",
+   "...H..."
+  ],
+  "hint": "She has five lives and walks in your footsteps. A full run cuts three. Where has she no step left?",
+  "story": [
+   [
+    "Tamamo",
+    "So this is the hand they sent. Ink on the fingers, mud on the hem."
+   ],
+   [
+    "Tamamo",
+    "I was the jewel of three courts, child. I will move as you move, think as you think, and I have had nine hundred years to practise."
+   ],
+   [
+    "Suzu",
+    "Then you already know how this ends."
+   ],
+   [
+    "Tamamo",
+    "...Show me anyway."
+   ]
+  ],
+  "after": [
+   [
+    "",
+    "Nine tails fold into nine lines of ink. In the scroll's crowd a fox in court robes is, very slightly, smiling."
+   ],
+   [
+    "Tessai",
+    "You spilled nothing, Suzu. And yet — unroll it further."
+   ],
+   [
+    "Suzu",
+    "The end of it is still blank."
+   ],
+   [
+    "Tessai",
+    "She was the one who freed them. She was never the last of them."
+   ]
+  ]
+ },
+ {
+  "kanji": "薄氷",
+  "name": "Thin Ice",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "...O...",
+   "...i...",
+   "...i...",
+   ".#.i.#.",
+   "...i...",
+   "o.....o",
+   "...H..."
+  ],
+  "hint": "Ice 氷: step onto it and you slide until something stops you, for one drop of ink. Every tile you slide is a step of run-up.",
+  "story": [
+   [
+    "",
+    "The scroll is whole from the capital to Nasu. But its far end is still bare paper, and the bare paper is cold to the touch."
+   ],
+   [
+    "Tessai",
+    "The north never came back, Suzu. Snow country. The ones who fled there were never afraid of you."
+   ],
+   [
+    "Suzu",
+    "The ground is glass."
+   ],
+   [
+    "Tessai",
+    "Then you cannot choose where you stop. Choose where you start."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "You let the ice carry the blade. Good. It will carry you into worse, too."
+   ]
+  ]
+ },
+ {
+  "kanji": "傘",
+  "name": "The Umbrella",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "u.....u",
+   ".......",
+   "..iii..",
+   "..iii..",
+   "..iii..",
+   ".......",
+   "...H..."
+  ],
+  "hint": "Kasa-obake hop two tiles toward you, straight over anything. They are never where an oni would be.",
+  "story": [
+   [
+    "",
+    "Something is coming down the white road in great idiotic bounds."
+   ],
+   [
+    "Suzu",
+    "Is that an umbrella?"
+   ],
+   [
+    "Tessai",
+    "A hundred years in a doorway and anything grows a temper. Mind its rhythm. It only knows one."
+   ]
+  ],
+  "after": [
+   [
+    "Suzu",
+    "Two tiles. Always two."
+   ],
+   [
+    "Tessai",
+    "Everything is easy once it is counted."
+   ]
+  ]
+ },
+ {
+  "kanji": "吹雪",
+  "name": "Blizzard",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "T.iii.u",
+   "..#i#..",
+   "...i...",
+   "o.iii..",
+   "...i...",
+   "..#.#..",
+   "...H..."
+  ],
+  "hint": "On ice you cannot choose where you stop — only where you start. The great tengu sees the whole length of its row and column.",
+  "story": [
+   [
+    "Tessai",
+    "A tengu has come north for the wind. It can see across the whole frozen field."
+   ],
+   [
+    "Suzu",
+    "And I cannot stop on it."
+   ],
+   [
+    "Tessai",
+    "Then be seen only where it does not matter."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "Mm. You slid the length of its gaze and were gone before it blinked."
+   ]
+  ]
+ },
+ {
+  "kanji": "雪女",
+  "name": "Yuki-onna",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "u..W..u",
+   ".iiiii.",
+   ".i#i#i.",
+   ".iiiii.",
+   ".i#i#i.",
+   ".iiiii.",
+   "...H..."
+  ],
+  "hint": "Yuki-onna has three lives and drifts toward you through anything, like a ghost. On ice there is no standing still.",
+  "story": [
+   [
+    "Yuki-onna",
+    "You are warm. I can hear it from here."
+   ],
+   [
+    "Suzu",
+    "You are not on the scroll."
+   ],
+   [
+    "Yuki-onna",
+    "I was. I was a white space between two pine trees. I did not like it."
+   ],
+   [
+    "Suzu",
+    "I will paint you the whole winter."
+   ],
+   [
+    "Yuki-onna",
+    "...Come onto the ice, then, and show me."
+   ]
+  ],
+  "after": [
+   [
+    "",
+    "Snow falls onto the paper and stays. Between two pines there is now a woman, looking out."
+   ],
+   [
+    "Tessai",
+    "South again. The river spirits have noticed the scroll filling and gone to ground. Or rather, to water."
+   ]
+  ]
+ },
+ {
+  "kanji": "河童",
+  "name": "The Kappa",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "...c...",
+   ".~~~~~.",
+   ".~...~.",
+   ".p.c.p.",
+   ".~...~.",
+   ".~~.~~.",
+   "...H..."
+  ],
+  "hint": "Kappa never leave the water. They swim toward you and drag at anything on the bank beside them. Cut them from dry land.",
+  "story": [
+   [
+    "",
+    "A green pool at the bend of a river. The water is still in a way that water should not be."
+   ],
+   [
+    "Kappa",
+    "Cucumber?"
+   ],
+   [
+    "Suzu",
+    "No."
+   ],
+   [
+    "Kappa",
+    "Then we wrestle."
+   ]
+  ],
+  "after": [
+   [
+    "Suzu",
+    "They cannot follow me onto land."
+   ],
+   [
+    "Tessai",
+    "And you cannot follow them off it. Remember which of you that troubles more."
+   ]
+  ]
+ },
+ {
+  "kanji": "相撲",
+  "name": "Sumo",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "~~~.~~~",
+   "~p...p~",
+   "~..O..~",
+   ".......",
+   ".#...#.",
+   "o.....o",
+   "...H..."
+  ],
+  "hint": "A shout throws land yokai into the water — and throws kappa against whatever is behind them. Water is a weapon for both sides here.",
+  "story": [
+   [
+    "Kappa",
+    "We have friends now. Big friends. Dry friends."
+   ],
+   [
+    "Suzu",
+    "Oni cannot swim."
+   ],
+   [
+    "Kappa",
+    "...Do not tell them that."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "Hah. The river took what the blade did not need to."
+   ]
+  ]
+ },
+ {
+  "kanji": "瀬",
+  "name": "The Rapids",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "t..~..k",
+   "...~...",
+   "~~p~~~~",
+   ".......",
+   ".o...u.",
+   ".......",
+   "...H..."
+  ],
+  "hint": "Water is a wall to you and a road to them. You have one leap. Decide which bank it is for.",
+  "story": [
+   [
+    "Tessai",
+    "A tengu on the high ground, a kappa in the crossing, and company on this side."
+   ],
+   [
+    "Suzu",
+    "One leap."
+   ],
+   [
+    "Tessai",
+    "One is a technique."
+   ]
+  ],
+  "after": [
+   [
+    "Suzu",
+    "I spent it going, not coming back."
+   ],
+   [
+    "Tessai",
+    "There was nothing to come back for. Well judged."
+   ]
+  ]
+ },
+ {
+  "kanji": "河伯",
+  "name": "Lord of the Pool",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "u.....u",
+   "~~~P~~~",
+   "~.....~",
+   "p.....p",
+   "~.....~",
+   "~~~.~~~",
+   "...H..."
+  ],
+  "hint": "The kappa lord has four lives. Wherever there is water, the bank beside it belongs to him.",
+  "story": [
+   [
+    "Kappa",
+    "I am the lord of this pool and of four hundred pools. I have never lost a bout."
+   ],
+   [
+    "Suzu",
+    "Because you never leave the water."
+   ],
+   [
+    "Kappa",
+    "That is called knowing your ground. You should try it."
+   ]
+  ],
+  "after": [
+   [
+    "",
+    "The pool goes clear. On the scroll, a river fills in from source to sea, and four hundred small green heads bob in it."
+   ],
+   [
+    "Tessai",
+    "The burial ground at Adashino is next, Suzu. Nothing there was ever properly put to rest."
+   ]
+  ]
+ },
+ {
+  "kanji": "鬼火",
+  "name": "Ghost-Fire Road",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "..n.n..",
+   ".......",
+   ".f.o.f.",
+   ".......",
+   ".#.f.#.",
+   ".......",
+   "...H..."
+  ],
+  "hint": "Fire 火 burns you if you end a stroke on it; passing over is free. Nurikabe are walls that must be broken: three lives, no malice, always in the way.",
+  "story": [
+   [
+    "",
+    "Adashino, where the capital once left its dead. The paper here is scorched, and the road across it is lit with fires nobody set."
+   ],
+   [
+    "Suzu",
+    "There are walls where there were no walls."
+   ],
+   [
+    "Tessai",
+    "Nurikabe. They do not strike. They simply stand between you and a clean ending. Count them as enemies anyway."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "You did not rest on the fire once. Go on."
+   ]
+  ]
+ },
+ {
+  "kanji": "関",
+  "name": "The Barrier",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "T.n...y",
+   "..f....",
+   ".#.n.#.",
+   "...f...",
+   "o..#..u",
+   ".......",
+   "...H..."
+  ],
+  "hint": "A wall will hide you from a tengu as well as stone does — until you break it.",
+  "story": [
+   [
+    "Tessai",
+    "They have built themselves a checkpoint. Wind behind walls."
+   ],
+   [
+    "Suzu",
+    "If I break the wall I lose my cover."
+   ],
+   [
+    "Tessai",
+    "Then the order you do things in is the whole problem. As usual."
+   ]
+  ],
+  "after": [
+   [
+    "Suzu",
+    "The wall last."
+   ],
+   [
+    "Tessai",
+    "The wall last."
+   ]
+  ]
+ },
+ {
+  "kanji": "百鬼",
+  "name": "The Hundred",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "c.k.O.c",
+   ".f...f.",
+   "~~.n.~~",
+   "p.....p",
+   "~~.i.~~",
+   ".u.i.y.",
+   "...H..."
+  ],
+  "hint": "Everything you have met, on one board. Nothing here is new. Read it twice before your first stroke.",
+  "story": [
+   [
+    "",
+    "And here they all are, the stragglers, drawn up across the road like a festival that has forgotten what it is for."
+   ],
+   [
+    "Suzu",
+    "Master, how many is a hundred?"
+   ],
+   [
+    "Tessai",
+    "More than you can fight. Exactly as many as you can solve."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "One left. It has been walking behind the parade this whole time, picking up what fell."
+   ]
+  ]
+ },
+ {
+  "kanji": "餓者髑髏",
+  "name": "Gashadokuro",
+  "par": 9,
+  "waza": [
+   "leap",
+   "ward",
+   "katsu"
+  ],
+  "rows": [
+   "f..G..f",
+   ".......",
+   ".#.i.#.",
+   "n..i..n",
+   ".#.i.#.",
+   ".......",
+   "...H..."
+  ],
+  "hint": "The great skeleton has seven lives and strikes all eight tiles around it, corners too. A full run cuts three. Arrive, and be gone.",
+  "story": [
+   [
+    "Gashadokuro",
+    "..."
+   ],
+   [
+    "Suzu",
+    "It does not speak."
+   ],
+   [
+    "Tessai",
+    "It is made of everyone the parade left unburied. It has nothing to say. It is only hungry, and very large."
+   ],
+   [
+    "Suzu",
+    "Then I will be small, and exact."
+   ]
+  ],
+  "after": [
+   [
+    "",
+    "The bones come apart gently, like a held breath let go, and lie down in the last blank hand-width as a field of white grass."
+   ],
+   [
+    "",
+    "The scroll is whole. A hundred demons, a road, a river, a winter. In one corner, very small, a girl with a brush."
+   ],
+   [
+    "Tessai",
+    "You spilled nothing, Suzu."
+   ],
+   [
+    "Suzu",
+    "I had the upper hand, Master."
+   ],
+   [
+    "Tessai",
+    "上手. Yes. That is how it is written."
+   ]
+  ]
+ },
+ {
+  "kanji": "恐山",
+  "name": "Mount Osore",
+  "par": 9,
+  "waza": [],
+  "rows": [],
+  "hint": "Nothing here is new. Everything here is together.",
+  "story": [
+   [
+    "",
+    "Mount Osore, in the far north, where the living go to speak with the dead. Sulphur, pinwheels, grey water."
+   ],
+   [
+    "Tessai",
+    "I have nothing left to teach you about any one of them, Suzu."
+   ],
+   [
+    "Suzu",
+    "And about all of them at once?"
+   ],
+   [
+    "Tessai",
+    "That was never something that could be taught."
+   ]
+  ],
+  "after": [
+   [
+    "Tessai",
+    "Mm. Go on. I will only be in the way."
+   ]
+  ]
+ },
+ {
+  "kanji": "行列",
+  "name": "The Procession",
+  "par": 9,
+  "waza": [],
+  "rows": [],
+  "hint": "The last hand-width of the scroll. Read every board twice.",
+  "story": [
+   [
+    "",
+    "The last hand-width of the scroll. A drum is beating somewhere ahead, slowly, and everything that has not yet been painted is walking toward it."
+   ],
+   [
+    "Suzu",
+    "They are forming up."
+   ],
+   [
+    "Tessai",
+    "It is a parade. It was always a parade. Go and be the end of it."
+   ]
+  ],
+  "after": []
+ }
+]

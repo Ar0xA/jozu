@@ -1,0 +1,9 @@
+# Godot
+.godot/
+
+# Build output
+build/
+
+# C# generator build output
+tools/gen/bin/
+tools/gen/obj/
