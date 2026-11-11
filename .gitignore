@@ -7,3 +7,7 @@ build/
 # C# generator build output
 tools/gen/bin/
 tools/gen/obj/
+
+# Browser build of the generator
+tools/genweb/bin/
+tools/genweb/obj/

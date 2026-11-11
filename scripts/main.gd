@@ -476,7 +476,18 @@ func daily_line(day):
 const BRACKETS = [["易", "Gentle"], ["中", "Even"], ["難", "Hard"], ["極", "Master"]]
 var last_random = -1
 
+# In the browser a new board is made on the spot (scripts/forge.gd); elsewhere, or if that fails,
+# one is drawn from the bank.
 func show_random(br):
+	if OS.has_feature("web"):
+		var scr = load("res://scripts/forge.gd").new()
+		scr.br = br
+		play_music("title")
+		go(scr)
+	else:
+		show_random_banked(br)
+
+func show_random_banked(br):
 	var bank = Extra.RANDOM
 	var n = bank.size() / 4
 	var lo = br * n
@@ -486,14 +497,56 @@ func show_random(br):
 		i = lo + (i - lo + 1) % max(1, hi - lo)
 	last_random = i
 	var lv = bank[i].duplicate(true)
+	lv["hint"] = "A board from off the map, number %d of %d on the shelf. Mastery asks %d stroke%s. Clear it and you can copy its code to pass on." % [i + 1, bank.size(), int(lv.par), "" if int(lv.par) == 1 else "s"]
+	_play_random(lv, br)
+
+func _play_random(lv, br):
 	lv["code"] = board_code(lv)
 	lv["kanji"] = "乱"
 	lv["name"] = "Off the map: %s" % BRACKETS[br][1].to_lower()
-	lv["hint"] = "A board from off the map, number %d of %d. Mastery asks %d stroke%s. Clear it and you can copy its code to pass on." % [i + 1, bank.size(), int(lv.par), "" if int(lv.par) == 1 else "s"]
 	lv["story"] = []
 	lv["after"] = []
 	lv["say"] = []
 	show_custom(lv, "random", "The Unmapped Road", _random_won.bind(br), Callable(), show_hub)
+
+# A board the generator has just made, as "rows|waza|rules|ink|par|answer|...". It is trusted only
+# after its answer has been played through the real rules. Returns {} if it does not hold up.
+func live_board(text):
+	var p = text.split("|")
+	if p.size() < 6 or p[0].length() != 49:
+		return {}
+	var lv = {"rows": [], "waza": Array(p[1].split(",", false)), "rules": Array(p[2].split(",", false)), "ink": int(p[3]), "par": int(p[4]), "sol": p[5]}
+	for y in range(7):
+		lv.rows.append(p[0].substr(y * 7, 7))
+	if board_from_code(board_code(lv)).is_empty() or not solution_holds(lv):
+		return {}
+	return lv
+
+func solution_holds(lv):
+	var Sim = preload("res://scripts/sim.gd")
+	var dirs = {"R": Vector2i(1, 0), "L": Vector2i(-1, 0), "D": Vector2i(0, 1), "U": Vector2i(0, -1)}
+	var s = Sim.new_state(lv.rows, Data.base_stats(lv), lv.rules)
+	for stroke in lv.sol.split(" / "):
+		for tok in stroke.split(" ", false):
+			var ok = false
+			if tok == "KATSU":
+				ok = Sim.act_katsu(s)
+			elif tok == "BELL":
+				ok = Sim.act_bell(s)
+			elif not dirs.has(tok.right(1)):
+				return false
+			elif tok.begins_with("leap"):
+				ok = Sim.act_leap(s, dirs[tok.right(1)])
+			elif tok.begins_with("ward"):
+				ok = Sim.act_ward(s, dirs[tok.right(1)])
+			elif tok.length() == 1:
+				ok = Sim.act_move(s, dirs[tok])
+			if not ok:
+				return false
+		if s.status == "won":
+			break
+		Sim.end_stroke(s)
+	return s.status == "won" and s.hits == 0 and s.turn == int(lv.par)
 
 func _random_won(grade, _mask, _turns, br):
 	var k = str(br)

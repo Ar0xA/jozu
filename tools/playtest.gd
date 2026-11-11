@@ -378,6 +378,17 @@ func other_roads():
 		if int(main.data.rand.get(str(br), 0)) != 1:
 			bad("an unmapped clear was not counted")
 
+	# a board handed over by the live generator is trusted only if its answer plays out
+	var lv0 = Data.LEVELS[0]
+	var text = "".join(lv0.rows) + "||" + "|%d|%d|%s|40.0|3|900|1" % [Data.base_stats(lv0).ink, lv0.par, lv0.sol]
+	var made = main.live_board(text)
+	if made.is_empty() or made.rows != lv0.rows:
+		bad("a sound generated board was refused")
+	if not main.live_board(text.replace(lv0.sol, "U")).is_empty():
+		bad("a generated board with a wrong answer was accepted")
+	if not main.live_board("").is_empty() or not main.live_board("x|y|z|1|1|U").is_empty():
+		bad("rubbish from the generator was accepted")
+
 	# settings
 	main.show_settings(main.show_hub)
 	await frames(2)

@@ -789,18 +789,22 @@ rest.sort(key=difficulty)
 henro = [slim(rest[round(i * (len(rest) - 1) / 87)]) for i in range(88)] if len(rest) >= 88 else []
 
 taken = set(''.join(l['rows']) for l in levels) | set(''.join(b['rows']) for b in henro) | set(''.join(b['rows']) for b in bank)
-rand = []
+rand, rand_d = [], []
 for g in sorted([g for c in sorted(SPARE) if c != 10 for g in SPARE[c]], key=difficulty):
     k = ''.join(g['rows'])
     if k not in taken and g['par'] > 0:
         taken.add(k)
         rand.append(slim(g))
+        rand_d.append(difficulty(g))
 
 with open(os.path.join(root, 'scripts', 'extra.gd'), 'w', encoding='utf-8') as fh:
     fh.write('extends RefCounted\n# Boards outside the story, written by tools/build_levels.py. All are proven solvable.\n\n')
     fh.write('# The daily koan bank, easiest first.\nconst DAILY = [\n' + ''.join('\t' + json.dumps(b, ensure_ascii=False) + ',\n' for b in bank) + ']\n\n')
     fh.write('# The 88 temples, in the order they are walked.\nconst HENRO = [\n' + ''.join('\t' + json.dumps(b, ensure_ascii=False) + ',\n' for b in henro) + ']\n')
     fh.write('\n# The unmapped road: unused boards, easiest first; a quarter of the list is one bracket.\nconst RANDOM = [\n' + ''.join('\t' + json.dumps(b, ensure_ascii=False) + ',\n' for b in rand) + ']\n')
+    q = len(rand_d) // 4
+    # where the four brackets of the unmapped road divide, on the difficulty measure above
+    fh.write(chr(10) + 'const RANDOM_CUTS = %s' % json.dumps([round(rand_d[q], 1), round(rand_d[2 * q], 1), round(rand_d[3 * q], 1)]) + chr(10))
 print('%d daily koan, %d temples, %d off the map' % (len(bank), len(henro), len(rand)))
 
 print('%d stages' % len(levels))

@@ -54,8 +54,8 @@ func _draw():
 	for k in range(4):
 		won.append(str(int(main.data.rand.get(str(k), 0))))
 	_card(f, 2, "乱", "The Unmapped Road", [
-		"A board at random from %d proven boards" % Extra.RANDOM.size(),
-		"the story never used. Cleared: " + " · ".join(won)])
+		"A new board, made and solved while you wait," if OS.has_feature("web") else "A board at random from %d proven boards" % Extra.RANDOM.size(),
+		("or one from a shelf of %d. Cleared: " % Extra.RANDOM.size() if OS.has_feature("web") else "the story never used. Cleared: ") + " · ".join(won)])
 
 	_card(f, 3, "工房", "The Workshop", [
 		"Lay out a board of your own, clear it, and it becomes a code to give away.",

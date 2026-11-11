@@ -62,8 +62,11 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
 - **Other roads** 別 (from the map): a **daily kōan**, the same board for everyone, gentle on Monday and
   hardest on Sunday, with a calendar of past days and a result line to copy; the **88 temples**, a pilgrimage with no undo, no hints and three staffs; and the
   **workshop**, where you lay out a board, clear it, and get a short code anyone can paste to play it.
-  The **unmapped road** deals a random board from some 1,500 proven boards the story never used, in
-  four brackets of difficulty, each with a code to pass on.
+  The **unmapped road** makes a new board while you wait, in one of four brackets of difficulty: in the
+  browser the generator and solver themselves run beside the game (`tools/genweb`, the C# of `tools/gen`
+  compiled to WebAssembly, in a web worker), and every board they hand over is replayed through the game's
+  own rules before it is shown. If none turns up in time, or outside the browser, a board comes from a
+  shelf of some 1,500 proven boards the story never used. Each has a code to pass on.
 - **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, and the
   painted look.
 - **Three seals a station:** 上手 mastery, 潔 no stroke taken back, 惜墨 sparing of ink. Seals earn the

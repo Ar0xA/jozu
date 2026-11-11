@@ -20,4 +20,15 @@ PYTHONIOENCODING=utf-8 python tools/subset_font.py
 rm -rf build/web
 mkdir -p build/web
 "$GODOT" --headless --path . --export-release "Web" build/web/index.html 2>&1 | grep -E "^ERROR" || true
+# the board generator, compiled to WebAssembly, sits beside the game (see tools/genweb)
+if command -v dotnet >/dev/null 2>&1 && dotnet workload list 2>/dev/null | grep -q wasm-tools; then
+	rm -rf tools/genweb/bin/Release/net10.0/publish
+	dotnet publish -c Release tools/genweb 2>&1 | grep -E " error " || true
+	OUT="$PWD/build/web/gen"
+	mkdir -p "$OUT"
+	(cd tools/genweb/bin/Release/net10.0/publish/wwwroot && find . -type f ! -name "*.br" ! -name "*.gz" -exec cp --parents {} "$OUT/" \;)
+	du -sh build/web/gen | awk '{print $1 "  build/web/gen (the generator)"}'
+else
+	echo "dotnet with the wasm-tools workload not found: the unmapped road will use its shelf of boards only." >&2
+fi
 ls -la build/web/index.pck build/web/index.wasm | awk '{printf "%.1f MB  %s\n", $5 / 1e6, $9}'

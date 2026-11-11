@@ -883,11 +883,11 @@ static class Gen
         return rows;
     }
 
-    // pool = true: keep every accepted board of the style chapters (10+), for the assembler to build a ladder from
-    public static void Generate(string outPath, int seed, bool pool = false, int only = -1)
+    // The table of what each chapter's boards are made of.
+    public static List<Seg> Segs()
     {
         string[] none = { "" };
-        var segs = new List<Seg>
+        return new List<Seg>
         {
             // chapter, segment, how many, waza sets, palette, must-have, yokai min/max, par lo/hi, water, ice, fire
             new(0, 0, 1, none, "cco", "o", 2, 3, 3, 3, 0, 0, 0),
@@ -1015,6 +1015,105 @@ static class Gen
             new(36, 0, 4, none, "co", "", 1, 2, 3, 6, 0, 0, 0, "write,+brush", 5, 6),
             new(36, 1, 4, new[] { "", "leap" }, "coOuK", "", 2, 3, 4, 9, 0, 0, 0, "write,+brush", 5, 6),
         };
+    }
+
+    // One attempt at a board for a segment: lay it out, solve it, and keep it only if it passes that
+    // chapter's tests. Returns null when the attempt is thrown away.
+    public static LevelOut TryOne(Seg g, int seed, double secs)
+    {
+            var r = new Random(seed);
+            var rows = Make(r, g);
+            if (rows == null) return null;
+            string kanjiName = lastName;
+            var waza = g.wazaSets[r.Next(g.wazaSets.Length)].Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var feats = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith("+") && x != "+brush").ToArray();
+            if (feats.Contains("+bell")) waza = waza.Append("bell").ToArray();
+            var rules = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => !x.StartsWith("+"))
+                .Select(x => x == "wind" ? "wind:" + "RLDU"[r.Next(4)] : x).ToArray();
+            bool B = waza.Contains("bell");
+            bool weather = rules.Any(x => x.StartsWith("wind") || x == "rain" || x == "snow");
+            int ink = r.Next(g.inkLo, g.inkHi + 1);
+            bool garden = rules.Contains("garden");
+            if (garden) ink = rows.Sum(l => l.Count(ch => ch == '.' || ch == 'i' || ch == 'H')) - 1;
+            bool L = waza.Contains("leap"), Wd = waza.Contains("ward"), K = waza.Contains("katsu");
+            var sim = new Sim(rows, ink, 3, L, Wd, K, rules, B);
+            Result res;
+            double score;
+            if (rules.Contains("koan") || garden)
+            {
+                // keep boards with very few answers that need nearly all the ink
+                res = sim.SolveKoan(3_000_000);
+                if (res.par != 1 || res.ways > (garden ? 6 : 4)) return null;
+                int used = res.trace.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+                if (!garden && used < ink - 1) return null;
+                score = ink * 10 - res.ways;
+            }
+            else
+            {
+                if (sim.Danger(sim.start, sim.start.hx, sim.start.hy)) return null;
+                if (g.rules.Contains("+brush")) sim.Beam = 1200;
+                res = sim.Solve(rules.Contains("enso") ? 25_000 : 120_000, g.parHi, sim.Beam > 0 ? secs * 4 : secs);
+                if (rules.Contains("stone") && res.par > 0 && !res.trace.Split('/').Any(x => x.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).Length > 4)) return null;   // must spend banked ink
+                if (res.par < g.parLo || res.par > g.parHi) return null;
+                if (rules.Contains("shiki") && !res.trace.Contains("shiki")) return null;   // a familiar must actually be set
+                if (B && !res.trace.Contains("BELL")) return null;   // a bell that is never rung is not a bell stage
+                if (g.palette.Contains('K') && feats.Length == 0 && rules.Length == 0)
+                {
+                    // the weasel's three steps must change the answer
+                    var slow = new Sim(rows, ink, 3, L, Wd, K, rules, B, true).Solve(120_000, g.parHi + 2, secs);
+                    if (slow.capped || slow.par == res.par) return null;
+                }
+                if (weather)
+                {
+                    // the weather must change the answer, for better or worse
+                    var dry = new Sim(rows, ink, 3, L, Wd, K).Solve(120_000, g.parHi + 2, secs);
+                    if (dry.capped || dry.par == res.par) return null;
+                }
+                else if (rules.Contains("order"))
+                {
+                    // the seals must cost at least a stroke
+                    var free = new Sim(rows, ink, 3, L, Wd, K).Solve(120_000, res.par - 1, secs);
+                    if (free.capped || free.par <= 0) return null;
+                }
+                else if (feats.Length > 0)
+                {
+                    string[] bare = rows.Select(l => l.Replace('m', '.').Replace('b', '.').Replace('w', '.')).ToArray();
+                    if (B)
+                    {
+                        if (!res.trace.Contains("BELL")) return null;
+                        var mute = new Sim(rows, ink, 3, L, Wd, K, rules).Solve(120_000, res.par, secs);
+                        if (mute.capped || mute.par > 0) return null;   // the bell must be what makes this par possible
+                    }
+                    else if (feats.Contains("+web"))
+                    {
+                        var clear = new Sim(bare, ink, 3, L, Wd, K, rules).Solve(120_000, res.par - 1, secs);
+                        if (clear.capped || clear.par <= 0) return null;   // the webs must cost at least a stroke
+                    }
+                    else
+                    {
+                        var clear = new Sim(bare, ink, 3, L, Wd, K, rules).Solve(120_000, res.par, secs);
+                        if (clear.capped || clear.par > 0) return null;   // the offering or the bridge must be what makes this par possible
+                    }
+                }
+                else if (rules.Length > 0 && !rules.Contains("write") && !rules.Contains("gate") && (!rules.Contains("nocut") || rules.Contains("shiki")) && !rules.Contains("night"))
+                {
+                    // the new rule must be what makes this par possible
+                    // for an enso board, the circle itself must matter: compare against wet ink alone
+                    var lesser = rules.Contains("shiki") ? rules.Where(x => x != "shiki").ToArray()
+                        : rules.Contains("enso") ? rules.Where(x => x != "enso" && x != "stone").ToArray() : Array.Empty<string>();
+                    var plain = new Sim(rows, ink, 3, L, Wd, K, lesser).Solve(rules.Contains("enso") ? 25_000 : 120_000, res.par, secs);
+                    if (plain.capped || plain.par > 0) return null;
+                }
+                score = Score(res, rows);
+            }
+            var lv = new LevelOut { chapter = g.chapter, seg = g.seg, name = kanjiName ?? "", rows = rows, waza = waza, rules = rules, ink = ink, par = res.par, ways = res.ways, states = res.states, trace = res.trace, score = score };
+            return lv;
+    }
+
+    // pool = true: keep every accepted board of the style chapters (10+), for the assembler to build a ladder from
+    public static void Generate(string outPath, int seed, bool pool = false, int only = -1)
+    {
+        var segs = Segs();
         var jopt = new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
         var all = File.Exists(outPath) ? JsonSerializer.Deserialize<List<LevelOut>>(File.ReadAllText(outPath)) : new List<LevelOut>();
         foreach (var g in segs)
@@ -1032,93 +1131,8 @@ static class Gen
                 attempts += 64;
                 Parallel.For(0, 64, k =>
                 {
-                    var r = new Random(baseSeed + k);
-                    var rows = Make(r, g);
-                    if (rows == null) return;
-                    string kanjiName = lastName;
-                    var waza = g.wazaSets[r.Next(g.wazaSets.Length)].Split(',', StringSplitOptions.RemoveEmptyEntries);
-                    var feats = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith("+") && x != "+brush").ToArray();
-                    if (feats.Contains("+bell")) waza = waza.Append("bell").ToArray();
-                    var rules = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => !x.StartsWith("+"))
-                        .Select(x => x == "wind" ? "wind:" + "RLDU"[r.Next(4)] : x).ToArray();
-                    bool B = waza.Contains("bell");
-                    bool weather = rules.Any(x => x.StartsWith("wind") || x == "rain" || x == "snow");
-                    int ink = r.Next(g.inkLo, g.inkHi + 1);
-                    bool garden = rules.Contains("garden");
-                    if (garden) ink = rows.Sum(l => l.Count(ch => ch == '.' || ch == 'i' || ch == 'H')) - 1;
-                    bool L = waza.Contains("leap"), Wd = waza.Contains("ward"), K = waza.Contains("katsu");
-                    var sim = new Sim(rows, ink, 3, L, Wd, K, rules, B);
-                    Result res;
-                    double score;
-                    if (rules.Contains("koan") || garden)
-                    {
-                        // keep boards with very few answers that need nearly all the ink
-                        res = sim.SolveKoan(3_000_000);
-                        if (res.par != 1 || res.ways > (garden ? 6 : 4)) return;
-                        int used = res.trace.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
-                        if (!garden && used < ink - 1) return;
-                        score = ink * 10 - res.ways;
-                    }
-                    else
-                    {
-                        if (sim.Danger(sim.start, sim.start.hx, sim.start.hy)) return;
-                        if (g.rules.Contains("+brush")) sim.Beam = 1200;
-                        res = sim.Solve(rules.Contains("enso") ? 25_000 : 120_000, g.parHi, sim.Beam > 0 ? 40 : 10);
-                        if (rules.Contains("stone") && res.par > 0 && !res.trace.Split('/').Any(x => x.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).Length > 4)) return;   // must spend banked ink
-                        if (res.par < g.parLo || res.par > g.parHi) return;
-                        if (rules.Contains("shiki") && !res.trace.Contains("shiki")) return;   // a familiar must actually be set
-                        if (B && !res.trace.Contains("BELL")) return;   // a bell that is never rung is not a bell stage
-                        if (g.palette.Contains('K') && feats.Length == 0 && rules.Length == 0)
-                        {
-                            // the weasel's three steps must change the answer
-                            var slow = new Sim(rows, ink, 3, L, Wd, K, rules, B, true).Solve(120_000, g.parHi + 2, 10);
-                            if (slow.capped || slow.par == res.par) return;
-                        }
-                        if (weather)
-                        {
-                            // the weather must change the answer, for better or worse
-                            var dry = new Sim(rows, ink, 3, L, Wd, K).Solve(120_000, g.parHi + 2, 10);
-                            if (dry.capped || dry.par == res.par) return;
-                        }
-                        else if (rules.Contains("order"))
-                        {
-                            // the seals must cost at least a stroke
-                            var free = new Sim(rows, ink, 3, L, Wd, K).Solve(120_000, res.par - 1, 10);
-                            if (free.capped || free.par <= 0) return;
-                        }
-                        else if (feats.Length > 0)
-                        {
-                            string[] bare = rows.Select(l => l.Replace('m', '.').Replace('b', '.').Replace('w', '.')).ToArray();
-                            if (B)
-                            {
-                                if (!res.trace.Contains("BELL")) return;
-                                var mute = new Sim(rows, ink, 3, L, Wd, K, rules).Solve(120_000, res.par, 10);
-                                if (mute.capped || mute.par > 0) return;   // the bell must be what makes this par possible
-                            }
-                            else if (feats.Contains("+web"))
-                            {
-                                var clear = new Sim(bare, ink, 3, L, Wd, K, rules).Solve(120_000, res.par - 1, 10);
-                                if (clear.capped || clear.par <= 0) return;   // the webs must cost at least a stroke
-                            }
-                            else
-                            {
-                                var clear = new Sim(bare, ink, 3, L, Wd, K, rules).Solve(120_000, res.par, 10);
-                                if (clear.capped || clear.par > 0) return;   // the offering or the bridge must be what makes this par possible
-                            }
-                        }
-                        else if (rules.Length > 0 && !rules.Contains("write") && !rules.Contains("gate") && (!rules.Contains("nocut") || rules.Contains("shiki")) && !rules.Contains("night"))
-                        {
-                            // the new rule must be what makes this par possible
-                            // for an enso board, the circle itself must matter: compare against wet ink alone
-                            var lesser = rules.Contains("shiki") ? rules.Where(x => x != "shiki").ToArray()
-                                : rules.Contains("enso") ? rules.Where(x => x != "enso" && x != "stone").ToArray() : Array.Empty<string>();
-                            var plain = new Sim(rows, ink, 3, L, Wd, K, lesser).Solve(rules.Contains("enso") ? 25_000 : 120_000, res.par, 10);
-                            if (plain.capped || plain.par > 0) return;
-                        }
-                        score = Score(res, rows);
-                    }
-                    var lv = new LevelOut { chapter = g.chapter, seg = g.seg, name = kanjiName ?? "", rows = rows, waza = waza, rules = rules, ink = ink, par = res.par, ways = res.ways, states = res.states, trace = res.trace, score = score };
-                    lock (lk) found.Add(lv);
+                    var lv = TryOne(g, baseSeed + k, 10);
+                    if (lv != null) lock (lk) found.Add(lv);
                 });
             }
             // spread the picks across the par range, hardest-looking board for each target

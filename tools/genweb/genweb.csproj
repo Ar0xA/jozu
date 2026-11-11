@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!-- The generator and solver of tools/gen, compiled to WebAssembly so the game can make a new
+       board in the browser.  dotnet publish -c Release tools/genweb  (needs: dotnet workload install wasm-tools) -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <WasmEnableThreads>false</WasmEnableThreads>
+    <NoWarn>$(NoWarn);IL2026;IL3050;CA1416</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../gen/Program.cs" />
+  </ItemGroup>
+</Project>

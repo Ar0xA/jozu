@@ -2284,3 +2284,5 @@ const RANDOM = [
 	{"rows": ["....###", "#....#H", ".......", "....###", "...####", "#i.####", "#.#####"], "waza": ["leap"], "rules": ["garden"], "ink": 25, "par": 1, "sol": "D L L U L U L L L leapD R U R D R D L L L D R R D L D"},
 	{"rows": ["##...##", "#...H##", "....###", "...####", "..#..##", "....###", "...####"], "waza": ["leap"], "rules": ["garden"], "ink": 24, "par": 1, "sol": "U L L D R D L D L leapU D L D D R D L D R R U R U R"},
 ]
+
+const RANDOM_CUTS = [43.5, 51.1, 58.5]
