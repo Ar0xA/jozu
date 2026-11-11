@@ -67,3 +67,9 @@ Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-clic
 - `tools/playtest.gd` — automated playthrough of the real screens: `godot --headless --path . -s tools/playtest.gd`
 - `tools/verify.gd` — replays every stage's stored solution: `godot --headless --path . -s tools/verify.gd`
 - `tools/solve.gd` — headless checker that proves each station solvable: `godot --headless --path . -s tools/solve.gd`
+
+## Licence
+
+Code, stage data, story text and synthesised audio: MIT (see `LICENSE`).
+The bundled paintings, typeface and shakuhachi recording keep their own terms; see `art/CREDITS.md`
+and `fonts/OFL.txt`.
