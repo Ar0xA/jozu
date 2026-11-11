@@ -13,7 +13,7 @@ onmessage = async (ev) => {
 	await ready;
 	const a = ev.data;
 	try {
-		postMessage({ id: a.id, out: api ? api.Make(a.seed, a.lo, a.hi, a.budget, a.bracket) : '' });
+		postMessage({ id: a.id, out: api ? api.Make(a.seed, a.lo, a.hi, a.budget, a.bracket, a.order || 0) : '' });
 	} catch (e) {
 		postMessage({ id: a.id, error: String(e) });
 	}

@@ -9,7 +9,7 @@ const WAIT = [
 	"A new board is being laid out and solved for you. A gentle one takes a moment.",
 	"A new board is being laid out and solved for you. This usually takes a few seconds.",
 	"A new board is being laid out and solved for you. Hard ones take longer: often ten seconds or so.",
-	"A new board is being laid out and solved for you. A master's board usually takes five to fifteen seconds.",
+	"A new board is being laid out and solved for you. A master's board takes longest: often ten to twenty seconds.",
 ]
 var br = 0
 var job = 0
@@ -31,7 +31,7 @@ func setup():
 	var lo = 0.0 if br == 0 else cuts[br - 1]
 	var hi = 999.0 if br == 3 else cuts[br]
 	job = int(JavaScriptBridge.eval("window.jozuGen.n += 1; window.jozuGen.n", true))
-	JavaScriptBridge.eval("window.jozuGen.w.forEach(function(w, k) { w.postMessage({id: %d, seed: %d + k * 7919, lo: %f, hi: %f, budget: %d, bracket: %d}); })" % [job, randi() % 2000000000, lo, hi, BUDGETS[br], br], true)
+	JavaScriptBridge.eval("window.jozuGen.w.forEach(function(w, k) { w.postMessage({id: %d, seed: %d + k * 7919, lo: %f, hi: %f, budget: %d, bracket: %d, order: %d}); })" % [job, randi() % 2000000000, lo, hi, BUDGETS[br], br, randi() % 2000000000], true)
 
 func _stop():
 	# a generator still at work is let go, so the next request does not queue behind it
