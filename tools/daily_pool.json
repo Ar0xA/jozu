@@ -3697,7 +3697,8 @@
   "ways": 4,
   "states": 26951,
   "score": 86,
-  "trace": "U L U R R R U U L"
+  "trace": "U L U R R R U U L",
+  "trace0": "R U leapL U R R R U U"
  },
  {
   "chapter": 10,
@@ -4957,7 +4958,8 @@
   "ways": 2,
   "states": 121051,
   "score": 118,
-  "trace": "L U U R R R U U U R R D"
+  "trace": "L U U R R R U U U R R D",
+  "trace0": "R U U L L KATSU U R U U R R"
  },
  {
   "chapter": 10,
@@ -12315,7 +12317,8 @@
   "ways": 2,
   "states": 87425,
   "score": 118,
-  "trace": "U R R R R U U U R U U L"
+  "trace": "U R R R R U U U R U U L",
+  "trace0": "R U R R R U U U R KATSU U U"
  },
  {
   "chapter": 10,
@@ -13259,7 +13262,8 @@
   "ways": 2,
   "states": 146818,
   "score": 118,
-  "trace": "U L D D L L U L L L U R"
+  "trace": "U L D D L L U L L L U R",
+  "trace0": "L L D L L L U L L KATSU U U"
  },
  {
   "chapter": 10,

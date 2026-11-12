@@ -308,14 +308,18 @@
    "#.....#",
    "....kc."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 5,
+  "par": 4,
   "ways": 329,
   "states": 3063,
   "score": 52,
-  "trace": "R R R R / D D R U / U R U L / L L L L / L U U U"
+  "trace": "U U U U / R R R R / R R D D / D D leapD L",
+  "par0": 5,
+  "trace0": "R R R R / D D R U / U R U L / L L L L / L U U U"
  },
  {
   "chapter": 2,
@@ -376,14 +380,18 @@
    ".....c.",
    "...H..."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 5,
+  "par": 4,
   "ways": 38,
   "states": 44330,
   "score": 54.714597781137755,
-  "trace": "R R U / R U U L / D D L L / L L U U / R U U U"
+  "trace": "R R U / R U U L / L leapL U U / L L U",
+  "trace0": "R R R wardU / U U U L / D D L L / L L U U / R U U U",
+  "par0": 5
  },
  {
   "chapter": 2,
@@ -429,7 +437,8 @@
   "ways": 3,
   "states": 53756,
   "score": 48.5,
-  "trace": "L U L U / L L U U / U R R R / D D D D"
+  "trace": "L U L U / L L U U / U R R R / D D D D",
+  "trace0": "L U L U / L L U U / leapR U U U / D D D D"
  },
  {
   "chapter": 3,
@@ -634,14 +643,18 @@
    ".o.~~..",
    "..c..H."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 6,
+  "par": 5,
   "ways": 452,
   "states": 13520,
   "score": 62.5,
-  "trace": " / L L L L / R U L L / L U U U / U R R R / D R R R"
+  "trace": "L L L / U U L / L U U R / L U leapR R / R R R",
+  "par0": 6,
+  "trace0": " / L L L L / R U L L / L U U U / U R R R / D R R R"
  },
  {
   "chapter": 4,
@@ -726,14 +739,18 @@
    "#.....#",
    "....H.."
   ],
-  "waza": [],
+  "waza": [
+   "katsu"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 5,
+  "par": 4,
   "ways": 526,
   "states": 16988,
   "score": 52.5,
-  "trace": "R U L L / L L U L / R R R R / L U U U / R R D D"
+  "trace": "L L L U / U KATSU R R / L U U U / R R D D",
+  "trace0": "R leapL L / L U U L / R R R R / L U U U / R R D D",
+  "par0": 5
  },
  {
   "chapter": 5,
@@ -748,14 +765,18 @@
    "#......",
    "...H..."
   ],
-  "waza": [],
+  "waza": [
+   "ward"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 5,
+  "par": 4,
   "ways": 96,
   "states": 31375,
   "score": 53.90008715781287,
-  "trace": " / R U U R / U L D D / L L L U / L U R R"
+  "trace": "R R U U / U U R D / L L U wardL / L L L L",
+  "par0": 5,
+  "trace0": " / R U U R / U L D D / L L L U / L U R R"
  },
  {
   "chapter": 5,
@@ -777,7 +798,8 @@
   "ways": 9,
   "states": 40880,
   "score": 47.67807190511264,
-  "trace": "U U L L / U R U R / D R R R / R U U"
+  "trace": "U U L L / U R U R / D R R R / R U U",
+  "trace0": "L leapU L L / U R U R / D R R R / R U U"
  },
  {
   "chapter": 5,
@@ -860,14 +882,18 @@
    "...#...",
    "...H..."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 5,
+  "par": 3,
   "ways": 12,
   "states": 33755,
   "score": 57.29956028185891,
-  "trace": "R U U R / R U U U / L D / D D L / L U U U"
+  "trace": "R U U / D D L L / U U U leapR",
+  "par0": 5,
+  "trace0": "R U U R / R U U U / L D / D D L / L U U U"
  },
  {
   "chapter": 5,
@@ -882,14 +908,18 @@
    ".#...#.",
    "......."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 6,
+  "par": 3,
   "ways": 620,
   "states": 16892,
   "score": 62.5,
-  "trace": " / U U R D / D D D / L L L L / L L U U / R U U U"
+  "trace": "R / U U L D / leapL L U U",
+  "par0": 6,
+  "trace0": " / U U R D / D D D / L L L L / L L U U / R U U U"
  },
  {
   "chapter": 6,
@@ -928,14 +958,18 @@
    ".......",
    "......."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 5,
+  "par": 4,
   "ways": 51,
   "states": 6824,
   "score": 54.79956028185891,
-  "trace": "U U R R / R R / R R / L L L / R U U L"
+  "trace": "U U R R / R R / R R leapL L / R U U L",
+  "par0": 5,
+  "trace0": "U U R R / R R / R R / L L L / R U U L"
  },
  {
   "chapter": 6,
@@ -1003,7 +1037,8 @@
   "ways": 1146,
   "states": 37435,
   "score": 62.5,
-  "trace": "R U L U / L L U U / D L D D / U U L D / R D D R / R R U U"
+  "trace": "R U L U / L L U U / D L D D / U U L D / R D D R / R R U U",
+  "trace0": " / L U U R / U U L L / L L R U / R U KATSU L / L L L U"
  },
  {
   "chapter": 6,
@@ -1018,14 +1053,18 @@
    ".......",
    ".....H."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 6,
+  "par": 5,
   "ways": 263,
   "states": 22669,
   "score": 63,
-  "trace": "L L L U / U U R R / R R U L / L U U R / R R D R / D D R R"
+  "trace": "L U U U / U U R / leapU U U R / L L U / L L L L",
+  "trace0": "L L / U U U L / U R R U / L U U KATSU / R R D R / D D R R",
+  "par0": 6
  },
  {
   "chapter": 6,
@@ -1071,7 +1110,8 @@
   "ways": 26,
   "states": 15701,
   "score": 66.74511249783653,
-  "trace": "U U L / R R / R R U L / R U R R / L L L L / R U L L"
+  "trace": "U U L / R R / R R U L / R U R R / L L L L / R U L L",
+  "trace0": "R U R L / U U R R / L U U U / L L L D / R D R U / D leapR R D"
  },
  {
   "chapter": 6,
@@ -1110,14 +1150,18 @@
    "..#.#..",
    "...H..."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 6,
+  "par": 5,
   "ways": 190,
   "states": 39526,
   "score": 62.92257117196425,
-  "trace": "U U U / R U R / U L L L / L L U U / L L D D / U L L L"
+  "trace": "U U U / L L U L / U R leapU U / D D D D / D D D D",
+  "trace0": "R R U U / U L U U / L L D D / D D / D D U KATSU / D D U U",
+  "par0": 6
  },
  {
   "chapter": 7,
@@ -1180,14 +1224,18 @@
    ".y.f...",
    "...H..."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 6,
+  "par": 4,
   "ways": 659,
   "states": 29358,
   "score": 62,
-  "trace": "R R / R U U U / L L L L / R D L L / L L L U / U U R R"
+  "trace": "L L U R / R R U U / R R R R / R leapU L L",
+  "trace0": "R / R U U U / R R KATSU L / R D L L / L L L U / U U R R",
+  "par0": 6
  },
  {
   "chapter": 7,
@@ -1202,14 +1250,18 @@
    ".......",
    "...H..."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 7,
+  "par": 6,
   "ways": 691,
   "states": 31573,
   "score": 73,
-  "trace": "R U U / U R R U / U U L L / L L L L / D R U U / U R U / R R R D"
+  "trace": "R U U / U R R U / U U L L / L L L L / D R U U / U R leapR R",
+  "trace0": "R R / R U U U / L L D D / D L L L / U L L KATSU / U U R U / R R R D",
+  "par0": 7
  },
  {
   "chapter": 7,
@@ -1434,14 +1486,18 @@
    ".#...#.",
    "...H..."
   ],
-  "waza": [],
+  "waza": [
+   "ward"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 7,
+  "par": 6,
   "ways": 598,
   "states": 11519,
   "score": 73,
-  "trace": " / R U U L / U U R U / R R D L / L U / U L L D / L U U L"
+  "trace": " / R U U L / U U R U / R R D L / L U U wardL / L L L L",
+  "trace0": " / R U L / U U U / U R R KATSU / L U / U L L D / L U U L",
+  "par0": 7
  },
  {
   "chapter": 8,
@@ -1463,7 +1519,8 @@
   "ways": 188,
   "states": 56462,
   "score": 73.43775757577893,
-  "trace": "L L L / U U U R / U U R U / D D R D / D D R R / U U U U / R U U"
+  "trace": "L L L / U U U R / U U R U / D D R D / D D R R / U U U U / R U U",
+  "trace0": "R U L L / U L L KATSU / U U R U / D D R D / D D R R / U U U U / R U U"
  },
  {
   "chapter": 9,
@@ -1526,14 +1583,18 @@
    "i.....O",
    "H......"
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 7,
+  "par": 6,
   "ways": 1121,
   "states": 36378,
   "score": 74,
-  "trace": " / R U U U / U U R / R U U U / R D L R / L L L L / R D D D"
+  "trace": " / R U U U / U U leapU R / R R R R / L R U / D D D",
+  "par0": 7,
+  "trace0": " / R U U U / U U R / R U U U / R D L R / L L L L / R D D D"
  },
  {
   "chapter": 9,
@@ -1577,7 +1638,8 @@
   "ways": 951,
   "states": 39966,
   "score": 62,
-  "trace": "L L D / R U U U / U U U D / U U U U / R U U U / L L U R"
+  "trace": "L L D / R U U U / U U U D / U U U U / R U U U / L L U R",
+  "trace0": "R D L / L L U R / U R U U / U L U L / R D L KATSU / L U R"
  },
  {
   "chapter": 8,
@@ -1719,7 +1781,8 @@
   "ways": 799,
   "states": 108694,
   "score": 73.5,
-  "trace": "R U R L / R R R R / D D U D / U U L U / U U L L / U L L L / D D D"
+  "trace": "R U R L / R R R R / D D U D / U U L U / U U L L / U L L L / D D D",
+  "trace0": " / R R U R / L U U L / U R R U / L U U L / U leapL L L / D D D"
  },
  {
   "chapter": 9,
@@ -1741,7 +1804,8 @@
   "ways": 69,
   "states": 50472,
   "score": 74.87071698305503,
-  "trace": "L L L L / D U U D / U R U U / U U U U / U R R D / U L L D / U L L L"
+  "trace": "L L L L / D U U D / U R U U / U U U U / U R R D / U L L D / U L L L",
+  "trace0": "L L L / L D U KATSU / U U R R / R U U U / U R R D / U L L D / U L L L"
  },
  {
   "chapter": 9,
@@ -1756,14 +1820,18 @@
    ".......",
    "...H..."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [],
   "ink": 4,
-  "par": 7,
+  "par": 6,
   "ways": 229,
   "states": 46409,
   "score": 73.15450994905562,
-  "trace": "L U U U / L U U U / R R R R / L L L / D D D D / R R D R / R U U U"
+  "trace": "L U U U / L U L U / R R U L / R R R R / D D D leapD / R U U U",
+  "trace0": "R / R R U U / KATSU L L / L L U U / L U U U / R R R / R D D D",
+  "par0": 7
  },
  {
   "chapter": 9,
@@ -1833,7 +1901,8 @@
   "ways": 6,
   "states": 40982,
   "score": 47.692645077942394,
-  "trace": "R R R U / U L L L / D D L U / U U R D"
+  "trace": "R R R U / U L L L / D D L U / U U R D",
+  "trace0": "R R R / U L U leapL / D D L U / U U R D"
  },
  {
   "chapter": 10,
@@ -2950,16 +3019,20 @@
    "u..#...",
    "...H..."
   ],
-  "waza": [],
+  "waza": [
+   "leap"
+  ],
   "rules": [
    "gate"
   ],
   "ink": 4,
-  "par": 4,
+  "par": 2,
   "ways": 5,
   "states": 3498,
   "score": 47.915037499278846,
-  "trace": "L L L U / U U U / R R U U / L L L L"
+  "trace": "L L U U / L U U leapU",
+  "par0": 4,
+  "trace0": "L L L U / U U U / R R U U / L L L L"
  },
  {
   "chapter": 12,

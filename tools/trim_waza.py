@@ -62,6 +62,9 @@ while todo:
         if r['par'] > 0 and r['trace'] != 'CAPPED' and r['par'] <= b['par'] and id(b) not in moved:
             # not needed: take it away, and what is left must be shown needed afresh
             b['waza'] = [x for x in b['waza'] if x != w]
+            # the board keeps its place on the road: build_levels.py ranks it by what it had
+            b.setdefault('par0', b['par'])
+            b.setdefault('trace0', b['trace'])
             b['par'], b['trace'] = r['par'], r['trace']
             tested[id(b)] = set()
             moved.add(id(b))

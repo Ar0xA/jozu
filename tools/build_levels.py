@@ -30,6 +30,14 @@ STYLE_FROM = 10      # chapters from here on are single-style ladders
 def n_yokai(g):
     return sum(ch in YOKAI for r in g['rows'] for ch in r)
 
+# A board keeps its place on the road when its techniques are changed afterwards (trim_waza.py,
+# grant_waza.py): it is ranked and told apart by the count and answer it was first given.
+def rank_par(g):
+    return g.get('par0', g['par'])
+
+def rank_trace(g):
+    return g.get('trace0', g['trace'])
+
 def difficulty(g):
     """How hard a board is to master. Strokes needed count most; then how much there is to search
     (more dead ends), how few optimal answers exist, and how crowded the board is."""
@@ -37,17 +45,17 @@ def difficulty(g):
     search = math.log2(g.get('states', 1) + 1)
     if 'koan' in rules or 'garden' in rules:
         return (g.get('ink') or 4) * 2 + search * 3 + n_yokai(g) - min(g.get('ways', 1), 6)
-    return g['par'] * 10 + search * 1.2 - math.log2(g.get('ways', 1) + 1) * 1.5 + n_yokai(g) * 0.5
+    return rank_par(g) * 10 + search * 1.2 - math.log2(g.get('ways', 1) + 1) * 1.5 + n_yokai(g) * 0.5
 
 def ladder(c):
     """Every distinct board found for a style chapter, as an evenly rising run of difficulty."""
     seen_rows, seen_sol, out = set(), set(), []
     for g in sorted([x for x in gen + pool if x['chapter'] == c], key=difficulty):
         k = ''.join(g['rows'])
-        if k in seen_rows or g['trace'] in seen_sol:
+        if k in seen_rows or rank_trace(g) in seen_sol:
             continue   # the same board, or a different board with the very same answer
         seen_rows.add(k)
-        seen_sol.add(g['trace'])
+        seen_sol.add(rank_trace(g))
         out.append(g)
     SPARE[c] = list(out)
     if len(out) > MAX_PER_STYLE:
@@ -671,7 +679,7 @@ for c in ORDER:
         if g['chapter'] == c:
             pools.setdefault(g['seg'], []).append(g)
     for k in pools:
-        pools[k].sort(key=lambda g: (g['par'], g.get('ink', 4), g['score']))
+        pools[k].sort(key=lambda g: (rank_par(g), g.get('ink', 4), g['score']))
     names = list(NAMES.get(c, []))
     started = set()
     rungs = ladder(c) if c >= STYLE_FROM else []
@@ -687,7 +695,7 @@ for c in ORDER:
         for ch in '上手':
             last = [g for g in gen + pool if (g.get('name') or '').startswith(ch + '|')]
             if last:
-                rungs.append(max(last, key=lambda g: g['par']))
+                rungs.append(max(last, key=rank_par))
     slots = ['L%d' % k for k in range(len(rungs))] if c >= STYLE_FROM else LAYOUT[c]
     for slot in slots:
         if slot[0] == 'H':

@@ -139,7 +139,8 @@
   "ways": 324,
   "states": 181,
   "score": 51.5,
-  "trace": "U U U / U U R / R U R D / L L L / L L L U"
+  "trace": "U U U / U U R / R U R D / L L L / L L L U",
+  "trace0": "R U L / U U R leapU / R U R D / L L L / L L L U"
  },
  {
   "chapter": 0,
@@ -159,7 +160,8 @@
   "ways": 576,
   "states": 2243,
   "score": 51.5,
-  "trace": "U U U / U U U / R R R U / L D L L / L L L U"
+  "trace": "U U U / U U U / R R R U / L D L L / L L L U",
+  "trace0": "R R U L / U U U U / R R leapU U / L D L L / L L L U"
  },
  {
   "chapter": 0,
@@ -221,7 +223,8 @@
   "ways": 18456,
   "states": 1337989,
   "score": 41.5,
-  "trace": "R R R U / U L L L / U U L U / U U L L"
+  "trace": "R R R U / U L L L / U U L U / U U L L",
+  "trace0": "R / R leapU L L / L L L U / U U U R"
  },
  {
   "chapter": 0,
@@ -266,7 +269,8 @@
   "ways": 21,
   "states": 38525,
   "score": 35.040568381362704,
-  "trace": "U U leapU / U U R / U U L L"
+  "trace": "U U leapU / U U R / U U L L",
+  "trace0": "R U L U / leapU U L wardR / U U R R"
  },
  {
   "chapter": 0,
@@ -286,7 +290,8 @@
   "ways": 1960,
   "states": 418867,
   "score": 52,
-  "trace": "R R R U / U U U U / L L D / D L L L / L U U U"
+  "trace": "R R R U / U U U U / L L D / D L L L / L U U U",
+  "trace0": " / R R R U / U U U leapL / D L L L / L U U U"
  },
  {
   "chapter": 0,
@@ -352,7 +357,8 @@
   "ways": 37492,
   "states": 165720,
   "score": 41.5,
-  "trace": " / D D R U / L U R / U U L"
+  "trace": " / D D R U / L U R / U U L",
+  "trace0": " /  / wardR D R U / U R leapL U"
  },
  {
   "chapter": 0,
@@ -444,7 +450,8 @@
   "ways": 378,
   "states": 237706,
   "score": 31.5,
-  "trace": "R U R R / L L U L / D D R U"
+  "trace": "R U R R / L L U L / D D R U",
+  "trace0": "R R / U U U leapL / D D R U"
  },
  {
   "chapter": 0,
@@ -464,7 +471,8 @@
   "ways": 130,
   "states": 7108,
   "score": 21.96657699846255,
-  "trace": "R U L U / R U L L"
+  "trace": "R U L U / R U L L",
+  "trace0": "R wardR U U / leapL U R R"
  },
  {
   "chapter": 0,
@@ -484,7 +492,8 @@
   "ways": 518,
   "states": 88169,
   "score": 31.5,
-  "trace": "U U R D / U L L / R D D"
+  "trace": "U U R D / U L L / R D D",
+  "trace0": " / U U L L / R D D leapR"
  },
  {
   "chapter": 0,
@@ -504,7 +513,8 @@
   "ways": 80,
   "states": 7535,
   "score": 23.160149997115376,
-  "trace": "U R R R / L L L L"
+  "trace": "U R R R / L L L L",
+  "trace0": "leapR U wardL R / L L L L"
  },
  {
   "chapter": 0,
@@ -526,7 +536,8 @@
   "ways": 24,
   "states": 53706,
   "score": 35.35614381022528,
-  "trace": "U U U / R R U L / L L leapU R"
+  "trace": "U U U / R R U L / L L leapU R",
+  "trace0": "wardR U U U / R R U L / L L leapU R"
  },
  {
   "chapter": 0,
@@ -594,7 +605,8 @@
   "ways": 977,
   "states": 1741913,
   "score": 42.5,
-  "trace": "U U R / R R U L / U U U U / L L L L"
+  "trace": "U U R / R R U L / U U U U / L L L L",
+  "trace0": "R R wardR leapU / R R L U / U U U U / L L L L"
  },
  {
   "chapter": 0,
@@ -614,7 +626,8 @@
   "ways": 624,
   "states": 120908,
   "score": 31.5,
-  "trace": "R U U U / U U U U / L L L"
+  "trace": "R U U U / U U U U / L L L",
+  "trace0": "R wardR U leapU / U U U U / L L L"
  },
  {
   "chapter": 0,
