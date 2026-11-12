@@ -249,7 +249,7 @@ func _unhandled_input(ev):
 
 # A board piece: a figure lifted from an old painting (see art/CREDITS.md).
 # On the board it stands on its tile and may rise above it; flat = centred, for the legend.
-const PIECE_SCALE = {"hero": 1.3, "oni": 1.3, "oni3": 1.25, "tengu": 1.3, "kitsune": 1.12, "yurei": 1.2, "tamamo": 1.3, "chochin": 0.95,
+const PIECE_SCALE = {"hero": 1.62, "oni": 1.3, "oni3": 1.25, "tengu": 1.3, "kitsune": 1.12, "yurei": 1.2, "tamamo": 1.3, "chochin": 0.95,
 	"kasa": 1.25, "kappa": 1.0, "nurikabe": 1.1, "yukionna": 1.3, "gasha": 1.15,
 	"daruma": 1.05, "tanuki": 1.05, "shinigami": 1.25, "kamaitachi": 1.3}
 
