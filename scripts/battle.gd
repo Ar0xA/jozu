@@ -147,7 +147,7 @@ func _brief(first):
 	# what is here: yokai, rules, ground and techniques
 	var here = []
 	for k in kinds:
-		here.append(["y:" + k, "%s %s: %s" % [Data.LEGEND[k][0], Data.LEGEND[k][1], Data.LEGEND[k][2]]])
+		here.append(["y:" + k, "%s %s: %s  To fell it: %s" % [Data.LEGEND[k][0], Data.LEGEND[k][1], Data.LEGEND[k][2], Data.LEGEND[k][3]]])
 	var ground = "".join(lv.rows)
 	for r in rules:
 		var key = "wind" if r.begins_with("wind") else r
@@ -971,6 +971,12 @@ func _draw():
 			Ink.text(self, f, Vector2(52, 714), "手本  " + main.touch_words(guide_msg), 24, Ink.SHU)
 		else:
 			Ink.text(self, f, Vector2(ORG.x, 713), "手本  " + guide_msg, 15, Ink.SHU)
+	elif not main.touch and not done and card.is_empty():
+		var over = tile_at(mouse)
+		var oi = Sim.yokai_at(s, over) if Sim.inb(s, over) else -1
+		if oi >= 0 and not Sim.hidden(s.yokai[oi]) and (lit.is_empty() or lit.has(over)):
+			var L = Data.LEGEND[s.yokai[oi].kind]
+			Ink.text(self, f, Vector2(ORG.x, 713), "%s %s  ·  %s" % [L[0], L[1], L[3]], 15, Ink.a(Ink.AI, 0.95))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if flash > 0.0:
 		draw_rect(Rect2(0, 0, 1280, 720), Ink.a(Ink.SHU, flash * 0.35))

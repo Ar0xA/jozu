@@ -51,23 +51,24 @@ const CHAPTERS = [
 ]
 const BOSSES = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99, 387, 585]
 
+# kanji, name, what it does, and how it is felled
 const LEGEND = {
-	"chochin": ["提灯", "Chōchin", "burns the four tiles beside it."],
-	"oni": ["鬼", "Oni", "strikes if beside you, else steps closer."],
-	"tengu": ["天狗", "Tengu", "its wind strikes along its row and column."],
-	"kitsune": ["狐", "Kitsune", "walks in your footsteps, step for step."],
-	"yurei": ["幽霊", "Yūrei", "drifts through stone and water toward you."],
-	"tamamo": ["玉藻前", "Tamamo", "copies your steps; bites if beside you."],
-	"kasa": ["傘", "Kasa-obake", "hops two tiles toward you, over anything."],
-	"kappa": ["河童", "Kappa", "stays in water; swims to you, strikes the bank."],
-	"nurikabe": ["塗壁", "Nurikabe", "a wall. Harmless, but it must be broken."],
-	"yukionna": ["雪女", "Yuki-onna", "drifts through anything toward you."],
-	"gasha": ["餓者髑髏", "Gashadokuro", "strikes all eight tiles around it."],
-	"daruma": ["達磨", "Daruma", "a blow only topples it; it rises again. Strike twice."],
-	"tanuki": ["狸", "Tanuki", "a stone until you rest beside it."],
-	"hitodama": ["人魂", "Hitodama", "relights while another still burns."],
-	"shinigami": ["死神", "Shinigami", "passes through anything. One touch is death."],
-	"kamaitachi": ["鎌鼬", "Kamaitachi", "runs up to three tiles a turn toward you."],
+	"chochin": ["提灯", "Chōchin", "burns the four tiles beside it.", "One cut."],
+	"oni": ["鬼", "Oni", "strikes if beside you, else steps closer.", "Needs as much damage as it has dots. Each straight step before the cut adds 1 (to 3), so step, then cut."],
+	"tengu": ["天狗", "Tengu", "its wind strikes along its row and column.", "One cut, or two for a great one. Come at it from off its row and column, or from behind cover."],
+	"kitsune": ["狐", "Kitsune", "walks in your footsteps, step for step.", "One cut, but it steps away as you step. Pin it against a wall or the edge first."],
+	"yurei": ["幽霊", "Yūrei", "drifts through stone and water toward you.", "One cut."],
+	"tamamo": ["玉藻前", "Tamamo", "copies your steps; bites if beside you.", "Five damage. Pin her as you would a fox, then cut with a full run-up, more than once."],
+	"kasa": ["傘", "Kasa-obake", "hops two tiles toward you, over anything.", "One cut. Stand where its two-tile hop is blocked, and let it come to you."],
+	"kappa": ["河童", "Kappa", "stays in water; swims to you, strikes the bank.", "Damage equal to its dots, cut from the bank. Run straight at the water to hit harder."],
+	"nurikabe": ["塗壁", "Nurikabe", "a wall. Harmless, but it must be broken.", "Three damage: one cut after two straight steps breaks it."],
+	"yukionna": ["雪女", "Yuki-onna", "drifts through anything toward you.", "Three damage: meet her with a two-step run-up. Stone does not stop her."],
+	"gasha": ["餓者髑髏", "Gashadokuro", "strikes all eight tiles around it.", "Seven damage. Never end a stroke on any of the eight tiles around it."],
+	"daruma": ["達磨", "Daruma", "a blow only topples it; it rises again. Strike twice.", "A cut only topples it, once a stroke. Topple it in two different strokes."],
+	"tanuki": ["狸", "Tanuki", "a stone until you rest beside it.", "End a stroke beside it to unmask it; after that, one cut."],
+	"hitodama": ["人魂", "Hitodama", "relights while another still burns.", "One cut each, but all in the same stroke, or end your stroke standing where one fell."],
+	"shinigami": ["死神", "Shinigami", "passes through anything. One touch is death.", "Three damage: one cut after two straight steps. Never end a stroke beside it."],
+	"kamaitachi": ["鎌鼬", "Kamaitachi", "runs up to three tiles a turn toward you.", "One cut. End your strokes more than three steps away, or behind stone or water."],
 }
 
 const UPGRADES = [
