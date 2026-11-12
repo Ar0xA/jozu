@@ -100,6 +100,14 @@ class Mix:
             k = int(d * SR)
             a[k:] += a[:-k] * g
         a = a / max(1e-9, np.abs(a).max()) * peak
+        if len(a) > 20 * SR:
+            # music: Ogg Vorbis, about a seventh the size of the same thing as a WAV
+            import soundfile as sf
+            with sf.SoundFile(os.path.join(OUT, name + '.ogg'), 'w', samplerate=SR, channels=1, format='OGG', subtype='VORBIS') as f:
+                for i in range(0, len(a), SR):   # a second at a time: libsndfile can fail on one very long write
+                    f.write(a[i:i + SR].astype('float32'))
+            print('%-10s %5.1fs' % (name, len(a) / SR))
+            return
         with wave.open(os.path.join(OUT, name + '.wav'), 'wb') as w:
             w.setnchannels(1)
             w.setsampwidth(2)

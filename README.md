@@ -112,7 +112,7 @@ Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-clic
 - `tools/build_web.sh` — builds the web version into `build/web` (re-trims the font first); `tools/publish_pages.sh` pushes it to GitHub Pages
 - `tools/web_shell.html` — the web build's loading page (paper, the name, a brush stroke for progress); `art/splash.png` and `art/icon.png` are the splash and the icon
 - `tools/subset_font.py` — trims the typeface to the characters the game uses (the full font is in `fonts/src/`)
-- `tools/make_audio.py` — regenerates the synthesised music and sound effects (needs numpy)
+- `tools/make_audio.py` — regenerates the synthesised music (Ogg Vorbis) and sound effects (needs numpy and soundfile)
 - `tools/gen/` — level generator and exact solver (.NET 8). `python tools/build_levels.py` assembles the stations from
   `tools/story_stages.json` (hand-written stages), `hand_solved.json` (their solutions), `generated.json`, `pool.json`
   and `daily_pool.json` (generated boards)

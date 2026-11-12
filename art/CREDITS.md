@@ -33,5 +33,5 @@ Each figure was cropped from the painting and its paper made transparent.
 
 - `story.ogg` - *Shika no Tone* (Distant Cry of the Deer), shakuhachi honkyoku played by Araki Kodo III,
   Victor 13029, recorded between 1925 and 1937. Public domain. Restored version from Wikimedia Commons.
-- `title.wav` - *Sakura Sakura*, traditional melody (public domain), arranged and synthesised for this game.
+- `title.ogg` - *Sakura Sakura*, traditional melody (public domain), arranged and synthesised for this game.
 - All other music (`battle`, `boss`, `boss2`, `road2`, `road3`, `zen`) and every sound effect - original, synthesised by `tools/make_audio.py`.

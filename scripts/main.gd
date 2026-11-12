@@ -116,9 +116,10 @@ func _setup_audio():
 		var p = AudioStreamPlayer.new()
 		add_child(p)
 		sfx_pool.append(p)
-	for nm in ["title", "battle", "boss", "road2", "road3", "boss2", "zen", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2", "brush"]:
+	for nm in ["title", "battle", "boss", "road2", "road3", "boss2", "zen", "story"]:
+		streams[nm] = load("res://audio/%s.ogg" % nm)
+	for nm in ["step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2", "brush"]:
 		streams[nm] = load("res://audio/%s.wav" % nm)
-	streams["story"] = load("res://audio/story.ogg")
 	AudioServer.set_bus_mute(0, not data.sound)
 	apply_opts()
 
