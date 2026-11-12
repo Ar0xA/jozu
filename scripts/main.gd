@@ -381,6 +381,7 @@ func fresh():
 		"henro": {"at": 0, "staffs": 3, "best": 0, "done": 0}, "mine": "", "sound": true, "opts": OPTS.duplicate(), "days": {}, "tries": {}, "rand": {}, "met": {}, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
 
 func load_save():
+	_front = -1
 	data = fresh()
 	if FileAccess.file_exists(save_path):
 		var txt = FileAccess.get_file_as_string(save_path)
@@ -434,6 +435,8 @@ func write_save():
 func erase_save():
 	var snd = data.get("sound", true)
 	var opts = data.get("opts", OPTS.duplicate())
+	_front = -1
+	gate_told = -1
 	data = fresh()
 	data.sound = snd
 	data.opts = opts
@@ -442,10 +445,62 @@ func erase_save():
 func grade_of(i):
 	return data.cleared.get(str(i), "")
 
+# The gate. The last station of a chapter opens only when two-thirds of the stations before it in
+# that chapter are mastered (上手). Any other station opens when the one before it is passed.
+var _front = -1     # the furthest station the road has reached; -1 = to be worked out again
+var gate_told = -1  # the chapter whose gate has already been explained on the map
+
+func chapter_of(i):
+	var c = 0
+	for k in range(Data.CHAPTERS.size()):
+		if Data.CHAPTERS[k].from <= i:
+			c = k
+	return c
+
+# [first station, last station, mastered among those before the last, how many the last asks for]
+func gate_of(c):
+	var a = Data.CHAPTERS[c].from
+	var z = (Data.CHAPTERS[c + 1].from if c + 1 < Data.CHAPTERS.size() else Data.LEVELS.size()) - 1
+	var got = 0
+	for i in range(a, z):
+		if grade_of(i) == "jouzu":
+			got += 1
+	return [a, z, got, int(ceil((z - a) * 2.0 / 3.0))]
+
+func frontier():
+	if _front < 0:
+		_front = 0
+		for c in range(Data.CHAPTERS.size()):
+			var g = gate_of(c)
+			for i in range(g[0], g[1] + 1):
+				if i == g[1] and g[2] < g[3]:
+					return _front   # the gate is shut
+				_front = i
+				if grade_of(i) == "":
+					return _front
+	return _front
+
 func unlocked(i):
-	return i == 0 or grade_of(i - 1) != ""
+	return i <= frontier() or grade_of(i) != ""
+
+# The chapter whose gate is holding the road, or -1: every station before its last is passed, and
+# too few of them are mastered.
+func held_chapter():
+	var f = frontier()
+	if grade_of(f) == "" or f + 1 >= Data.LEVELS.size():
+		return -1
+	return chapter_of(f)
+
+func gate_words():
+	var c = held_chapter()
+	if c < 0:
+		return ""
+	var g = gate_of(c)
+	var more = g[3] - g[2]
+	return "The last station of a chapter opens when two-thirds of the chapter is mastered (上手: within the stroke count, unharmed). Here %d of %d are mastered and %d are asked for: master %d more and the road opens. A station passed but not mastered shows an empty ring." % [g[2], g[1] - g[0], g[3], more]
 
 func record(i, grade, paths = null, seal_mask = 0):
+	_front = -1
 	var better = grade_of(i) != "jouzu"
 	if better:
 		data.cleared[str(i)] = grade

@@ -1254,6 +1254,8 @@ func _result(f):
 			why = "%d strokes, %d blow%s taken." % [s.turn, s.hits, "" if s.hits == 1 else "s"]
 		Ink.text(self, f, Vector2(150, 402), "Passed. " + why, 17, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
 		Ink.text(self, f, Vector2(150, 422), "上手 needs %d strokes and no blows." % lv.par, 14, Ink.a(Ink.SUMI, 0.7), HORIZONTAL_ALIGNMENT_CENTER, 400)
+		if custom == null and main.held_chapter() == main.chapter_of(idx):
+			Ink.text(self, f, Vector2(150, 446), "関 The chapter's last station asks for more mastery.", 15, Ink.SHU, HORIZONTAL_ALIGNMENT_CENTER, 400)
 	else:
 		Ink.text(self, f, Vector2(150, 320), "無念", 84, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
 		var why = "The ink runs. Nothing is lost but a stroke."

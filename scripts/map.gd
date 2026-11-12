@@ -11,6 +11,8 @@ var hover_st = -1
 var pan = -1.0
 var page = 0
 var tally = {}
+var gate = []         # this page's gate: [first, last, mastered, asked for]
+var notice = ""       # the gate, explained: laid over the page until it is sent away
 var tabs = []
 var nav = []          # the buttons of the road page itself (hidden while chapters are being chosen)
 var picking = false   # phone: the page of chapters is open
@@ -23,6 +25,9 @@ func setup():
 		if main.grade_of(i) != "":
 			done += 1
 	tally = {"done": done, "rank": main.rank(), "seals": main.seal_count(), "points": main.points()}
+	if main.held_chapter() >= 0 and main.gate_told != main.held_chapter():
+		main.gate_told = main.held_chapter()   # said once when the road first stops; after that, on asking
+		notice = main.gate_words()
 	var phone = main.touch
 	if phone:
 		band = Rect2(40, 150, 1200, 236)
@@ -59,11 +64,7 @@ func _next_open():
 	return Data.LEVELS.size() - 1
 
 func _chapter_of(i):
-	var c = 0
-	for k in range(Data.CHAPTERS.size()):
-		if Data.CHAPTERS[k].from <= i:
-			c = k
-	return c
+	return main.chapter_of(i)
 
 func _range(c):
 	var a = Data.CHAPTERS[c].from
@@ -144,8 +145,23 @@ func on_click(pos, button):
 	on_motion(pos, false)
 	if hover_st >= 0 and main.unlocked(hover_st):
 		main.start_stage(hover_st)
+	elif hover_st >= 0 and _gated(hover_st):
+		notice = main.gate_words()
+
+# is this the station the gate is keeping shut?
+func _gated(i):
+	return main.held_chapter() >= 0 and i == main.frontier() + 1
+
+func swallow(_pos, _button):
+	if notice == "":
+		return false
+	notice = ""
+	return true
 
 func on_key(code):
+	if notice != "":
+		notice = ""
+		return
 	if code == KEY_ESCAPE:
 		main.show_title()
 	elif code == KEY_RIGHT:
@@ -165,6 +181,7 @@ func _draw_chapters(f):
 	draw_btns()
 
 func _draw():
+	gate = main.gate_of(page)
 	var f = main.font
 	var phone = main.touch
 	if picking:
@@ -230,8 +247,11 @@ func _draw():
 		var r = ((24.0 if phone else 20.0) if small else 28.0 if phone else 26.0) + (2.5 * sin(time * 3.0) if (open and g == "") else 0.0)
 		draw_circle(p, r, Ink.PAPER)
 		Ink.enso(self, p, r, 6.0 if open else 3.5, Ink.SHU if (i == hover_st and open) else Ink.a(Ink.SUMI, 1.0 if open else 0.35), -1.9 + i)
-		if g != "" and spare:
-			draw_circle(p, r * 0.52, Ink.SHU if g == "jouzu" else Ink.AI)
+		if g == "jouzu" and spare:
+			draw_circle(p, r * 0.52, Ink.SHU)
+		elif g != "" and spare:
+			# passed, not mastered: an empty ring where the red dot would be
+			draw_arc(p, r * 0.46, 0, TAU, 28, Ink.AI, 3.0, true)
 		elif g == "jouzu":
 			Ink.seal(self, f, p, 13 if small else 17, "上手")
 		elif g != "":
@@ -247,6 +267,9 @@ func _draw():
 				draw_circle(q, 3.2, Ink.SHU)
 			elif open:
 				draw_arc(q, 3.0, 0, TAU, 10, Ink.a(Ink.SUMI, 0.35), 1.0, true)
+		if i == gate[1] and g == "" and gate[2] < gate[3]:
+			# the chapter's gate, and how far along it is
+			Ink.text(self, f, Vector2(p.x - 50, p.y - r - (28 if Data.BOSSES.has(i) else 8)), "関 %d/%d" % [gate[2], gate[3]], 15, Ink.a(Ink.SHU, 0.9), HORIZONTAL_ALIGNMENT_CENTER, 100)
 		if Data.BOSSES.has(i):
 			Ink.text(self, f, Vector2(p.x - 30, p.y - r - 8), "主", 16, Ink.a(Ink.SHU, 1.0 if open else 0.4), HORIZONTAL_ALIGNMENT_CENTER, 60)
 
@@ -254,13 +277,15 @@ func _draw():
 	var show = _focus()
 	var lv = Data.LEVELS[show]
 	var sub = "The road is not yet open."
+	if _gated(show):
+		sub = "Held: master %d more in this chapter." % (gate[3] - gate[2])
 	if main.unlocked(show):
 		var g = main.grade_of(show)
 		sub = "Mastery: %d strokes, unharmed." % lv.par
 		if g == "jouzu":
 			sub = "Mastered — 上手."
 		elif g != "":
-			sub = "Cleared 可.  Mastery: %d strokes, unharmed." % lv.par
+			sub = "Passed, not mastered.  上手: %d strokes, unharmed." % lv.par
 	if phone:
 		Ink.text(self, f, Vector2(760, 50), lv.kanji, 44, Ink.SUMI, HORIZONTAL_ALIGNMENT_RIGHT, 480)
 		Ink.text(self, f, Vector2(760, 84), "%d · %s" % [show + 1, lv.name], 24, Ink.SUMI, HORIZONTAL_ALIGNMENT_RIGHT, 480)
@@ -272,3 +297,19 @@ func _draw():
 		Ink.text(self, f, Vector2(576, 674), "%s %s   Stations %d / %d   Seals %d / %d   Points %d" % [rk[0], rk[1], done, Data.LEVELS.size(), tally.seals, 3 * Data.LEVELS.size(), tally.points], 17, Ink.SUMI)
 		Ink.text(self, f, Vector2(566, 700), "Seals: 上手 mastery · 潔 first attempt, nothing taken back · 惜墨 sparing of ink.", 14, Ink.a(Ink.SUMI, 0.6))
 	draw_btns()
+	if notice != "":
+		_draw_notice(f)
+
+# The gate explained, on a slip of paper over the road.
+func _draw_notice(f):
+	var big = main.touch
+	var w = 1000.0 if big else 720.0
+	var size = 26 if big else 19
+	var h = f.get_multiline_string_size(notice, HORIZONTAL_ALIGNMENT_LEFT, w - 80.0, size).y + (150.0 if big else 120.0)
+	var r = Rect2(640.0 - w * 0.5, 360.0 - h * 0.5, w, h)
+	draw_rect(Rect2(0, 0, 1280, 720), Ink.a(Ink.PAPER, 0.55))
+	draw_rect(r, Ink.a(Ink.PAPER, 0.98))
+	draw_rect(Rect2(r.position.x, r.position.y, 5.0, r.size.y), Ink.a(Ink.SHU, 0.85))
+	Ink.text(self, f, Vector2(r.position.x + 40.0, r.position.y + (56.0 if big else 46.0)), "関  The road is held", 34 if big else 26, Ink.SUMI)
+	Ink.para(self, f, Vector2(r.position.x + 40.0, r.position.y + (104.0 if big else 84.0)), notice, size, Ink.a(Ink.AI, 0.95), w - 80.0)
+	Ink.text(self, f, Vector2(r.position.x, r.end.y - 18.0), "tap to close" if big else "any key or click", 18 if big else 12, Ink.a(Ink.SUMI, 0.5), HORIZONTAL_ALIGNMENT_RIGHT, r.size.x - 30.0)

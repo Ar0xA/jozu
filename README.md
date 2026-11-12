@@ -97,6 +97,7 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
 - **Red tiles** — where you would be struck if you sheathed the brush there.
 - **Waza** learned on the road: 縮地 leap over a tile, 結界 paste a ward, 喝 shout yokai away (into water, they are gone).
 - **上手 seal** — clear a station unharmed within the mastery stroke count. Always possible with no upgrades.
+- **The gate 関** — the last station of a chapter opens once two-thirds of the chapter carries the 上手 seal. Every other station opens when the one before it is passed.
 - **Training 修練** — points from stations buy ink, ki and extra waza uses. Help for the road, never required.
 
 Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-click take back a step of the stroke in hand, `R` restart, `1 2 3` waza, `4` shikigami, `5` bell, `H` ask the master.

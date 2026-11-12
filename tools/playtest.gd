@@ -84,6 +84,31 @@ func _run():
 	if kind() != "title":
 		bad("did not start on the title screen")
 
+	# ---- the gate: a chapter's last station asks for two-thirds of the chapter mastered
+	var g0 = main.gate_of(0)
+	for i in range(g0[0], g0[1]):
+		main.record(i, "ka")
+	if main.unlocked(g0[1]) or main.held_chapter() != 0 or main.gate_words() == "":
+		bad("a chapter passed without mastery should find its last station shut, and say why")
+	main.show_map()
+	await frames(2)
+	if main.cur.notice == "":
+		bad("the map does not explain the gate when the road is first held")
+	key(main.cur, KEY_SPACE)
+	main.cur.on_click(main.cur.st_pos(g0[1]), MOUSE_BUTTON_LEFT)
+	if kind() != "map" or main.cur.notice == "":
+		bad("clicking the shut station should explain the gate, not open it")
+	for i in range(g0[0], g0[0] + g0[3] - 1):
+		main.record(i, "jouzu")
+	if main.unlocked(g0[1]):
+		bad("the gate opened one mastery short")
+	main.record(g0[0] + g0[3] - 1, "jouzu")
+	if not main.unlocked(g0[1]) or main.held_chapter() != -1:
+		bad("the gate did not open at two-thirds mastered")
+	main.erase_save()
+	main.show_title()
+	await frames(2)
+
 	# ---- title: sound toggle and its button
 	var snd = main.data.sound
 	key(main.cur, KEY_M)
