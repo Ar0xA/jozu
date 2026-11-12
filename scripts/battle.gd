@@ -308,7 +308,10 @@ func _after(ok, quiet = "step"):
 		if ["kill", "cut", "hit", "katsu", "ward", "leap", "bell"].has(e.t) and not (ending and e.t == "kill" and e.dmg == 0):
 			main.sfx(e.t)
 			heard = true
-	if not heard:
+	if not heard and quiet == "step" and main.spare():
+		# the brush on the paper: lower and longer the further the stroke has run
+		main.sfx("brush", clamp(1.30 - 0.09 * s.visited.size(), 0.72, 1.3))
+	elif not heard:
 		main.sfx(quiet)
 	if quiet == "step":
 		if Sim.ter(s, s.hero) == "w" and s.ink == 0:
@@ -705,12 +708,24 @@ func _draw():
 		Ink.kinun(self, Vector2(400, 20), 250.0)
 		Ink.kinun(self, Vector2(1090, 204), 240.0, 0.20)
 		Ink.seal(self, f, Vector2(84, 52), 24, "上手")
-	if main.data.opts.motion:
-		Ink.written(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI, time - 0.35)
+	if spare:
+		var fade_in = clamp((time - 0.3) / 0.5, 0.0, 1.0) if main.data.opts.motion else 1.0
+		Ink.tategaki(self, f, Vector2(28, 98), lv.kanji, 30, Ink.a(Ink.SUMI, fade_in))
+		if custom == null:
+			var num = ""
+			for dg in str(idx + 1):
+				num += "〇一二三四五六七八九"[int(dg)]
+			Ink.tategaki(self, f, Vector2(28, 108 + lv.kanji.length() * 32.4), num, 15, Ink.a(Ink.SUMI, 0.55 * fade_in))
+		else:
+			Ink.text(self, f, Vector2(56, 34), label, 15, Ink.a(Ink.SUMI, 0.6))
+		Ink.text(self, f, Vector2(56, 62), lv.name, 28, Ink.SUMI)
 	else:
-		Ink.text(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI)
-	Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 48), ("Station %d" % (idx + 1)) if custom == null else label, 16, Ink.a(Ink.SUMI, 0.6))
-	Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 72), lv.name, 22, Ink.SUMI)
+		if main.data.opts.motion:
+			Ink.written(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI, time - 0.35)
+		else:
+			Ink.text(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI)
+		Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 48), ("Station %d" % (idx + 1)) if custom == null else label, 16, Ink.a(Ink.SUMI, 0.6))
+		Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 72), lv.name, 22, Ink.SUMI)
 	var rl = []
 	if rules.has("koan"):
 		rl.append("公案 one stroke only")
@@ -761,7 +776,7 @@ func _draw():
 		for k in range(rl.size()):
 			rl[k] = brief.get(rl[k].substr(0, 1), rl[k])
 	if not rl.is_empty():
-		Ink.text(self, f, Vector2(124, 96), "  ·  ".join(rl), 14, Ink.SHU)
+		Ink.text(self, f, Vector2(56 if spare else 124, 90 if spare else 96), "  ·  ".join(rl), 14, Ink.SHU)
 
 	# board
 	var br = Rect2(ORG, Vector2(s.w, s.h) * TS)
@@ -804,11 +819,29 @@ func _draw():
 					draw_line(cc + Vector2(TS * 0.2, -TS * 0.2), cc + Vector2(-TS * 0.2, TS * 0.2), Ink.a(Ink.SUMI, 0.75), 4.0, true)
 			if not lit.is_empty() and not lit.has(p):
 				draw_rect(r, Color(0.06, 0.06, 0.12, 0.62))
-	for i in range(s.w + 1):
-		draw_line(ORG + Vector2(i * TS, 0), ORG + Vector2(i * TS, s.h * TS), Ink.a(Ink.SUMI, 0.28), 1.2)
-	for i in range(s.h + 1):
-		draw_line(ORG + Vector2(0, i * TS), ORG + Vector2(s.w * TS, i * TS), Ink.a(Ink.SUMI, 0.28), 1.2)
-	Ink.frame(self, br, 6.0, Ink.SUMI)
+	if spare:
+		# each square carries the faint cross that centres a character on practice paper
+		for y in range(s.h):
+			for x in range(s.w):
+				if Sim.ter(s, Vector2i(x, y)) == ".":
+					var cc = ctr(Vector2i(x, y))
+					draw_dashed_line(cc - Vector2(TS * 0.5, 0), cc + Vector2(TS * 0.5, 0), Ink.a(Ink.SUMI, 0.10), 1.0, 5.0)
+					draw_dashed_line(cc - Vector2(0, TS * 0.5), cc + Vector2(0, TS * 0.5), Ink.a(Ink.SUMI, 0.10), 1.0, 5.0)
+		for i in range(1, s.w):
+			draw_line(ORG + Vector2(i * TS, 0), ORG + Vector2(i * TS, s.h * TS), Ink.a(Ink.SUMI, 0.20), 1.0)
+		for i in range(1, s.h):
+			draw_line(ORG + Vector2(0, i * TS), ORG + Vector2(s.w * TS, i * TS), Ink.a(Ink.SUMI, 0.20), 1.0)
+		draw_rect(br, Ink.a(Ink.SUMI, 0.6), false, 1.6)
+		# the paperweight that holds the sheet
+		var pw = Rect2(br.position.x + br.size.x * 0.5 - 150, br.position.y - 4, 300, 13)
+		draw_rect(pw, Color(0.13, 0.12, 0.13))
+		draw_line(pw.position + Vector2(4, 3), Vector2(pw.end.x - 4, pw.position.y + 3), Ink.a(Ink.GOFUN, 0.28), 1.5, true)
+	else:
+		for i in range(s.w + 1):
+			draw_line(ORG + Vector2(i * TS, 0), ORG + Vector2(i * TS, s.h * TS), Ink.a(Ink.SUMI, 0.28), 1.2)
+		for i in range(s.h + 1):
+			draw_line(ORG + Vector2(0, i * TS), ORG + Vector2(s.w * TS, i * TS), Ink.a(Ink.SUMI, 0.28), 1.2)
+		Ink.frame(self, br, 6.0, Ink.SUMI)
 
 	for w in s.wards:
 		Ink.ward(self, f, ctr(w), TS)
@@ -836,7 +869,15 @@ func _draw():
 				draw_circle(ctr(t), 7.0 if dist == 1 else 10.0, Ink.a(Ink.AI if mode != "" else Ink.SUMI, 0.45))
 
 	# the stroke before this one, drying
-	if not s.paths.is_empty() and not done:
+	if spare and not done:
+		for k in range(s.paths.size()):
+			var age = s.paths.size() - 1 - k
+			var old = []
+			for v in s.paths[k]:
+				old.append(ctr(v))
+			if old.size() > 1:
+				Ink.brush(self, old, 18.0, Ink.a(Ink.AI if (rules.has("wet") and age == 0) else Ink.SUMI, max(0.045, 0.24 * pow(0.6, age))))
+	elif not s.paths.is_empty() and not done:
 		var old = []
 		for v in s.paths.back():
 			old.append(ctr(v))
@@ -1048,6 +1089,11 @@ func _weather(br):
 func _pips(f, y, kanji, label, n, mx, col):
 	Ink.text(self, f, Vector2(PX, y), kanji, 26, Ink.SUMI)
 	Ink.text(self, f, Vector2(PX + 36, y - 2), label, 17, Ink.a(Ink.SUMI, 0.7))
+	if kanji == "墨" and main.spare():
+		var wd = clamp(mx * 34.0, 110.0, 250.0)
+		Ink.suzuri(self, Rect2(PX + 138, y - 21, wd, 24), n, mx)
+		Ink.text(self, f, Vector2(PX + 150 + wd, y - 1), str(n), 22, Ink.SUMI)
+		return
 	for i in range(mx):
 		# long brushes wrap onto a tighter row so they never run into the text beside them
 		var step = 30.0 if mx <= 8 else 240.0 / mx
@@ -1075,6 +1121,10 @@ func _panel_phone(f):
 		var y = 130.0 + k * 66.0
 		Ink.text(self, f, Vector2(PX, y + 16), rows[k][0], 46, Ink.SUMI)
 		var mx = rows[k][2]
+		if k == 1 and main.spare():
+			Ink.suzuri(self, Rect2(PX + 78, y - 20, 360, 40), rows[k][1], mx)
+			Ink.text(self, f, Vector2(PX + 452, y + 14), str(rows[k][1]), 40, Ink.SUMI)
+			continue
 		var step = min(54.0, 440.0 / max(1, mx))
 		for i in range(mx):
 			var c = Vector2(PX + 96 + i * step, y)
@@ -1175,12 +1225,14 @@ func _result(f):
 	if open < 1.0:
 		return
 	if grade == "jouzu":
-		Ink.stamp(self, f, Vector2(232, 296), 50, "上手", _since(0.55, 0.3))
+		if not main.spare():
+			Ink.stamp(self, f, Vector2(232, 296), 50, "上手", _since(0.55, 0.3))
 		_my_scroll()
 		_seals(f)
 		Ink.text(self, f, Vector2(150, 408), "Mastered in %d stroke%s, unharmed." % [s.turn, "" if s.turn == 1 else "s"], 19, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
 	elif grade == "ka":
-		Ink.stamp(self, f, Vector2(232, 290), 58, "可", _since(0.55, 0.3), Ink.AI)
+		if not main.spare():
+			Ink.stamp(self, f, Vector2(232, 290), 58, "可", _since(0.55, 0.3), Ink.AI)
 		_my_scroll()
 		_seals(f)
 		var why = "%d strokes; mastery asks %d." % [s.turn, lv.par]
@@ -1214,10 +1266,21 @@ func _seals(f):
 
 # what you painted to clear this stage, as it will hang in the scroll
 func _my_scroll():
+	var wrote = 0.28 * max(1, my_paths.size())
+	if main.spare():
+		# your strokes alone on the paper, and round them the circle a teacher gives: two for
+		# mastery, one for a pass
+		var rr = Rect2(262, 228, 176, 144)
+		Ink.calligraphy(self, rr, my_paths, s.w, s.h, _since(0.6, wrote))
+		var c = rr.get_center()
+		Ink.maru(self, c, 92.0, 7.0, Ink.a(Ink.SHU, 0.9), _since(0.7 + wrote, 0.45))
+		if grade == "jouzu":
+			Ink.maru(self, c, 78.0, 5.0, Ink.a(Ink.SHU, 0.9), _since(1.0 + wrote, 0.4))
+		return
 	var r = Rect2(318, 222, 196, 160)
 	draw_rect(r, Ink.a(Ink.GOFUN, 0.9))
 	Ink.frame(self, r, 2.5, Ink.a(Ink.SUMI, 0.7))
-	Ink.calligraphy(self, r.grow(-10), my_paths, s.w, s.h, _since(0.85, 0.28 * max(1, my_paths.size())))
+	Ink.calligraphy(self, r.grow(-10), my_paths, s.w, s.h, _since(0.85, wrote))
 
 # how far along something is that began `after` seconds past the end of the stage and takes `length`
 func _since(after, length):

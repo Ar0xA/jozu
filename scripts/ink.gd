@@ -227,13 +227,14 @@ static func fude(ci, pts, w, full):
 		ci.draw_polygon(PackedVector2Array([a0 + nrm * w0, b0 + nrm * w1, b0 - nrm * w1, a0 - nrm * w0]), PackedColorArray([c0, c1, c1, c0]))
 		ci.draw_circle(b0, w1, c1)      # the turn of the brush at each corner
 		# dry brush: streaks of paper along the stroke, more of them the emptier the brush
-		var dry = clamp((u1 - 0.45) / 0.55, 0.0, 1.0)
+		var dry = clamp((u1 - 0.30) / 0.55, 0.0, 1.0)
 		if dry > 0.0:
-			for k in range(5):
-				var off = (k - 2) * w1 * 0.36 + sin(i * 3.7 + k * 1.9) * w1 * 0.08
-				var from = a0.lerp(b0, 0.10 + 0.13 * ((k * 3 + i) % 4))
-				var to = a0.lerp(b0, 0.62 + 0.09 * ((k + i * 2) % 4))
-				ci.draw_line(from + nrm * off, to + nrm * off, a(PAPER, 0.80 * dry), 1.0 + 1.8 * dry, true)
+			# hihaku, flying white: where a fast, emptying brush leaves the paper showing
+			for k in range(6):
+				var off = (k - 2.5) * w1 * 0.32 + sin(i * 3.7 + k * 1.9) * w1 * 0.07
+				var from = a0.lerp(b0, 0.06 + 0.11 * ((k * 3 + i) % 4))
+				var to = a0.lerp(b0, 0.70 + 0.09 * ((k + i * 2) % 4))
+				ci.draw_line(from + nrm * off, to + nrm * off, a(PAPER, min(1.0, 1.05 * dry)), 1.3 + 2.4 * dry, true)
 	# where the brush came down
 	blot(ci, pts[0], w * 0.95, w * 0.95, black, 0.30)
 	ci.draw_circle(pts[0], w * 0.56, a(black, 0.97))
@@ -243,6 +244,30 @@ static func fude(ci, pts, w, full):
 		var tip = pts[n - 1] + last.normalized() * w * 0.55 * (1.0 - 0.3 * full)
 		var side = last.normalized().orthogonal() * w * 0.5 * (1.0 - 0.34 * full)
 		ci.draw_colored_polygon(PackedVector2Array([pts[n - 1] + side, tip, pts[n - 1] - side]), a(black, 0.96 - 0.42 * full))
+
+# An inkstone seen from above: the dark stone, and in its well as much ink as is left.
+static func suzuri(ci, r, n, mx):
+	ci.draw_rect(r, Color(0.17, 0.17, 0.19))
+	var well = r.grow(-4.0)
+	ci.draw_rect(well, Color(0.40, 0.40, 0.42))
+	if n > 0:
+		var pool = Rect2(well.position, Vector2(well.size.x * float(n) / float(max(1, mx)), well.size.y))
+		ci.draw_rect(pool, Color(0.05, 0.04, 0.05))
+		ci.draw_line(pool.position + Vector2(3, 3), Vector2(pool.end.x - 3, pool.position.y + 3), a(GOFUN, 0.35), 1.5, true)
+	for i in range(1, mx):
+		var x = well.position.x + well.size.x * i / float(mx)
+		ci.draw_line(Vector2(x, well.position.y), Vector2(x, well.end.y), a(GOFUN, 0.30), 1.0)
+
+# A teacher's circle in red round work well done, drawn as far as u (0 to 1).
+static func maru(ci, c, r, w, col, u):
+	if u <= 0.0:
+		return
+	var pts = []
+	var n = 48
+	for i in range(int(n * clamp(u, 0.0, 1.0)) + 1):
+		var t = -2.2 + TAU * 1.03 * i / float(n)
+		pts.append(c + Vector2(cos(t), sin(t)) * r * (1.0 + 0.035 * sin(t * 2.0 + r)))
+	brush(ci, pts, w, col)
 
 # The first part of a path, by length: u = 0 nothing, 1 all of it.
 static func part(pts, u):

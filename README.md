@@ -83,7 +83,9 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
 - **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, the
   painted look, and how strokes may be taken back: freely, only within the stroke in hand, or never.
   **Style** chooses between Shodō, the default (bare paper, one seal, a stroke that pools where the
-  brush comes down, pales as its ink is spent and runs dry at the end) and Ornate (gold clouds,
+  brush comes down, pales as its ink is spent and runs dry at the end; the board ruled as a practice
+  sheet under a paperweight; the stage signed down the left margin; earlier strokes drying to grey; ink
+  in an inkstone; a teacher's red circle on a clear) and Ornate (gold clouds,
   drifting seasons, seals and frames throughout).
 - **Three seals a station:** 上手 mastery, 潔 mastery at the first attempt since entering the stage (no
   undo, no restart), 惜墨 sparing of ink. Seals earn the

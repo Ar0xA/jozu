@@ -292,3 +292,18 @@ def late_music():
     zen('zen', 28, 5)
 
 late_music()
+
+def brush_sound():
+    """Hair on paper: a soft, short hush. The game plays it lower and longer as a stroke runs on."""
+    n = int(0.30 * SR)
+    t = np.arange(n) / SR
+    hush = np.random.default_rng(11).standard_normal(n)
+    # soften it: a running mean takes the hiss off the top
+    k = 9
+    hush = np.convolve(hush, np.ones(k) / k, mode='same')
+    env = np.clip(t / 0.03, 0, 1) * np.exp(-t * 9.0)
+    m = Mix(0.4)
+    m.add(0, hush * env * 0.9)
+    m.save('brush', 0.34, peak=0.45)
+
+brush_sound()

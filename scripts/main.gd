@@ -115,7 +115,7 @@ func _setup_audio():
 		var p = AudioStreamPlayer.new()
 		add_child(p)
 		sfx_pool.append(p)
-	for nm in ["title", "battle", "boss", "road2", "road3", "boss2", "zen", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2"]:
+	for nm in ["title", "battle", "boss", "road2", "road3", "boss2", "zen", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2", "brush"]:
 		streams[nm] = load("res://audio/%s.wav" % nm)
 	streams["story"] = load("res://audio/story.ogg")
 	AudioServer.set_bus_mute(0, not data.sound)
@@ -169,7 +169,7 @@ func show_settings(back = Callable()):
 	scr.back = back if back.is_valid() else show_title
 	go(scr)
 
-func sfx(nm):
+func sfx(nm, pitch = 1.0):
 	var st = streams.get(nm)
 	if st == null:
 		return
@@ -177,6 +177,7 @@ func sfx(nm):
 	sfx_i += 1
 	p.stream = st
 	p.volume_db = -7.0
+	p.pitch_scale = pitch
 	p.play()
 
 func toggle_sound():
