@@ -273,9 +273,7 @@
   "kanji": "団扇",
   "name": "Crossed Fans",
   "par": 5,
-  "waza": [
-   "leap"
-  ],
+  "waza": [],
   "rows": [
    "t.....t",
    ".......",
@@ -311,9 +309,7 @@
   "kanji": "僧正",
   "name": "Sōjōbō's Court",
   "par": 5,
-  "waza": [
-   "leap"
-  ],
+  "waza": [],
   "rows": [
    "t.#.#.t",
    ".......",
@@ -435,10 +431,7 @@
   "kanji": "化かし",
   "name": "Bewitched",
   "par": 4,
-  "waza": [
-   "leap",
-   "ward"
-  ],
+  "waza": [],
   "rows": [
    "k.....k",
    ".#.#.#.",
@@ -475,8 +468,7 @@
   "name": "The Shinoda Mirror",
   "par": 4,
   "waza": [
-   "leap",
-   "ward"
+   "leap"
   ],
   "rows": [
    "t......",
@@ -514,8 +506,7 @@
   "name": "The Ogres' Gate",
   "par": 3,
   "waza": [
-   "leap",
-   "ward"
+   "leap"
   ],
   "rows": [
    ".o.O.o.",
@@ -526,7 +517,7 @@
    ".#...#.",
    "...H..."
   ],
-  "hint": "Three oni, and the great one in front. A ward stops an oni as surely as stone — and a stopped oni is standing at a distance you chose.",
+  "hint": "Three oni, and the great one in front. Stone stops an oni — and a stopped oni is standing at a distance you chose.",
   "story": [
    [
     "",
@@ -552,10 +543,7 @@
   "kanji": "谷風",
   "name": "Valley Wind",
   "par": 5,
-  "waza": [
-   "leap",
-   "ward"
-  ],
+  "waza": [],
   "rows": [
    "T..~..o",
    "...~...",
@@ -677,10 +665,7 @@
   "kanji": "殺生石",
   "name": "The Killing Stone",
   "par": 4,
-  "waza": [
-   "leap",
-   "ward"
-  ],
+  "waza": [],
   "rows": [
    "y..#..y",
    "...#...",
@@ -690,7 +675,7 @@
    "...#...",
    "...y..."
   ],
-  "hint": "Yūrei pass through stone and water as if they were mist. They cannot pass a ward.",
+  "hint": "Yūrei pass through stone and water as if they were mist. Nothing here holds them back: stand where they must come to you one at a time.",
   "story": [
    [
     "",
@@ -722,7 +707,6 @@
   "par": 5,
   "waza": [
    "leap",
-   "ward",
    "katsu"
   ],
   "rows": [
@@ -864,11 +848,7 @@
   "kanji": "薄氷",
   "name": "Thin Ice",
   "par": 9,
-  "waza": [
-   "leap",
-   "ward",
-   "katsu"
-  ],
+  "waza": [],
   "rows": [
    "...O...",
    "...i...",
@@ -908,11 +888,7 @@
   "kanji": "傘",
   "name": "The Umbrella",
   "par": 9,
-  "waza": [
-   "leap",
-   "ward",
-   "katsu"
-  ],
+  "waza": [],
   "rows": [
    "u.....u",
    ".......",
@@ -952,11 +928,7 @@
   "kanji": "吹雪",
   "name": "Blizzard",
   "par": 9,
-  "waza": [
-   "leap",
-   "ward",
-   "katsu"
-  ],
+  "waza": [],
   "rows": [
    "T.iii.u",
    "..#i#..",
@@ -992,11 +964,7 @@
   "kanji": "雪女",
   "name": "Yuki-onna",
   "par": 9,
-  "waza": [
-   "leap",
-   "ward",
-   "katsu"
-  ],
+  "waza": [],
   "rows": [
    "u..W..u",
    ".iiiii.",
@@ -1049,9 +1017,7 @@
   "name": "The Kappa",
   "par": 9,
   "waza": [
-   "leap",
-   "ward",
-   "katsu"
+   "leap"
   ],
   "rows": [
    "...c...",
@@ -1180,11 +1146,7 @@
   "kanji": "河伯",
   "name": "Lord of the Pool",
   "par": 9,
-  "waza": [
-   "leap",
-   "ward",
-   "katsu"
-  ],
+  "waza": [],
   "rows": [
    "u.....u",
    "~~~P~~~",
@@ -1228,11 +1190,7 @@
   "kanji": "鬼火",
   "name": "Ghost-Fire Road",
   "par": 9,
-  "waza": [
-   "leap",
-   "ward",
-   "katsu"
-  ],
+  "waza": [],
   "rows": [
    "..n.n..",
    ".......",
