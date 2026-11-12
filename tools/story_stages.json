@@ -43,7 +43,7 @@
   "after": [
    [
     "Tessai",
-    "Two lanterns, two strokes. The paper remembers them already. Go on to the gate."
+    "Two lanterns, and not a drop spilled. The paper remembers them already. Go on to the gate."
    ],
    [
     "Tessai",
@@ -643,7 +643,7 @@
    ],
    [
     "Suzu",
-    "I brought neither."
+    "I brought none of those."
    ],
    [
     "Shuten",
@@ -1844,7 +1844,7 @@
   "after": [
    [
     "Tessai",
-    "春雨じゃ、濡れて参ろう. It is only spring rain. Let us go and get wet."
+    "春雨じゃ、濡れて行こう. It is only spring rain. Let us walk on and get wet."
    ]
   ],
   "par": 1,
@@ -1950,7 +1950,7 @@
   "story": [
    [
     "Tessai",
-    "Abe no Seimei, the fox's son, kept twelve spirits folded in paper under the Ichijō bridge and called them out when he had need. 式神."
+    "Abe no Seimei, the fox's son, kept twelve spirits folded in paper under the Modori bridge at Ichijō, and called them out when he had need. 式神."
    ],
    [
     "Suzu",
@@ -1984,6 +1984,10 @@
   "name": "Offerings",
   "hint": "Offering 供: walking yokai (oni, umbrellas, kappa, the great skeleton) go to the nearest offering instead of to you. One that is standing on an offering does not strike: it spends its next turn eating, and then the offering is gone. Ghosts are not hungry.",
   "story": [
+   [
+    "",
+    "The scroll is whole and the lessons are done. The road, it turns out, goes on past the temple gate."
+   ],
    [
     "",
     "At a crossroads someone has left three dumplings on a leaf, for whoever, or whatever, passes."
@@ -2180,7 +2184,7 @@
   "after": [
    [
     "Tessai",
-    "永字八法. They say the one character 永 holds all eight strokes there are. You will get to it. Start with the ones that are straight lines."
+    "永字八法. They say the one character 永 holds all eight strokes there are. That one is for later years. Start with the ones that are straight lines."
    ]
   ],
   "par": 1,
@@ -2244,7 +2248,7 @@
   "after": [
    [
     "Tessai",
-    "雨降って地固まる. After the rain the ground is firmer. So are you."
+    "待てば海路の日和あり. Wait, and fair weather comes for the crossing. You did not wait. It came anyway."
    ]
   ],
   "par": 1,
@@ -2266,7 +2270,7 @@
    ],
    [
     "Tessai",
-    "急がば回れ. If you are in a hurry, go round. Today that is not advice. It is the map."
+    "近道は遠道. The short cut is the long way. Today that is not advice. It is the map."
    ]
   ],
   "after": [

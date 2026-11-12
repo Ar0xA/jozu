@@ -27,7 +27,7 @@ var music_name = ""
 var sfx_pool = []
 var sfx_i = 0
 var streams = {}
-const MUSIC_DB = {"title": -9.0, "story": -5.0, "battle": -10.0, "boss": -9.0}
+const MUSIC_DB = {"title": -9.0, "story": -5.0, "battle": -10.0, "boss": -9.0, "road2": -10.0, "road3": -10.0, "boss2": -9.0, "zen": -7.0}
 
 func _ready():
 	var sysf = SystemFont.new()
@@ -115,7 +115,7 @@ func _setup_audio():
 		var p = AudioStreamPlayer.new()
 		add_child(p)
 		sfx_pool.append(p)
-	for nm in ["title", "battle", "boss", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2"]:
+	for nm in ["title", "battle", "boss", "road2", "road3", "boss2", "zen", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2"]:
 		streams[nm] = load("res://audio/%s.wav" % nm)
 	streams["story"] = load("res://audio/story.ogg")
 	AudioServer.set_bus_mute(0, not data.sound)
@@ -130,6 +130,22 @@ func play_music(nm):
 	music.volume_db = MUSIC_DB.get(nm, -9.0)
 	if music.stream and data.opts.music:
 		music.play()
+
+# What is heard on a stage. The chapters of stillness (the kōan, the garden, the circle, the ink
+# stone, the written character) have the quiet piece; the rest take the three road pieces in turn,
+# and the last board of a story has drum and shamisen.
+const QUIET = ["Zen Temple", "Stone Garden", "Ensō", "Ink Stone", "Red Thread", "Temple Bell", "The Character", "The Brush"]
+
+func stage_music(i):
+	var c = 0
+	for k in range(Data.CHAPTERS.size()):
+		if Data.CHAPTERS[k].from <= i:
+			c = k
+	if Data.BOSSES.has(i):
+		return "boss" if c % 2 == 0 else "boss2"
+	if QUIET.has(Data.CHAPTERS[c].name):
+		return "zen"
+	return ["battle", "road2", "road3"][c % 3]
 
 # the settings a player can change (scripts/settings.gd)
 # undo: 0 freely, 1 only within the stroke in hand, 2 not at all
@@ -473,7 +489,8 @@ func show_hub():
 	go(load("res://scripts/hub.gd").new())
 
 func show_custom(lv, kind, label, on_win, on_fail, back):
-	play_music("battle")
+	var quiet = kind == "daily" or lv.rules.has("koan") or lv.rules.has("garden") or lv.rules.has("write") or lv.rules.has("enso")
+	play_music("zen" if quiet else "road3" if kind == "henro" else "road2" if kind == "random" else "battle")
 	var scr = load("res://scripts/battle.gd").new()
 	scr.custom = lv
 	scr.kind_of = kind
@@ -788,7 +805,7 @@ func start_stage(i):
 	show_story(Data.LEVELS[i].story, show_battle.bind(i), i / float(Data.LEVELS.size()))
 
 func show_battle(i):
-	play_music("boss" if Data.BOSSES.has(i) else "battle")
+	play_music(stage_music(i))
 	var scr = load("res://scripts/battle.gd").new()
 	scr.idx = i
 	go(scr)

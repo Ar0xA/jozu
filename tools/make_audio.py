@@ -256,3 +256,39 @@ def clappers():
 
 late_sfx()
 clappers()
+
+# ------------------------------------------------------------------ more music for the road
+# Made after everything above, so the earlier files come out exactly as before.
+def zen(name, bars, seed):
+    """For the kōan, the garden, the circle and the written character: no drum, a great deal of
+    silence, a few koto notes left to ring, a long breath on the flute, and now and then a bell."""
+    r = np.random.default_rng(seed)
+    beat = 60.0 / 52
+    sc = scale(3, 3)
+    m = Mix(bars * 4 * beat + 8)
+    deg = 7
+    for bar in range(bars):
+        t0 = bar * 4 * beat
+        if bar % 8 == 0:
+            m.add(t0, bell(hz('D3'), 6.0, 0.30))
+            m.add(t0, pluck(hz('D2'), 6.0, bright=0.15, amp=0.45))
+        if bar % 4 == 2:
+            m.add(t0 + beat * 0.5, flute(hz(r.choice(['D4', 'A4', 'G4', 'D5'])), beat * 7, amp=0.24))
+        if bar % 8 == 7:
+            continue                       # a whole bar of nothing
+        for s in (0, 1.5, 3):
+            if r.random() < 0.52:
+                continue
+            deg = int(np.clip(deg + r.choice([-3, -2, -1, 1, 2, 3]), 0, len(sc) - 1))
+            m.add(t0 + s * beat, pluck(hz(sc[deg]), 5.0, bright=0.45, decay=0.9975, amp=0.55))
+            if r.random() < 0.3:           # the octave answered softly, as the left hand does on a koto
+                m.add(t0 + (s + 0.5) * beat, pluck(hz(sc[max(0, deg - 5)]), 4.0, bright=0.3, decay=0.9975, amp=0.28))
+    m.save(name, bars * 4 * beat)
+
+def late_music():
+    piece('road2', 92, 24, 21, False)      # a brisker koto for the middle of the road
+    piece('road3', 74, 20, 33, False)      # a slower one, with more flute
+    piece('boss2', 120, 28, 44, True)      # shamisen and drum for the later endings
+    zen('zen', 28, 5)
+
+late_music()

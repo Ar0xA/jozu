@@ -365,7 +365,6 @@ SAY = [
     ('風が吹けば桶屋が儲かる', 'Kaze ga fukeba okeya ga mōkaru', 'When the wind blows, the cooper profits: everything is connected, at some remove.', [], ['wind']),
     ('物言えば唇寒し秋の風', 'Mono ieba / kuchibiru samushi / aki no kaze', 'When I speak, my lips are cold: the autumn wind. — Bashō', [], ['wind']),
     # ---- rain
-    ('雨降って地固まる', 'Ame futte ji katamaru', 'After the rain, the ground is firmer.', [], ['rain']),
     ('五月雨を集めて早し最上川', 'Samidare o / atsumete hayashi / Mogami-gawa', 'Gathering all the rains of early summer, how swift it runs: the Mogami river. — Bashō', [], ['rain']),
     ('晴耕雨読', 'Seikō udoku', 'Plough when it is fine; read when it rains.', [], ['rain']),
     ('雨後の筍', 'Ugo no takenoko', 'Bamboo shoots after rain: one thing after another, all at once.', [], ['rain']),
@@ -480,6 +479,7 @@ RULE_WEIGHT = {'wet': 4, 'enso': 5, 'koan': 6, 'garden': 6, 'gate': 6, 'stone': 
 KINDS = {'K': 'kama', 'd': 'daruma', 'a': 'tanuki', 'A': 'tanuki', 'e': 'hitodama', 'X': 'shinigami',
          'c': 'chochin', 'o': 'oni', 'O': 'bigoni', 'S': 'bigoni', 't': 'tengu', 'T': 'tengu', 'k': 'kitsune', 'y': 'yurei',
          'u': 'kasa', 'p': 'kappa', 'P': 'kappa', 'n': 'nurikabe', 'W': 'yukionna', 'G': 'gasha', 'Q': 'kitsune'}
+THINGS = set(KINDS.values()) | {'water', 'ice', 'fire', 'rock'}   # what a saying may be about that a board has or has not
 used_says = {}     # saying index -> the chapters it has been used in
 MAX_USES = 4       # a saying may appear three times in the whole game, never twice in one chapter
 
@@ -534,20 +534,28 @@ def pick_saying(b, trace, chapter):
         score = sum(weight.get(t, 3) for t in tags if t in f and t not in RULE_TAGS) + (2 if chapter in chs else 0) + max([RULE_WEIGHT[t] for t in rule if t in f] or [0])
         if chs and chapter not in chs and hits == 0:
             continue
+        if any(t in THINGS and t not in f for t in tags) and not any(t in THINGS and t in f for t in tags):
+            continue   # it speaks of a yokai or a ground that is nowhere on this board
         if not chs and not tags:
             score = 0.5
         score -= 1.5 * len(seen)   # prefer one not yet heard
         if score > best_score:
             best, best_score = i, score
-    if best is None and any(t in f for t in RULE_TAGS):
-        # this style's own sayings are all spoken for: fall back on the common stock
-        for i, (jp, ro, en, chs, tags) in enumerate(SAY):
-            seen = used_says.get(i, [])
-            if len(seen) >= MAX_USES or chapter in seen or chs or any(t in RULE_TAGS for t in tags):
-                continue
-            score = sum(3 for t in tags if t in f) + (0.5 if all(t in f for t in tags) else 0.1)
-            if score > best_score:
-                best, best_score = i, score
+    if best is None:
+        # this stage's own sayings are all spoken for: fall back on the common stock, and first on
+        # what does not speak of a yokai or a kind of ground that is not on the board
+        for strict in (True, False):
+            for i, (jp, ro, en, chs, tags) in enumerate(SAY):
+                seen = used_says.get(i, [])
+                if len(seen) >= MAX_USES + (0 if strict else 1) or chapter in seen or chs or any(t in RULE_TAGS for t in tags):
+                    continue
+                if strict and any(t in THINGS and t not in f for t in tags):
+                    continue
+                score = sum(3 for t in tags if t in f) + (0.5 if all(t in f for t in tags) else 0.1)
+                if score > best_score:
+                    best, best_score = i, score
+            if best is not None:
+                break
     if best is None:
         return []
     used_says.setdefault(best, []).append(chapter)
@@ -669,6 +677,10 @@ for c in ORDER:
     if c == 32:
         rungs = [g for g in rungs if not (g.get('name') or '').startswith('上')]
     if c == 36:
+        hito = [g for g in rungs if (g.get('name') or '').startswith('人|')]
+        if hito:
+            rungs.remove(hito[0])
+            rungs.insert(0, hito[0])
         # the road ends by writing the two characters of its own name: 上, then 手
         rungs = [g for g in rungs if not (g.get('name') or '').startswith('手')][:MAX_PER_STYLE - 2]
         for ch in '上手':
@@ -730,6 +742,17 @@ for c in ORDER:
                 levels[-1]['story'] = end
     if c < 10 or c in ENDINGS:
         bosses.append(len(levels) - 1)
+    if c == 7 and not levels[-1]['after']:
+        levels[-1]['after'] = [
+            ['Tessai', '諸行無常. All things pass. The fires are out, and the stones are only stones again.'],
+            ['Tessai', 'North now, Suzu, as far as the road goes: to the mountain where the living go to ask after the dead.'],
+        ]
+    if c == 8 and not levels[-1]['after']:
+        levels[-1]['after'] = [
+            ['', 'The grey lake goes still. From its far shore comes the sound of a drum, slow, and a long way off.'],
+            ['Suzu', 'Is that an echo?'],
+            ['Tessai', 'No. That is the rest of them. Come.'],
+        ]
     if c == 24:
         # the last board of the scroll carries its ending
         levels[-1]['after'] = [

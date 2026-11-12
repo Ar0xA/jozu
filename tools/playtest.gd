@@ -604,6 +604,16 @@ func other_roads():
 		bad("with undo set to 'never', a loss should offer only to begin again")
 	main.data.opts.undo = 0
 
+	# every stage has music that exists, and the quiet chapters have the quiet piece
+	var heard = {}
+	for i in range(Data.LEVELS.size()):
+		var nm = main.stage_music(i)
+		heard[nm] = true
+		if main.streams.get(nm) == null:
+			bad("stage %d asks for music '%s' that is not there" % [i + 1, nm])
+	if heard.size() < 6 or main.stage_music(Data.CHAPTERS[10].from + 1) != "zen":
+		bad("the stages do not spread across the pieces of music: %s" % str(heard.keys()))
+
 	# settings
 	main.show_settings(main.show_hub)
 	await frames(2)

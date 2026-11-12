@@ -17,8 +17,10 @@ Export presets for a single Windows executable and for the web are included.
     godot --path .
 
 Music: a 1920s shakuhachi recording of *Shika no Tōne* under the story, *Sakura Sakura* on synthesised
-koto for the title and road, and original koto, shamisen and taiko pieces in the miyako-bushi scale for
-the stages. Press `M` to mute.
+koto for the title and road, and original pieces composed in code (`tools/make_audio.py`) in the
+miyako-bushi scale for the stages: three for koto and drum that take turns by chapter, two for
+shamisen and taiko on the last board of a story, and a sparse one for flute, koto and bell in the
+chapters of stillness. Press `M` to mute.
 
 586 stations in thirty-seven chapters. Ten chapters tell the story; twenty-seven more each explore one
 puzzle style, yokai, kind of weather or piece of ground, or a mixture of them, in a rising ladder of
