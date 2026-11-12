@@ -80,7 +80,7 @@ var label = ""
 var on_win = Callable()
 var on_fail = Callable()
 var back = Callable()
-var guide = false      # first visit to a chapter's opening stage: the master's line is shown unasked
+var guide = false      # the very first stage, until it is cleared: the stroke to paint is shown dotted
 var guide_msg = ""
 var dng = {}
 var undos = 0
@@ -98,10 +98,7 @@ func setup():
 	rules = lv.get("rules", [])
 	if not back.is_valid():
 		back = main.show_map
-	if custom == null:
-		for c in Data.CHAPTERS:
-			if c.from == idx and main.grade_of(idx) == "":
-				guide = true
+	guide = custom == null and idx == 0 and main.grade_of(0) == ""
 	b_leap = btn(Rect2(PX, 470, 172, 46), "Leap [1]", _mode.bind("leap"), "縮地")
 	b_ward = btn(Rect2(PX + 184, 470, 172, 46), "Ward [2]", _mode.bind("ward"), "結界")
 	b_katsu = btn(Rect2(PX + 368, 470, 172, 46), "Shout [3]", _katsu, "喝")
@@ -441,7 +438,7 @@ func _play_tokens(st, stroke, track):
 			hint_path.append(st.hero)
 
 # The next stroke of the known solution, if the board is still on its line: shown only as the
-# lesson of a chapter's opening stage (`guide`), never on asking. Returns a reason when it cannot
+# lesson of the first stage (`guide`), never on asking. Returns a reason when it cannot
 # be shown.
 func _master_line():
 	_clear_hint()
