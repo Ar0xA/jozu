@@ -20,6 +20,7 @@ var walk_t = 0.0
 var aim = {}           # where each yokai is being drawn towards while it walks
 var later = []         # sounds waiting for their moment: [{at, nm}]
 var last_inked = 0
+var ki_max = 0
 # The card laid over the board when a stage opens: what must be done, and anything met here for
 # the first time. It goes by itself after a while, or at a touch.
 var card = []          # [[text, size, colour]]
@@ -67,7 +68,7 @@ var b_shiki
 # A board from outside the story (daily koan, pilgrimage, workshop) is passed in as `custom`,
 # with what to do when it is won or lost and where "back" leads.
 var custom = null
-var kind_of = "story"   # story | daily | henro | custom
+var kind_of = "story"   # story | daily | henro | custom | random
 var label = ""
 var on_win = Callable()
 var on_fail = Callable()
@@ -98,7 +99,7 @@ func setup():
 	b_leap = btn(Rect2(PX, 470, 172, 46), "Leap [1]", _mode.bind("leap"), "縮地")
 	b_ward = btn(Rect2(PX + 184, 470, 172, 46), "Ward [2]", _mode.bind("ward"), "結界")
 	b_katsu = btn(Rect2(PX + 368, 470, 172, 46), "Shout [3]", _katsu, "喝")
-	b_bell = btn(Rect2(PX, 470, 172, 46), "Bell [5]", _bell, "鐘")
+	b_bell = btn(Rect2(), "Bell [5]", _bell, "鐘")   # _sync lays out the row of techniques
 	b_goal = btn(Rect2(536, 34, 108, 40), "Goal", func(): _brief(false), "問")
 	b_end = btn(Rect2(PX, 526, 264, 50), "Sheathe  [Space]", _end, "納刀")
 	b_undo = btn(Rect2(PX + 276, 526, 264, 50), "Undo  [Z]", _undo, "戻")
@@ -122,16 +123,17 @@ func setup():
 			kinds.append(y.kind)
 	_brief(true)
 
-# the Restart button and key: on the pilgrimage, starting a temple again costs a staff
-# Walking out of a temple once a step has been painted is the same as giving it up.
+# Walking out of a temple that is lost, or begun and not won, is the same as giving it up.
 func _leave():
-	if kind_of == "henro" and not done and (s.turn > 0 or s.visited.size() > 1):
+	if kind_of == "henro" and s.status != "won" and (done or s.turn > 0 or not hist.is_empty()):
 		main.henro_spend()
 	back.call()
 
 # Lay out the card. first = the stage is opening (new things are noted as met); otherwise it has
 # been asked for again, and shows everything.
 func _brief(first):
+	if done:
+		return
 	var big = main.touch
 	var goal = "Fell every yokai."
 	if rules.has("koan"):
@@ -226,9 +228,11 @@ func _draw_card(f):
 	draw_rect(Rect2(r.position.x + 30.0, r.end.y - 14.0, (r.size.x - 60.0) * clamp(1.0 - card_t / card_len, 0.0, 1.0), 4.0), Ink.a(Ink.SHU, 0.7 * fade))
 	Ink.text(self, f, Vector2(r.position.x, r.end.y - 20.0), "tap to close" if main.touch else "any key or click", 18 if main.touch else 12, Ink.a(Ink.SUMI, 0.5 * fade), HORIZONTAL_ALIGNMENT_RIGHT, r.size.x - 30.0)
 
+# The Restart button and key. On the pilgrimage, starting a temple again costs a staff.
 func _retry():
 	if kind_of == "henro":
-		on_fail.call()
+		if s.status != "won":
+			on_fail.call()
 	else:
 		_restart()
 
@@ -236,6 +240,13 @@ func _restart():
 	s = Sim.new_state(lv.rows, main.stats_for(idx) if custom == null else Data.base_stats(lv), rules)
 	s["paths"] = []
 	s["spent"] = 0
+	ki_max = s.ki
+	last_inked = s.inked
+	walk = []
+	aim = {}
+	later = []
+	shake = 0.0
+	flash = 0.0
 	undos = 0
 	starts += 1
 	born_t = time
@@ -287,7 +298,8 @@ func _sync():
 	dng = {} if done else Sim.danger(s)
 	_guide_update()
 	b_undo.on = _can_undo()
-	b_restart.on = true
+	b_goal.on = not done
+	b_restart.on = not (kind_of == "henro" and s.status == "won")
 
 func _mode(m):
 	mode = "" if mode == m else m
@@ -359,7 +371,7 @@ func _after(ok, quiet = "step"):
 		if e.t == "kill":
 			fx.append({"k": "kill", "pos": Vector2(e.pos), "life": 0.8, "max": 0.8, "wait": wait})
 		elif e.t == "cut":
-			fx.append({"k": "cut", "pos": Vector2(e.pos), "life": 0.4, "max": 0.4, "n": e.dmg})
+			fx.append({"k": "cut", "pos": Vector2(e.pos), "life": 0.4, "max": 0.4})
 		elif e.t == "hit":
 			fx.append({"k": "hit", "pos": Vector2(e.src), "life": 0.5, "max": 0.5})
 			if main.data.opts.motion:
@@ -427,7 +439,7 @@ func _play_tokens(st, stroke, track):
 # when it cannot be shown.
 func _master_line():
 	_clear_hint()
-	if s.visited.size() > 1 or s.ink != s.ink_max:
+	if not hist.is_empty():
 		return "Finish or undo this stroke first; the master shows whole strokes."
 	var strokes = lv.get("sol", "").split(" / ")
 	var ref = Sim.new_state(lv.rows, Data.base_stats(lv), rules)
@@ -453,7 +465,7 @@ func _guide_update():
 	guide_msg = ""
 	if not guide or done:
 		return
-	if s.visited.size() == 1 and s.ink == s.ink_max:
+	if hist.is_empty():
 		var why = _master_line()
 		if why == "":
 			guide_msg = "Paint the dotted stroke: click or drag from tile to tile, or use the arrow keys."
@@ -502,7 +514,7 @@ func _end():
 	if done:
 		return
 	_clear_hint()
-	_push()
+	hist = []   # a sheathed stroke is committed: nothing before it can be taken back
 	s.paths.append(s.visited.duplicate())
 	if s.visited.size() > 1 and main.data.opts.motion:
 		var tip = s.visited[s.visited.size() - 1]
@@ -512,14 +524,10 @@ func _end():
 	_after(true, "sheathe")
 	ending = false
 
-# May the last thing done be taken back? Only within the stroke in hand: a stroke once sheathed
-# is committed. With the Undo setting at "never", not at all.
+# May the last thing done be taken back? Only within the stroke in hand (`hist` holds that stroke
+# alone). With the Undo setting at "never", not at all; and a pilgrim does not take a step back.
 func _can_undo():
-	if hist.is_empty() or grade == "jouzu" or grade == "ka" or kind_of == "henro":
-		return false   # a pilgrim does not take a step back
-	if int(main.data.opts.undo) == 2:
-		return false
-	return s.status == "play" and int(hist.back().turn) == int(s.turn)
+	return not hist.is_empty() and s.status == "play" and kind_of != "henro" and int(main.data.opts.undo) != 2
 
 func _undo():
 	if not _can_undo():
@@ -527,13 +535,9 @@ func _undo():
 	s = hist.pop_back()
 	undos += 1
 	mode = ""
-	_clear_hint()
-	if done:
-		done = false
-		grade = ""
-		for b in extra:
-			btns.erase(b)
-		extra = []
+	last_inked = s.inked
+	if not guide:
+		_clear_hint()
 	_sync()
 
 func _finish():
@@ -578,11 +582,11 @@ func _finish():
 		if kind_of == "henro":
 			extra.append(btn(Rect2(250, 440, 200, 54), "Rise", on_fail, "起"))
 			return
-		if _can_undo():
-			extra.append(btn(Rect2(250, 440, 200, 54), "Take it back", _undo, "戻"))
-			extra.append(btn(Rect2(250, 506, 200, 46), "Restart", _restart))
-		else:
-			extra.append(btn(Rect2(250, 452, 200, 60), "Begin again", _restart, "再"))
+		extra.append(btn(Rect2(250, 452, 200, 60), "Begin again", _restart, "再"))
+
+# Is mastery still within reach (or, once the stage is done, was it kept)?
+func _on_par():
+	return s.hits == 0 and s.turn + (0 if done else 1) <= lv.par
 
 func tile_at(pos):
 	var p = (pos - ORG) / TS
@@ -610,19 +614,17 @@ func swallow(pos, _button):
 	return mine
 
 func on_click(pos, button):
-	if not card.is_empty():
-		card = []
-		if main.touch:
-			return   # on a phone the first touch only puts the card away
+	card = []
 	if button == MOUSE_BUTTON_RIGHT:
 		_undo()
 		return
 	if button == MOUSE_BUTTON_LEFT:
+		painting = true
 		last_drag = tile_at(pos)
 		_try_tile(last_drag)
 
 func on_motion(pos, held):
-	if not held or mode != "":
+	if not held or not painting or mode != "":
 		return
 	var t = tile_at(pos)
 	if t != last_drag:
@@ -630,7 +632,9 @@ func on_motion(pos, held):
 		_try_tile(t)
 
 func on_key(code):
-	card = []
+	if not card.is_empty() and not done:
+		card = []
+		return   # the key that puts the card away does nothing else
 	match code:
 		KEY_RIGHT, KEY_D: _dir(Vector2i(1, 0))
 		KEY_LEFT, KEY_A: _dir(Vector2i(-1, 0))
@@ -639,7 +643,8 @@ func on_key(code):
 		KEY_SPACE, KEY_ENTER: _end()
 		KEY_Z, KEY_BACKSPACE: _undo()
 		KEY_R: _retry()
-		KEY_H: _hint()
+		KEY_H:
+			if b_hint.on: _hint()
 		KEY_1:
 			if b_leap.show and b_leap.on: _mode("leap")
 		KEY_2:
@@ -671,10 +676,11 @@ func tick(dt):
 		walk.pop_front()
 	if walk.is_empty():
 		aim = {}
-	for snd in later:
-		if snd.at <= walk_t:
-			main.sfx(snd.nm)
-	later = later.filter(func(snd): return snd.at > walk_t)
+	if not later.is_empty():
+		for snd in later:
+			if snd.at <= walk_t:
+				main.sfx(snd.nm)
+		later = later.filter(func(snd): return snd.at > walk_t)
 	var kk = 1.0 - exp(-dt * (26.0 if not aim.is_empty() else 18.0))
 	for y in s.yokai:
 		if not disp.has(y.id):
@@ -682,12 +688,13 @@ func tick(dt):
 		disp[y.id] = disp[y.id].lerp(aim.get(y.id, Vector2(y.pos)), kk)
 	shake = max(0.0, shake - dt)
 	flash = max(0.0, flash - dt)
-	for e in fx:
-		if e.get("wait", 0.0) > 0.0:
-			e.wait -= dt
-		else:
-			e.life -= dt
-	fx = fx.filter(func(e): return e.life > 0.0)
+	if not fx.is_empty():
+		for e in fx:
+			if e.get("wait", 0.0) > 0.0:
+				e.wait -= dt
+			else:
+				e.life -= dt
+		fx = fx.filter(func(e): return e.life > 0.0)
 
 func ctr(p):
 	return ORG + (Vector2(p) + Vector2(0.5, 0.5)) * TS
@@ -1111,9 +1118,9 @@ func _pips(f, y, kanji, label, n, mx, col):
 # arm's length. Everything explanatory is in the card.
 func _panel_phone(f):
 	Ink.text(self, f, Vector2(PX, 62), "Stroke %d" % (s.turn + (0 if done else 1)), 40, Ink.SUMI)
-	var ok = s.turn < lv.par and s.hits == 0
+	var ok = _on_par()
 	Ink.text(self, f, Vector2(PX + 250, 60), "上手 within %d" % lv.par, 30, Ink.SHU if ok else Ink.a(Ink.SUMI, 0.5))
-	var rows = [["気", s.ki, s.ki + s.hits, Ink.SHU], ["墨", s.ink, Sim.INK_CAP if s.r_stone else max(s.ink_max, s.ink), Ink.SUMI], ["勢", min(2, s.mom), 2, Ink.AI]]
+	var rows = [["気", max(0, s.ki), ki_max, Ink.SHU], ["墨", s.ink, Sim.INK_CAP if s.r_stone else max(s.ink_max, s.ink), Ink.SUMI], ["勢", min(2, s.mom), 2, Ink.AI]]
 	for k in range(rows.size()):
 		var y = 130.0 + k * 66.0
 		Ink.text(self, f, Vector2(PX, y + 16), rows[k][0], 46, Ink.SUMI)
@@ -1159,8 +1166,8 @@ func _panel(f):
 		_panel_phone(f)
 		return
 	Ink.text(self, f, Vector2(PX, 52), "Stroke %d" % (s.turn + (0 if done else 1)), 26, Ink.SUMI)
-	Ink.text(self, f, Vector2(PX + 150, 52), "上手 mastery: within %d, unharmed" % lv.par, 17, Ink.SHU if (s.turn < lv.par and s.hits == 0) else Ink.a(Ink.SUMI, 0.5))
-	_pips(f, 96, "気", "Ki", s.ki, s.ki + s.hits, Ink.SHU)
+	Ink.text(self, f, Vector2(PX + 150, 52), "上手 mastery: within %d, unharmed" % lv.par, 17, Ink.SHU if _on_par() else Ink.a(Ink.SUMI, 0.5))
+	_pips(f, 96, "気", "Ki", max(0, s.ki), ki_max, Ink.SHU)
 	_pips(f, 134, "墨", "Ink", s.ink, Sim.INK_CAP if s.r_stone else max(s.ink_max, s.ink), Ink.SUMI)
 	_pips(f, 172, "勢", "Momentum", min(2, s.mom), 2, Ink.AI)
 	Ink.text(self, f, Vector2(PX + 230, 170), "a straight cut now deals %d" % min(3, 1 + s.mom), 16, Ink.a(Ink.SUMI, 0.7))

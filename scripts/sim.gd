@@ -542,7 +542,7 @@ static func end_stroke(s):
 				s.yokai.append({"id": s.next_id, "ch": "e", "kind": "hitodama", "hp": 1, "max": 1, "pos": p, "down": false})
 				s.next_id += 1
 		s.revive = []
-	if s.yokai.is_empty() and not s.r_write:
+	if s.yokai.is_empty() and not s.r_write and not s.r_gate:
 		_won(s)
 		return
 	if s.r_wet:
@@ -557,7 +557,7 @@ static func end_stroke(s):
 		for i in range(s.yokai.size() - 1, -1, -1):
 			if reaches(s, al.kind, al.pos, s.yokai[i].pos):
 				_hurt(s, i, 1)
-	if s.yokai.is_empty() and not s.r_write:
+	if s.yokai.is_empty() and not s.r_write and not s.r_gate:
 		_won(s)
 		return
 	var struck = []
@@ -596,7 +596,7 @@ static func end_stroke(s):
 				s.yokai.remove_at(yi)
 				_gone(s, y)
 				s.events.append({"t": "kill", "pos": v, "kind": y.kind, "dmg": 0})
-	if fell and s.yokai.is_empty() and not s.r_write and s.ki > 0:
+	if fell and s.yokai.is_empty() and not s.r_write and not s.r_gate and s.ki > 0:
 		_won(s)
 		return
 	s.turn += 1

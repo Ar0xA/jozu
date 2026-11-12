@@ -24,6 +24,8 @@ var st = {}            # the board being made: rows, waza, rules, ink, par
 var tool = "#"
 var note = "stone"
 var msg = ""
+var dirty = false     # the board has changed since it was last saved
+var dirty_at = 0.0
 var line
 var tool_btns = {}
 var rule_btns = {}
@@ -143,7 +145,8 @@ func _sync():
 	msg = _problem()
 	line.text = main.board_code(st) if (msg == "" and int(st.par) > 0) else ""
 	main.data.mine = main.board_code(st)
-	main.write_save()
+	dirty = true
+	dirty_at = time
 
 func _changed():
 	st.par = 0   # a changed board must be cleared again before it can be given away
@@ -174,7 +177,7 @@ func _waza(w):
 	_changed()
 
 func _ink(d):
-	st.ink = clamp(int(st.ink) + d, 2, 12)
+	st.ink = clamp(int(st.ink) + d, 1, 40)   # the range a share code can carry
 	_changed()
 
 func _clear():
@@ -228,7 +231,7 @@ func _test():
 	var lv = main.board_level(st)
 	lv["kanji"] = "自作"
 	lv["name"] = "A board from the workshop"
-	lv["hint"] = "Clear it and it can be given away as a code. Your stroke count becomes its mastery target."
+	lv["hint"] = "Clear it unharmed and it can be given away as a code. Your stroke count becomes its mastery target."
 	if int(st.par) > 0:
 		lv["hint"] = "Mastery here asks %d stroke%s, unharmed." % [int(st.par), "" if int(st.par) == 1 else "s"]
 	main.show_custom(lv, "custom", "Workshop", main.mine_won, Callable(), main.show_editor)
@@ -242,8 +245,8 @@ func _paint(pos):
 		for y in range(7):
 			st.rows[y] = st.rows[y].replace("H", ".")
 	var row = st.rows[t.y]
-	if row[t.x] == tool:
-		return
+	if row[t.x] == tool or row[t.x] == "H":
+		return   # Suzu is moved by placing her elsewhere, never painted over
 	st.rows[t.y] = row.substr(0, t.x) + tool + row.substr(t.x + 1)
 	_changed()
 
@@ -314,7 +317,7 @@ func _draw():
 		draw_btns()
 		return
 	Ink.text(self, f, Vector2(PX, 80), "Ground", 16, Ink.a(Ink.SUMI, 0.7))
-	Ink.text(self, f, Vector2(PX + 320, 118), "brush: " + note, 16, Ink.SHU)
+	Ink.text(self, f, Vector2(PX + 90, 80), "brush: " + note, 16, Ink.SHU)
 	Ink.text(self, f, Vector2(PX, 152), "Suzu and the yokai  (click or drag on the board to place)", 16, Ink.a(Ink.SUMI, 0.7))
 	Ink.text(self, f, Vector2(PX, 272), "Rules of the stage", 16, Ink.a(Ink.SUMI, 0.7))
 	Ink.text(self, f, Vector2(PX, 388), "Techniques", 16, Ink.a(Ink.SUMI, 0.7))
@@ -325,3 +328,18 @@ func _draw():
 		status = "Cleared in %d stroke%s. The code below is ready to give away." % [int(st.par), "" if int(st.par) == 1 else "s"] if int(st.par) > 0 else "Ready. Play it and clear it to turn it into a code."
 	Ink.para(self, f, Vector2(PX, 462), status, 16, Ink.a(Ink.SHU, 0.95), 540)
 	draw_btns()
+
+
+# the board is saved once the brush has rested a moment, and when the workshop is left
+func _process(dt):
+	super(dt)
+	if dirty and time - dirty_at > 0.5:
+		_save()
+
+func _exit_tree():
+	if dirty:
+		_save()
+
+func _save():
+	dirty = false
+	main.write_save()

@@ -1,7 +1,8 @@
 // Jozu level generator and exact solver.
 //
 //   dotnet run -c Release --project tools/gen -- solve in.json out.json
-//   dotnet run -c Release --project tools/gen -- gen out.json [seed]
+//   dotnet run -c Release --project tools/gen -- gen out.json [seed]             the story chapters
+//   dotnet run -c Release --project tools/gen -- gen out.json seed pool [chapter]  a pool for the style chapters
 //
 // The rules here are a line-for-line port of scripts/sim.gd. tools/verify.gd replays every
 // solution this program finds inside the real game rules, so the two cannot drift apart unnoticed.
@@ -411,14 +412,14 @@ sealed class Sim
             }
             s.revive = 0;
         }
-        if (s.n == 0 && !rWrite) { Won(s); return; }
+        if (s.n == 0 && !rWrite && !rGate) { Won(s); return; }
         if (rWet) s.wet = s.visited & ~Bit(s.hx, s.hy);
         for (int i = 0; i < s.n; i++)
             if (Hidden(s, i) && Math.Abs(s.yx[i] - s.hx) + Math.Abs(s.yy[i] - s.hy) == 1) s.yc[i] = 'A';
         for (int a = 0; a < s.na; a++)
             for (int i = s.n - 1; i >= 0; i--)
                 if (Reaches(s, s.ak[a], s.ax[a], s.ay[a], s.yx[i], s.yy[i])) Hurt(s, i, 1);
-        if (s.n == 0 && !rWrite) { Won(s); return; }
+        if (s.n == 0 && !rWrite && !rGate) { Won(s); return; }
         ulong struck = 0;
         for (int i = 0; i < s.n; i++)
             if (Threatens(s, i, s.hx, s.hy))
@@ -449,7 +450,7 @@ sealed class Sim
                 int yi = YokaiAt(s, vx, vy);
                 if (yi >= 0 && Kind(s.yc[yi]) != "kappa" && !Ghost(Kind(s.yc[yi])) && !Sealed(yi)) { Gone(s, yi); s.RemoveAt(yi); }
             }
-            if (fell && s.n == 0 && !rWrite && s.ki > 0) { Won(s); return; }
+            if (fell && s.n == 0 && !rWrite && !rGate && s.ki > 0) { Won(s); return; }
         }
         s.turn++; s.ink = rStone ? Math.Min(8, s.inkMax + s.ink) : s.inkMax; s.mom = 0; s.mdx = 0; s.mdy = 0;
         s.visited = Bit(s.hx, s.hy);
@@ -1163,6 +1164,6 @@ static class Program
         Console.OutputEncoding = Encoding.UTF8;
         if (a.Length >= 3 && a[0] == "solve") Gen.SolveFile(a[1], a[2]);
         else if (a.Length >= 2 && a[0] == "gen") Gen.Generate(a[1], a.Length > 2 ? int.Parse(a[2]) : 1, a.Length > 3 && a[3] == "pool", a.Length > 4 ? int.Parse(a[4]) : -1);
-        else Console.WriteLine("usage: solve in.json out.json | gen out.json [seed]");
+        else Console.WriteLine("usage: solve in.json out.json | gen out.json [seed [pool [chapter]]]");
     }
 }

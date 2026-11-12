@@ -122,7 +122,7 @@ def sakura():
         t = rep * (total + 2.4)
         bt = 0.0
         for i, (nt, b) in enumerate(tune):
-            f = hz(nt) * (1 if rep == 0 else 1)
+            f = hz(nt)
             m.add(t, pluck(f, min(3.2, b * beat + 1.6), bright=0.55, amp=0.9))
             if rep == 1 and b >= 1:          # second time: octave answer under the tune
                 m.add(t + beat * 0.5, pluck(f / 2, 2.4, bright=0.3, amp=0.42))

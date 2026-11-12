@@ -1,6 +1,6 @@
 extends RefCounted
-# Brush, pigment and figures. Everything in Jōzu is painted here with code:
-# sumi ink on washi, a handful of mineral pigments, gold mist, and a vermilion seal.
+# Brush and pigment. The board, its ground and the calligraphy are painted here with code: sumi ink
+# on washi, a handful of mineral pigments, and a vermilion seal. (The figures are old paintings.)
 
 const PAPER = Color(0.925, 0.878, 0.76)
 const PAPER_D = Color(0.855, 0.795, 0.655)
@@ -10,7 +10,6 @@ const AI = Color(0.17, 0.25, 0.40)      # indigo
 const KIN = Color(0.78, 0.62, 0.27)     # gold
 const MATSU = Color(0.26, 0.36, 0.28)   # pine green
 const GOFUN = Color(0.97, 0.95, 0.90)   # shell white
-const HADA = Color(0.94, 0.85, 0.72)    # skin
 
 static func a(col, alpha):
 	return Color(col.r, col.g, col.b, alpha)
@@ -411,82 +410,6 @@ static func seal(ci, font, c, size, kanji, col = SHU):
 	for i in range(n):
 		ci.draw_string(font, Vector2(r.position.x, r.position.y + size * 0.92 + i * size * 0.9), kanji[i], HORIZONTAL_ALIGNMENT_CENTER, r.size.x, size * 0.8, GOFUN)
 
-# mist: bare paper left between washes, where the mountains dissolve
-static func mist(ci, x, y, w, h, alpha = 0.28):
-	var col = Color(0.945, 0.905, 0.80)
-	var al = clamp(alpha * 3.3, 0.0, 0.95)
-	var xs = [x, x + w * 0.25, x + w * 0.75, x + w]
-	var ys = [y - h * 0.9, y + h * 0.5, y + h * 1.9]
-	for i in range(3):
-		for j in range(2):
-			var ps = PackedVector2Array()
-			var cs = PackedColorArray()
-			for k in [[i, j], [i + 1, j], [i + 1, j + 1], [i, j + 1]]:
-				ps.append(Vector2(xs[k[0]], ys[k[1]]))
-				cs.append(a(col, al if ((k[0] == 1 or k[0] == 2) and k[1] == 1) else 0.0))
-			ci.draw_polygon(ps, cs)
-	blot(ci, Vector2(x + w * 0.5, y + h * 0.5), w * 0.42, h * 0.9, KIN, alpha * 0.45)
-
-# a mountain in wash: dark at the ridge, thinning to nothing where the mist takes it
-static func mountain(ci, base, w, h, col, snow = false, sd = 7):
-	var rng = RandomNumberGenerator.new()
-	rng.seed = sd + int(w) * 13
-	var n = 40
-	var ridge = PackedVector2Array()
-	var prof = []
-	var jag = 0.0
-	for i in range(n + 1):
-		var u = 2.0 * i / n - 1.0
-		var pr = 0.0
-		if snow:
-			pr = min(pow(1.0 - abs(u), 1.8), 0.9) / 0.9
-		else:
-			jag = lerp(jag, rng.randf_range(-1.0, 1.0), 0.65)
-			pr = pow(1.0 - abs(u), 1.2) * (0.80 + 0.22 * jag)
-		prof.append(pr)
-		ridge.append(base + Vector2(u * w * 0.5, -max(h * pr, 3.0)))
-	var clear = a(col, 0.0)
-	for i in range(n):
-		ci.draw_polygon(PackedVector2Array([ridge[i], ridge[i + 1], Vector2(ridge[i + 1].x, base.y), Vector2(ridge[i].x, base.y)]),
-			PackedColorArray([col, col, clear, clear]))
-	if snow:
-		var cap = PackedVector2Array()
-		var lo = []
-		for i in range(n + 1):
-			if prof[i] > 0.78:
-				cap.append(ridge[i])
-				lo.append(Vector2(ridge[i].x, base.y - h * (0.72 - 0.07 * (cap.size() % 2))))
-		lo.reverse()
-		for p in lo:
-			cap.append(p)
-		if cap.size() >= 6:
-			ci.draw_colored_polygon(cap, Color(0.96, 0.94, 0.88, 0.95))
-	else:
-		for i in range(4, n - 3, 3):
-			var st = ridge[i] + Vector2(0, h * 0.03)
-			ci.draw_line(st, st + Vector2(rng.randf_range(-0.03, 0.03) * w, h * rng.randf_range(0.08, 0.24)), a(SUMI, min(0.5, col.a * 0.7)), 1.6, true)
-	var line = []
-	for i in range(2, n - 1):
-		line.append(ridge[i])
-	brush(ci, line, 2.0 + h * 0.012, a(SUMI, clamp(col.a * 1.25, 0.15, 0.85)))
-
-# pine: a bent trunk and fans of needles, each needle one flick
-static func pine(ci, base, s):
-	var trunk = [base, base + Vector2(s * 0.06, -s * 0.25), base + Vector2(-s * 0.05, -s * 0.5), base + Vector2(s * 0.08, -s * 0.75), base + Vector2(s * 0.02, -s)]
-	brush(ci, trunk, s * 0.11, SUMI)
-	var tips = [Vector2(-0.36, -0.60), Vector2(0.38, -0.80), Vector2(-0.24, -0.96), Vector2(0.14, -1.08)]
-	var roots = [trunk[2], trunk[3], trunk[4], trunk[4]]
-	var needle = Color(0.09, 0.16, 0.12, 0.9)
-	for i in range(4):
-		var tip = base + tips[i] * s
-		var mid = (roots[i] + tip) * 0.5 + Vector2(0, -s * 0.03)
-		brush(ci, [roots[i], mid, tip], s * 0.045, SUMI)
-		for c in [tip, mid]:
-			blot(ci, c + Vector2(0, -s * 0.05), s * 0.22, s * 0.12, MATSU, 0.6)
-			for k in range(13):
-				var ang = -PI + PI * (k + 0.5) / 13.0
-				ci.draw_line(c, c + Vector2(cos(ang), sin(ang) * 0.8) * s * 0.17, needle, max(1.0, s * 0.012), true)
-
 static func sun(ci, c, r):
 	blot(ci, c, r * 1.5, r * 1.5, SHU, 0.22)
 	ci.draw_circle(c, r, a(SHU, 0.93))
@@ -672,148 +595,3 @@ static func hp_pips(ci, c, s, hp, mx):
 			ci.draw_circle(p, s * 0.05, SUMI)
 		else:
 			ci.draw_arc(p, s * 0.045, 0, TAU, 12, a(SUMI, 0.5), 1.2, true)
-
-static func person(ci, c, s, robe, hat, bald = false):
-	# robe with hanging sleeves
-	blob(ci, PackedVector2Array([c + Vector2(-s * 0.10, -s * 0.10), c + Vector2(s * 0.10, -s * 0.10), c + Vector2(s * 0.31, s * 0.07),
-		c + Vector2(s * 0.25, s * 0.19), c + Vector2(s * 0.15, s * 0.11), c + Vector2(s * 0.22, s * 0.38), c + Vector2(-s * 0.22, s * 0.38),
-		c + Vector2(-s * 0.15, s * 0.11), c + Vector2(-s * 0.25, s * 0.19), c + Vector2(-s * 0.31, s * 0.07)]), robe, 2.2)
-	brush(ci, [c + Vector2(-s * 0.07, -s * 0.09), c + Vector2(-s * 0.01, s * 0.02), c + Vector2(s * 0.04, s * 0.14)], s * 0.035, a(GOFUN, 0.9))
-	brush(ci, [c + Vector2(-s * 0.17, s * 0.16), c + Vector2(0, s * 0.175), c + Vector2(s * 0.17, s * 0.16)], s * 0.06, SHU if not bald else KIN)
-	# head
-	oval(ci, c + Vector2(0, -s * 0.2), s * 0.11, s * 0.12, HADA, 1.8)
-	if bald:
-		ci.draw_arc(c + Vector2(0, -s * 0.16), s * 0.05, 0.2, PI - 0.2, 8, SUMI, 1.5, true)
-		ci.draw_line(c + Vector2(-s * 0.07, -s * 0.22), c + Vector2(-s * 0.02, -s * 0.21), SUMI, 1.5, true)
-		ci.draw_line(c + Vector2(s * 0.07, -s * 0.22), c + Vector2(s * 0.02, -s * 0.21), SUMI, 1.5, true)
-	elif not hat:
-		ci.draw_colored_polygon(ell(c + Vector2(0, -s * 0.22), s * 0.125, s * 0.12, 14, PI, TAU), SUMI)
-	if hat:
-		# sedge hat: a shallow curve, not a triangle
-		var top = PackedVector2Array()
-		for k in range(11):
-			var x = lerp(-0.30, 0.30, k / 10.0)
-			top.append(c + Vector2(x * s, -s * (0.21 + 0.20 * pow(1.0 - pow(abs(x) / 0.30, 1.6), 0.9))))
-		for k in range(5):
-			var x = lerp(0.24, -0.24, k / 4.0)
-			top.append(c + Vector2(x * s, -s * (0.20 - 0.025 * (1.0 - pow(x / 0.24, 2)))))
-		blob(ci, top, Color(0.78, 0.65, 0.40), 1.8)
-		for k in [-0.16, -0.06, 0.06, 0.16]:
-			ci.draw_line(c + Vector2(k * s * 0.2, -s * 0.40), c + Vector2(k * s, -s * 0.215), a(SUMI, 0.35), 1.0, true)
-
-static func hero(ci, c, s):
-	# the brush-blade, carried over the shoulder
-	brush(ci, [c + Vector2(s * 0.10, s * 0.14), c + Vector2(s * 0.26, -s * 0.10), c + Vector2(s * 0.39, -s * 0.30)], s * 0.045, Color(0.42, 0.28, 0.17))
-	brush(ci, [c + Vector2(s * 0.37, -s * 0.27), c + Vector2(s * 0.42, -s * 0.36), c + Vector2(s * 0.47, -s * 0.47)], s * 0.10, SUMI)
-	person(ci, c, s, AI, true)
-
-static func chochin(ci, c, s, t):
-	var cc = c + Vector2(0, sin(t * 2.0) * s * 0.02)
-	ci.draw_circle(cc, s * 0.36, a(Color(0.95, 0.6, 0.2), 0.16))
-	oval(ci, cc, s * 0.22, s * 0.27, Color(0.93, 0.74, 0.42), 2.0)
-	for i in range(-2, 3):
-		var yy = i * s * 0.085
-		var hw = s * 0.22 * sqrt(max(0.0, 1.0 - pow(yy / (s * 0.27), 2)))
-		ci.draw_line(cc + Vector2(-hw, yy), cc + Vector2(hw, yy), a(SUMI, 0.35), 1.2, true)
-	ci.draw_rect(Rect2(cc + Vector2(-s * 0.1, -s * 0.31), Vector2(s * 0.2, s * 0.06)), SUMI)
-	ci.draw_rect(Rect2(cc + Vector2(-s * 0.1, s * 0.25), Vector2(s * 0.2, s * 0.05)), SUMI)
-	ci.draw_circle(cc + Vector2(0, -s * 0.07), s * 0.075, GOFUN)
-	ci.draw_circle(cc + Vector2(0.0, -s * 0.06), s * 0.035, SUMI)
-	ci.draw_colored_polygon(ell(cc + Vector2(0, s * 0.07), s * 0.11, s * 0.05, 10, 0, PI), SUMI)
-	blob(ci, PackedVector2Array([cc + Vector2(-s * 0.05, s * 0.08), cc + Vector2(s * 0.05, s * 0.08), cc + Vector2(s * 0.04, s * 0.22), cc + Vector2(-s * 0.03, s * 0.22)]), SHU, 1.2)
-
-static func oni(ci, c, s, big):
-	var col = Color(0.72, 0.22, 0.16)
-	if big:
-		col = Color(0.22, 0.33, 0.52)
-	for sx in [-1.0, 1.0]:
-		blob(ci, PackedVector2Array([c + Vector2(sx * s * 0.22, -s * 0.20), c + Vector2(sx * s * 0.30, -s * 0.44), c + Vector2(sx * s * 0.08, -s * 0.26)]), GOFUN, 1.5)
-	ci.draw_colored_polygon(ell(c + Vector2(0, -s * 0.1), s * 0.33, s * 0.26, 14, PI, TAU), SUMI)
-	oval(ci, c + Vector2(0, s * 0.03), s * 0.30, s * 0.28, col, 2.2)
-	for sx in [-1.0, 1.0]:
-		ci.draw_circle(c + Vector2(sx * s * 0.12, -s * 0.03), s * 0.06, GOFUN)
-		ci.draw_circle(c + Vector2(sx * s * 0.11, -s * 0.02), s * 0.026, SUMI)
-		ci.draw_line(c + Vector2(sx * s * 0.21, -s * 0.15), c + Vector2(sx * s * 0.04, -s * 0.08), SUMI, 3.5, true)
-		blob(ci, PackedVector2Array([c + Vector2(sx * s * 0.07, s * 0.14), c + Vector2(sx * s * 0.13, s * 0.14), c + Vector2(sx * s * 0.10, s * 0.05)]), GOFUN, 1.0)
-	ci.draw_arc(c + Vector2(0, s * 0.10), s * 0.15, 0.25, PI - 0.25, 12, SUMI, 2.5, true)
-	if big:
-		ci.draw_circle(c + Vector2(0, -s * 0.2), s * 0.035, KIN)
-
-static func tengu(ci, c, s, big):
-	for sx in [-1.0, 1.0]:
-		ci.draw_colored_polygon(PackedVector2Array([c + Vector2(sx * s * 0.16, -s * 0.02), c + Vector2(sx * s * 0.44, -s * 0.24), c + Vector2(sx * s * 0.40, s * 0.02),
-			c + Vector2(sx * s * 0.42, s * 0.2), c + Vector2(sx * s * 0.18, s * 0.2)]), SUMI)
-	blob(ci, PackedVector2Array([c + Vector2(-s * 0.16, s * 0.1), c + Vector2(s * 0.16, s * 0.1), c + Vector2(s * 0.22, s * 0.36), c + Vector2(-s * 0.22, s * 0.36)]),
-		KIN if big else GOFUN, 2.0)
-	oval(ci, c + Vector2(0, -s * 0.08), s * 0.2, s * 0.21, Color(0.78, 0.2, 0.14), 2.0)
-	ci.draw_rect(Rect2(c + Vector2(-s * 0.06, -s * 0.36), Vector2(s * 0.12, s * 0.09)), SUMI)
-	for sx in [-1.0, 1.0]:
-		ci.draw_line(c + Vector2(sx * s * 0.16, -s * 0.2), c + Vector2(sx * s * 0.04, -s * 0.14), GOFUN, 3.5, true)
-		ci.draw_circle(c + Vector2(sx * s * 0.09, -s * 0.1), s * 0.024, SUMI)
-	ci.draw_line(c + Vector2(0, -s * 0.06), c + Vector2(s * 0.24, s * 0.04), SUMI, s * 0.085, true)
-	ci.draw_line(c + Vector2(0, -s * 0.06), c + Vector2(s * 0.23, s * 0.035), Color(0.84, 0.26, 0.18), s * 0.055, true)
-	ci.draw_line(c + Vector2(-s * 0.08, s * 0.06), c + Vector2(s * 0.06, s * 0.06), SUMI, 2.0, true)
-
-static func fox_head(ci, c, s, fur):
-	for sx in [-1.0, 1.0]:
-		blob(ci, PackedVector2Array([c + Vector2(sx * s * 0.06, -s * 0.16), c + Vector2(sx * s * 0.2, -s * 0.4), c + Vector2(sx * s * 0.24, -s * 0.1)]), fur, 2.0)
-		ci.draw_colored_polygon(PackedVector2Array([c + Vector2(sx * s * 0.12, -s * 0.18), c + Vector2(sx * s * 0.19, -s * 0.33), c + Vector2(sx * s * 0.21, -s * 0.15)]), SHU)
-	blob(ci, PackedVector2Array([c + Vector2(-s * 0.24, -s * 0.12), c + Vector2(0, -s * 0.2), c + Vector2(s * 0.24, -s * 0.12),
-		c + Vector2(s * 0.16, s * 0.08), c + Vector2(0, s * 0.24), c + Vector2(-s * 0.16, s * 0.08)]), fur, 2.0)
-	for sx in [-1.0, 1.0]:
-		ci.draw_line(c + Vector2(sx * s * 0.16, -s * 0.07), c + Vector2(sx * s * 0.05, -s * 0.01), SUMI, 2.5, true)
-		ci.draw_line(c + Vector2(sx * s * 0.19, s * 0.02), c + Vector2(sx * s * 0.1, s * 0.07), SHU, 2.0, true)
-	ci.draw_circle(c + Vector2(0, s * 0.2), s * 0.03, SUMI)
-	ci.draw_circle(c + Vector2(0, -s * 0.1), s * 0.025, SHU)
-
-static func kitsune(ci, c, s, t):
-	var pts = []
-	for i in range(8):
-		var u = i / 7.0
-		pts.append(c + Vector2(s * (0.1 + 0.3 * u), s * (0.3 - 0.45 * u * u) + sin(t * 2.5 + u * 3.0) * s * 0.02))
-	brush(ci, pts, s * 0.16, SUMI)
-	brush(ci, pts, s * 0.11, GOFUN)
-	blob(ci, PackedVector2Array([c + Vector2(-s * 0.14, s * 0.1), c + Vector2(s * 0.14, s * 0.1), c + Vector2(s * 0.18, s * 0.37), c + Vector2(-s * 0.18, s * 0.37)]), GOFUN, 2.0)
-	fox_head(ci, c + Vector2(0, -s * 0.05), s * 0.9, GOFUN)
-
-static func yurei(ci, c, s, t):
-	var cc = c + Vector2(sin(t * 1.4) * s * 0.03, cos(t * 1.9) * s * 0.02)
-	var body = PackedVector2Array([cc + Vector2(-s * 0.13, -s * 0.12), cc + Vector2(s * 0.13, -s * 0.12), cc + Vector2(s * 0.2, s * 0.12),
-		cc + Vector2(s * 0.1, s * 0.26), cc + Vector2(s * 0.14, s * 0.4), cc + Vector2(-s * 0.02, s * 0.3), cc + Vector2(-s * 0.2, s * 0.14)])
-	ci.draw_colored_polygon(body, Color(0.88, 0.92, 0.93, 0.85))
-	var o = PackedVector2Array(body)
-	o.append(body[0])
-	ci.draw_polyline(o, a(AI, 0.7), 1.6, true)
-	ci.draw_colored_polygon(PackedVector2Array([cc + Vector2(-s * 0.17, -s * 0.34), cc + Vector2(s * 0.17, -s * 0.34), cc + Vector2(s * 0.2, s * 0.1),
-		cc + Vector2(s * 0.12, -s * 0.05), cc + Vector2(-s * 0.12, -s * 0.05), cc + Vector2(-s * 0.22, s * 0.14)]), SUMI)
-	oval(ci, cc + Vector2(0, -s * 0.19), s * 0.11, s * 0.12, Color(0.93, 0.95, 0.95), 1.5)
-	blob(ci, PackedVector2Array([cc + Vector2(-s * 0.07, -s * 0.28), cc + Vector2(s * 0.07, -s * 0.28), cc + Vector2(0, -s * 0.42)]), GOFUN, 1.5)
-	for sx in [-1.0, 1.0]:
-		ci.draw_line(cc + Vector2(sx * s * 0.07, -s * 0.2), cc + Vector2(sx * s * 0.025, -s * 0.185), SUMI, 2.0, true)
-	ci.draw_line(cc + Vector2(-s * 0.03, -s * 0.12), cc + Vector2(s * 0.03, -s * 0.12), a(SHU, 0.8), 1.5, true)
-
-static func tamamo(ci, c, s, t):
-	for i in range(9):
-		var ang = -PI * 0.5 + (i - 4) * 0.27 + sin(t * 1.2 + i) * 0.04
-		var pts = []
-		for k in range(7):
-			var u = k / 6.0
-			pts.append(c + Vector2(0, s * 0.2) + Vector2(cos(ang + u * 0.25 * sign(i - 4.0)), sin(ang + u * 0.25 * sign(i - 4.0))) * s * 0.52 * u)
-		brush(ci, pts, s * 0.12, SUMI)
-		brush(ci, pts, s * 0.08, Color(0.90, 0.76, 0.40))
-	blob(ci, PackedVector2Array([c + Vector2(-s * 0.14, s * 0.08), c + Vector2(s * 0.14, s * 0.08), c + Vector2(s * 0.24, s * 0.38), c + Vector2(-s * 0.24, s * 0.38)]), Color(0.55, 0.16, 0.22), 2.0)
-	ci.draw_line(c + Vector2(-s * 0.07, s * 0.09), c + Vector2(s * 0.03, s * 0.3), KIN, 2.5, true)
-	fox_head(ci, c + Vector2(0, -s * 0.04), s * 0.85, Color(0.98, 0.93, 0.80))
-
-static func figure(ci, kind, c, s, t, big = false):
-	match kind:
-		"hero": hero(ci, c, s)
-		"monk": person(ci, c, s, Color(0.42, 0.38, 0.32), false, true)
-		"monk2": person(ci, c, s, Color(0.60, 0.42, 0.18), false, true)
-		"lady": person(ci, c, s, GOFUN, false)
-		"chochin": chochin(ci, c, s, t)
-		"oni": oni(ci, c, s, big)
-		"tengu": tengu(ci, c, s, big)
-		"kitsune": kitsune(ci, c, s, t)
-		"yurei": yurei(ci, c, s, t)
-		"tamamo": tamamo(ci, c, s, t)

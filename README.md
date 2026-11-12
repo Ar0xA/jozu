@@ -2,6 +2,8 @@
 
 A puzzle RPG of single brush strokes, set among the yokai of Heian-era Japan.
 
+![A board in play](docs/board.jpg)
+
 The look comes from real Japanese painting: Hasegawa Tōhaku's *Pine Trees* behind the title,
 Sesshū's Long Scroll unrolling above the road map, and the Muromachi *Hyakki Yagyō Emaki*
 (the Night Parade scroll the story is about) behind the dialogue. All are public domain
@@ -11,7 +13,7 @@ Kyōsai oni, Sōjōbō the tengu, the fox and ghost of the *Bakemono no e* scrol
 and Sekien's lantern ghost. The board and UI are brushed in code and passed through a paint shader that adds ink bleed,
 dry-brush breakup and paper grain.
 
-Open the folder in **Godot 4.3+** (built and tested on 4.7.2) and press Play, or run the line below.
+Open the folder in **Godot 4.7** or later and press Play, or run the line below.
 Export presets for a single Windows executable and for the web are included.
 
     godot --path .
@@ -97,12 +99,13 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
 - **上手 seal** — clear a station unharmed within the mastery stroke count. Always possible with no upgrades.
 - **Training 修練** — points from stations buy ink, ki and extra waza uses. Help for the road, never required.
 
-Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-click undo, `R` restart, `1 2 3` waza, `4` shikigami, `5` bell, `H` ask the master.
+Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-click take back a step of the stroke in hand, `R` restart, `1 2 3` waza, `4` shikigami, `5` bell, `H` ask the master.
 
 ## Files
 
 - `scripts/sim.gd` — the rules, pure and deterministic
-- `scripts/data.gd` — every station, story and text (generated file; edit the sources in `tools/`)
+- `scripts/data.gd` — every station, story and text. The legend and upgrades at its top are written by hand; the chapters and stations below them are written by `tools/build_levels.py`
+- `scripts/extra.gd` — boards outside the story: the daily kōan, the 88 temples, the unmapped road (generated)
 - `scripts/ink.gd` — brushwork drawn in code
 - `shaders/paint.gdshader` — ink bleed, dry brush and paper grain over the whole frame
 - `art/`, `fonts/` — public-domain paintings and the bundled typeface
@@ -110,12 +113,13 @@ Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-clic
 - `tools/web_shell.html` — the web build's loading page (paper, the name, a brush stroke for progress); `art/splash.png` and `art/icon.png` are the splash and the icon
 - `tools/subset_font.py` — trims the typeface to the characters the game uses (the full font is in `fonts/src/`)
 - `tools/make_audio.py` — regenerates the synthesised music and sound effects (needs numpy)
-- `tools/gen/` — level generator and exact solver; `tools/build_levels.py` assembles `scripts/data.gd` from
-  `tools/story_stages.json` (hand-written stages), `tools/generated.json` and `tools/pool.json` (boards the
-  style chapters' ladders are drawn from)
+- `tools/gen/` — level generator and exact solver (.NET 8). `python tools/build_levels.py` assembles the stations from
+  `tools/story_stages.json` (hand-written stages), `hand_solved.json` (their solutions), `generated.json`, `pool.json`
+  and `daily_pool.json` (generated boards)
+- `tools/genweb/` — the same generator compiled to WebAssembly for the unmapped road (.NET 10 with the `wasm-tools` workload)
 - `tools/playtest.gd` — automated playthrough of the real screens: `godot --headless --path . -s tools/playtest.gd`
 - `tools/verify.gd` — replays every stage's stored solution: `godot --headless --path . -s tools/verify.gd`
-- `tools/solve.gd` — headless checker that proves each station solvable: `godot --headless --path . -s tools/solve.gd`
+- `tools/shots.gd` — renders the screenshots in `docs/`
 
 ## Licence
 

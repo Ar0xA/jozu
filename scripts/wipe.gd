@@ -17,10 +17,13 @@ func _len():
 func start(k = "wash"):
 	kind = k
 	t = 0.0
+	mouse_filter = Control.MOUSE_FILTER_STOP
 
 func _process(dt):
 	if t < _len():
 		t += min(dt, 0.034)   # a long first frame must not swallow the whole of it
+		if t >= _len() * 0.6:
+			mouse_filter = Control.MOUSE_FILTER_IGNORE
 		queue_redraw()
 
 func _door(x, left):

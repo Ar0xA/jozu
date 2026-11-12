@@ -7,12 +7,11 @@ const CH = 84.0
 const ORG = Vector2(110, 150)
 var first_day = 0
 var note = ""
-var b_copy
 
 func setup():
 	var t = main.today()
 	first_day = t - ((t + 3) % 7) - (WEEKS - 1) * 7     # the Monday four weeks back
-	b_copy = btn(Rect2(1046, 296, 200, 60) if main.touch else Rect2(1046, 300, 200, 46), "Copy" if main.touch else "Copy the line", _copy, "写")
+	btn(Rect2(1046, 296, 200, 60) if main.touch else Rect2(1046, 300, 200, 46), "Copy" if main.touch else "Copy the line", _copy, "写")
 	btn(Rect2(40, 642, 260, 66) if main.touch else Rect2(40, 656, 220, 46), "Back", main.show_hub, "道")
 
 func _copy():

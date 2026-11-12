@@ -1,5 +1,5 @@
 extends SceneTree
-# Dev tool: renders screens to PNG in user://shots.  godot --path . -s tools/shots.gd
+# Dev tool: renders screens to PNG in user://shots (docs/ holds copies).  godot --path . -s tools/shots.gd
 const Data = preload("res://scripts/data.gd")
 const DIR = {"R": Vector2i(1, 0), "L": Vector2i(-1, 0), "D": Vector2i(0, 1), "U": Vector2i(0, -1)}
 var main
@@ -40,16 +40,12 @@ func _initialize():
 	root.add_child(main)
 	main.erase_save()
 	steps = [
-		["guide", func(): main.show_battle(0)],
-		["guide2", func(): main.show_battle(first(11))],
+		["board", func():
+			main.show_battle(first(3) + 4)
+			main.cur.card = []
+			play(1, 2)],
+		["map", func(): main.show_map()],
 	]
-
-func _fill_scroll():
-	for i in range(first(14), first(14) + 6):
-		main.show_battle(i)
-		play(99, 99)
-	main.show_scroll()
-	main.cur._page(14)
 
 func _process(_dt):
 	n += 1

@@ -1,5 +1,6 @@
 extends "res://scripts/screen_base.gd"
-# Settings: sound, music, motion, a danger mark that does not rely on colour, and the paint filter.
+# Settings: sound, music, motion, a danger mark that does not rely on colour, the paint filter,
+# taking steps back, and the look (Shodō or ornate).
 
 const ROWS = [
 	["sound", "音", "Sound", "Everything you hear."],

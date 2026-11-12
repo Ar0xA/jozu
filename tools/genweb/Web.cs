@@ -7,7 +7,8 @@ using System.Text;
 
 public static partial class Web
 {
-    // The same measure tools/build_levels.py uses to order a chapter's ladder.
+    // The measure tools/build_levels.py orders a chapter's ladder by (koan and garden boards, which
+    // it weighs differently, are not made here).
     static double Difficulty(LevelOut g)
     {
         int ny = g.rows.Sum(l => l.Count(c => Sim.DEF.ContainsKey(c)));
@@ -52,7 +53,7 @@ public static partial class Web
         var r = new Random(seed);
         LevelOut best = null; double bestMiss = 1e9; int tries = 0;
         // master: the chapters in an order both generators share, a slice of the time for each
-        var turn = Enumerable.Range(0, MASTER.Length).OrderBy(_ => 0).ToArray();
+        var turn = Enumerable.Range(0, MASTER.Length).ToArray();
         var shuffle = new Random(order);
         for (int i = turn.Length - 1; i > 0; i--) { int j = shuffle.Next(i + 1); (turn[i], turn[j]) = (turn[j], turn[i]); }
         long slice = Math.Max(8000, budgetMs / 3);

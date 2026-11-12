@@ -2,15 +2,15 @@ extends "res://scripts/screen_base.gd"
 # Title, set on Hasegawa Tohaku's Pine Trees.
 
 var b_new
-var b_snd
 var armed = false
+var armed_at = 0.0
 
 func setup():
 	var has = not main.data.cleared.is_empty()
 	btn(Rect2(940, 444, 290, 58), "Continue the road" if has else "Take up the brush", main.show_map, "旅")
 	b_new = btn(Rect2(940, 516, 290, 50), "Begin anew", _anew, "新")
 	b_new.show = has
-	b_snd = btn(Rect2(940, 588, 290, 44), "Settings", main.show_settings, "設")
+	btn(Rect2(940, 588, 290, 44), "Settings", main.show_settings, "設")
 	if OS.has_feature("web"):  # a browser tab is closed by the browser; offer the whole screen instead
 		btn(Rect2(940, 646, 290, 44), "Full screen", main.toggle_fullscreen, "全")
 	else:
@@ -29,8 +29,11 @@ func _grow():
 func _anew():
 	if not armed:
 		armed = true
+		armed_at = time
 		b_new.label = "Erase all seals? Again"
 		return
+	if time - armed_at < 0.7:
+		return   # the second press of a double-click is not an answer
 	main.erase_save()
 	main.show_title()
 

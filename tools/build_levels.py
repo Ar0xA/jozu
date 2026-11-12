@@ -1,26 +1,34 @@
-"""Assembles scripts/data.gd's LEVELS from the hand-written story stages and the generated boards.
+"""Assembles the game's boards from the hand-written story stages and the generated ones.
 
-    python tools/build_levels.py <hand_blocks.json> <hand_solved.json> <generated.json> [pool.json]
+    python tools/build_levels.py
 
-hand_blocks.json  - the hand-written stages (kanji, name, waza, rows, hint, story, after)
-hand_solved.json  - the same boards solved by tools/gen (par, trace)
-generated.json    - output of `tools/gen gen`
-Writes scripts/data.gd (LEVELS, CHAPTERS, BOSSES, WAZA_FROM) and tools/solutions.json.
+Reads, from tools/:
+  story_stages.json - the hand-written stages (kanji, name, waza, rows, hint, story, after)
+  hand_solved.json  - the same boards solved by `tools/gen solve` (par, trace)
+  generated.json    - the story chapters' boards, from `tools/gen gen generated.json <seed>`
+  pool.json         - boards for the style chapters, from `tools/gen gen pool.json <seed> pool`
+  daily_pool.json   - extra koan boards for the daily bank (optional)
+Four paths given on the command line replace the first four.
+
+Writes the WAZA_FROM, CHAPTERS, BOSSES and LEVELS parts of scripts/data.gd (the rest of that file
+is written by hand) and the whole of scripts/extra.gd.
 """
-import json, re, sys, os
+import json, math, os, re, sys
 
+sys.stdout.reconfigure(encoding='utf-8')
 root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-hand = {b['kanji']: b for b in json.load(open(sys.argv[1], encoding='utf-8'))}
-solved = {''.join(l['rows']): l for l in json.load(open(sys.argv[2], encoding='utf-8'))}
-gen = json.load(open(sys.argv[3], encoding='utf-8'))
-pool = json.load(open(sys.argv[4], encoding='utf-8')) if len(sys.argv) > 4 else []
-import math
+args = sys.argv[1:] or [os.path.join(root, 'tools', n) for n in ('story_stages.json', 'hand_solved.json', 'generated.json', 'pool.json')]
+hand = {b['kanji']: b for b in json.load(open(args[0], encoding='utf-8'))}
+solved = {''.join(l['rows']): l for l in json.load(open(args[1], encoding='utf-8'))}
+gen = json.load(open(args[2], encoding='utf-8'))
+pool = json.load(open(args[3], encoding='utf-8')) if len(args) > 3 else []
+YOKAI = 'coOStTkyQupPnWGdaAeXK'
 
 MAX_PER_STYLE = 18   # the most stages a style chapter may hold
 STYLE_FROM = 10      # chapters from here on are single-style ladders
 
 def n_yokai(g):
-    return sum(ch in 'coOStTkyQupPnWGdaAeXK' for r in g['rows'] for ch in r)
+    return sum(ch in YOKAI for r in g['rows'] for ch in r)
 
 def difficulty(g):
     """How hard a board is to master. Strokes needed count most; then how much there is to search
@@ -90,13 +98,6 @@ LAYOUT = {
     7: ['G0', 'G0', 'G0', 'G0', 'G1', 'G1', 'G1', 'G1', 'G1', 'G2'],
     8: ['G0', 'G0', 'G0', 'G0', 'G0', 'G1', 'G1', 'G1', 'G1', 'G1'],
     9: ['G0', 'G0', 'G0', 'G0', 'G1', 'G1', 'G1', 'G1', 'G2', 'G3'],
-    10: ['G0', 'G0', 'G0', 'G0', 'G1', 'G1', 'G1', 'G2', 'G2', 'G2'],
-    11: ['G0', 'G0', 'G0', 'G0', 'G1', 'G1', 'G1', 'G2', 'G2', 'G2'],
-    12: ['G0', 'G0', 'G0', 'G0', 'G1', 'G1', 'G1', 'G2', 'G2', 'G2'],
-    13: ['G0', 'G0', 'G0', 'G0', 'G1', 'G1', 'G1', 'G2', 'G2', 'G2'],
-    14: ['G0', 'G0', 'G0', 'G0', 'G1', 'G1', 'G1', 'G2', 'G2', 'G2'],
-    15: ['G0', 'G0', 'G0', 'G0', 'G1', 'G1', 'G1', 'G2', 'G2', 'G2'],
-    16: ['G0', 'G0', 'G0', 'G0', 'G1', 'G1', 'G1', 'G2', 'G2', 'G2'],
 }
 
 # In the later chapters the story rides on generated boards: (chapter, segment) -> story stage
@@ -481,7 +482,7 @@ KINDS = {'K': 'kama', 'd': 'daruma', 'a': 'tanuki', 'A': 'tanuki', 'e': 'hitodam
          'u': 'kasa', 'p': 'kappa', 'P': 'kappa', 'n': 'nurikabe', 'W': 'yukionna', 'G': 'gasha', 'Q': 'kitsune'}
 THINGS = set(KINDS.values()) | {'water', 'ice', 'fire', 'rock'}   # what a saying may be about that a board has or has not
 used_says = {}     # saying index -> the chapters it has been used in
-MAX_USES = 4       # a saying may appear three times in the whole game, never twice in one chapter
+MAX_USES = 4       # how often a saying may appear in the whole game; never twice in one chapter
 
 def features(b, trace):
     """What a stage is about: its yokai, its ground, and the shape of its answer."""
@@ -661,7 +662,7 @@ BEATS = {
          [[T, 'Ryōkan is said to have written, near the end: 散る桜 残る桜も 散る桜. Go and meet it once more, and then let us have some tea.']]),
 }
 
-levels, sols, chapters, bosses = [], {}, [], []
+levels, chapters, bosses = [], [], []
 NCH = len(CHAPTERS)
 for c in ORDER:
     chapters.append({'kanji': CHAPTERS[c][0], 'name': CHAPTERS[c][1], 'from': len(levels), 'note': NOTES[c]})
@@ -703,8 +704,7 @@ for c in ORDER:
             if slot[0] == 'L':
                 g, seg = rungs[seg], 0
             elif not pools.get(seg):
-                print('!! chapter %d segment %d ran out of boards' % (c, seg))
-                continue
+                sys.exit('chapter %d segment %d ran out of boards' % (c, seg))
             else:
                 g = pools[seg].pop(0)
             b = {'kanji': '', 'name': '', 'par': g['par'], 'waza': g['waza'], 'rows': g['rows'], 'hint': '', 'story': [], 'after': [],
@@ -729,7 +729,6 @@ for c in ORDER:
         b['sol'] = trace
         b.setdefault('say', [])
         b = {k: b[k] for k in ('kanji', 'name', 'par', 'waza', 'rules', 'ink', 'rows', 'hint', 'say', 'story', 'after', 'sol')}
-        sols[b['kanji'] + '|' + ''.join(b['rows'])] = trace
         levels.append(b)
     if c in BEATS:
         first = chapters[-1]['from']
@@ -784,12 +783,11 @@ p = os.path.join(root, 'scripts', 'data.gd')
 s = open(p, encoding='utf-8').read()
 head = s[:s.index('const LEVELS = [')]
 head = re.sub(r'const WAZA_FROM = \{[^\n]*\}[^\n]*', 'const WAZA_FROM = %s  # first stage index that grants each waza' % json.dumps(waza_from), head)
-i, j = head.index('const CHAPTERS = ['), head.index('const LEGEND')
+i = head.index('const CHAPTERS = [')
+j = head.rindex('\n\n', 0, head.index('const LEGEND')) + 2   # keeps the comment above LEGEND
 ch = 'const CHAPTERS = [\n' + ''.join('\t%s,\n' % json.dumps(c, ensure_ascii=False) for c in chapters) + ']\nconst BOSSES = %s\n\n' % json.dumps(bosses)
 head = head[:i] + ch + head[j:]
 body = 'const LEVELS = [\n' + ''.join('\t' + gd(l) + ',\n' for l in levels) + ']\n'
-open(p, 'w', encoding='utf-8').write(head + body)
-json.dump(sols, open(os.path.join(root, 'tools', 'solutions.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
 # ---- boards for the daily koan and the 88 temples (scripts/extra.gd)
 def slim(g):
@@ -809,7 +807,8 @@ bank = bank[:len(bank) // 7 * 7]   # seven equal slices, Monday's the gentlest
 
 rest = [g for c in sorted(SPARE) if c >= 12 for g in SPARE[c]]
 rest.sort(key=difficulty)
-henro = [slim(rest[round(i * (len(rest) - 1) / 87)]) for i in range(88)] if len(rest) >= 88 else []
+assert len(rest) >= 88, 'too few spare boards for the 88 temples'
+henro = [slim(rest[round(i * (len(rest) - 1) / 87)]) for i in range(88)]
 
 taken = set(''.join(l['rows']) for l in levels) | set(''.join(b['rows']) for b in henro) | set(''.join(b['rows']) for b in bank)
 rand, rand_d = [], []
@@ -820,7 +819,10 @@ for g in sorted([g for c in sorted(SPARE) if c != 10 for g in SPARE[c]], key=dif
         rand.append(slim(g))
         rand_d.append(difficulty(g))
 
-with open(os.path.join(root, 'scripts', 'extra.gd'), 'w', encoding='utf-8') as fh:
+assert len(rand) >= 4, 'no spare boards for the unmapped road'
+# nothing is written until everything has been assembled
+open(p, 'w', encoding='utf-8', newline='\n').write(head + body)
+with open(os.path.join(root, 'scripts', 'extra.gd'), 'w', encoding='utf-8', newline='\n') as fh:
     fh.write('extends RefCounted\n# Boards outside the story, written by tools/build_levels.py. All are proven solvable.\n\n')
     fh.write('# The daily koan bank, easiest first.\nconst DAILY = [\n' + ''.join('\t' + json.dumps(b, ensure_ascii=False) + ',\n' for b in bank) + ']\n\n')
     fh.write('# The 88 temples, in the order they are walked.\nconst HENRO = [\n' + ''.join('\t' + json.dumps(b, ensure_ascii=False) + ',\n' for b in henro) + ']\n')
@@ -835,7 +837,7 @@ for k, c in enumerate(ORDER):
     a = chapters[k]['from']
     b = chapters[k + 1]['from'] if k < NCH - 1 else len(levels)
     pars = [l['par'] for l in levels[a:b]]
-    ny = [sum(ch in 'coOStTkyQupPnWGdaAeXK' for r in l['rows'] for ch in r) for l in levels[a:b]]
+    ny = [n_yokai(l) for l in levels[a:b]]
     if not pars:
         continue
     print('  %-12s pars %s  mean %.1f   yokai mean %.1f' % (CHAPTERS[c][1], pars, sum(pars) / len(pars), sum(ny) / len(ny)))

@@ -24,7 +24,7 @@ for path in glob.glob(os.path.join(root, 'scripts', '*.gd')):
     chars |= set(open(path, encoding='utf-8').read())
 chars = {c for c in chars if c >= ' '}
 
-font = TTFont(src)
+font = TTFont(src, recalcTimestamp=False)   # so an unchanged glyph set gives an unchanged file
 have = set(font.getBestCmap().keys())
 missing = sorted(c for c in chars if ord(c) not in have and ord(c) > 0x7F)
 opts = subset.Options()

@@ -7,6 +7,7 @@ const Data = preload("res://scripts/data.gd")
 var main
 var btns = []
 var hover_btn = -1
+var painting = false   # a press that began on the page itself is held: dragging paints
 var time = 0.0
 var mouse = Vector2.ZERO
 
@@ -58,13 +59,13 @@ func draw_btns():
 			label = label.substr(0, label.find("[")).strip_edges() + label.substr(label.find("]") + 1)
 		var r = b.rect
 		var al = 1.0 if b.on else 0.32
-		var hot = (i == hover_btn and b.on) or b.sel
+		var hot = (i == hover_btn and b.on and not main.touch) or b.sel   # a finger does not hover
 		if hot:
 			Ink.blot(self, r.get_center(), r.size.x * 0.56, r.size.y * 0.95, Ink.SHU, 0.26)
-		var pts = []
-		for k in range(11):
-			pts.append(Vector2(lerp(r.position.x + 2.0, r.end.x - 2.0, k / 10.0), r.end.y - 5.0 + sin(k * 1.3 + r.position.x) * 1.3))
 		if hot or not main.spare():   # in the spare style a button is its character and its word; the rule comes only under the one chosen
+			var pts = []
+			for k in range(11):
+				pts.append(Vector2(lerp(r.position.x + 2.0, r.end.x - 2.0, k / 10.0), r.end.y - 5.0 + sin(k * 1.3 + r.position.x) * 1.3))
 			Ink.brush(self, pts, 6.0 if hot else 4.0, Ink.a(Ink.SHU if hot else Ink.SUMI, 0.9 * al))
 		var ts = min(30.0 if main.touch else 22.0, r.size.y * 0.46)   # larger where a finger, not a pointer, must find it
 		if b.kanji == "" and label != "" and label.unicode_at(0) >= 0x2E80:
@@ -89,6 +90,9 @@ func _gui_input(ev):
 		on_motion(mouse, (ev.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0)
 	elif ev is InputEventMouseButton and ev.pressed:
 		mouse = ev.position
+		if ev.button_index != MOUSE_BUTTON_LEFT and ev.button_index != MOUSE_BUTTON_RIGHT:
+			return   # the wheel presses nothing
+		painting = false
 		if swallow(mouse, ev.button_index):
 			return   # something lying over the page took the press: nothing under it is pressed
 		if ev.button_index == MOUSE_BUTTON_LEFT:
@@ -97,11 +101,10 @@ func _gui_input(ev):
 			for b in btns:
 				if b.on and b.show and _hit(b).has_point(mouse) and (best == null or b.rect.get_center().distance_to(mouse) < best.rect.get_center().distance_to(mouse)):
 					best = b
-			for b in btns:
-				if b == best:
-					main.sfx("click")
-					b.cb.call()
-					return
+			if best != null:
+				main.sfx("click")
+				best.cb.call()
+				return
 		on_click(mouse, ev.button_index)
 
 func _hit(b):

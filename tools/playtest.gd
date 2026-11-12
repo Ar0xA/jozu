@@ -9,7 +9,6 @@ const KEYS = {"R": KEY_RIGHT, "L": KEY_LEFT, "D": KEY_DOWN, "U": KEY_UP}
 const DIR = {"R": Vector2i(1, 0), "L": Vector2i(-1, 0), "D": Vector2i(0, 1), "U": Vector2i(0, -1)}
 
 var main
-var sols
 var fails = []
 
 func _initialize():
@@ -28,6 +27,12 @@ func kind():
 func frames(n = 1):
 	for i in range(n):
 		await process_frame
+
+# a key for the screen, once the goal card (which would take it) has been put away
+func key(scr, code):
+	if scr.get("card"):
+		scr.card = []
+	scr.on_key(code)
 
 func skip_story():
 	var guard = 0
@@ -48,29 +53,29 @@ func play(i, use_mouse, lv = null):
 		for tok in strokes[k].split(" ", false):
 			var before = b.s.ink
 			if tok == "KATSU":
-				b.on_key(KEY_3)
+				key(b, KEY_3)
 			elif tok == "BELL":
-				b.on_key(KEY_5)
+				key(b, KEY_5)
 			elif tok.begins_with("leap") or tok.begins_with("ward") or tok.begins_with("shiki"):
 				var d = tok.right(1)
-				b.on_key(KEY_1 if tok.begins_with("leap") else (KEY_2 if tok.begins_with("ward") else KEY_4))
+				key(b, KEY_1 if tok.begins_with("leap") else (KEY_2 if tok.begins_with("ward") else KEY_4))
 				if b.mode == "":
 					bad("stage %d: %s mode did not engage" % [i + 1, tok.left(tok.length() - 1)])
 				if use_mouse:
 					b.on_click(b.ctr(b.s.hero + DIR[d] * (2 if tok.begins_with("leap") else 1)), MOUSE_BUTTON_LEFT)
 				else:
-					b.on_key(KEYS[d])
+					key(b, KEYS[d])
 			elif use_mouse:
 				b.on_click(b.ctr(b.s.hero + DIR[tok]), MOUSE_BUTTON_LEFT)
 			else:
-				b.on_key(KEYS[tok])
+				key(b, KEYS[tok])
 			if b.s.ink >= before and not b.done:
 				bad("stage %d: action %s was not accepted" % [i + 1, tok])
 				return
 			await frames()
 		if b.done:
 			break
-		b.on_key(KEY_SPACE)
+		key(b, KEY_SPACE)
 		await frames()
 
 func _run():
@@ -81,12 +86,12 @@ func _run():
 
 	# ---- title: sound toggle and its button
 	var snd = main.data.sound
-	main.cur.on_key(KEY_M)
+	key(main.cur, KEY_M)
 	main._unhandled_input(_key(KEY_M))
 	if main.data.sound == snd:
 		bad("M does not toggle sound")
 	main.toggle_sound()
-	main.cur.on_key(KEY_ENTER)
+	key(main.cur, KEY_ENTER)
 	await frames(2)
 	if kind() != "map":
 		bad("Enter on the title does not open the map")
@@ -106,19 +111,19 @@ func _run():
 	main.show_battle(1)
 	await frames(2)
 	var b = main.cur
-	b.on_key(KEY_RIGHT)
-	b.on_key(KEY_RIGHT)
+	key(b, KEY_RIGHT)
+	key(b, KEY_RIGHT)
 	if b.s.hero != Vector2i(2, 3):
 		bad("arrow keys do not move Suzu")
 	b.on_click(Vector2(10, 10), MOUSE_BUTTON_RIGHT)
 	if b.s.hero != Vector2i(1, 3) or b.s.ink != 3:
 		bad("right-click undo does not restore the last step")
-	b.on_key(KEY_Z)
-	b.on_key(KEY_Z)
+	key(b, KEY_Z)
+	key(b, KEY_Z)
 	if b.s.hero != Vector2i(0, 3) or not b.hist.is_empty():
 		bad("undo past the start misbehaves")
-	b.on_key(KEY_RIGHT)
-	b.on_key(KEY_R)
+	key(b, KEY_RIGHT)
+	key(b, KEY_R)
 	if b.s.hero != Vector2i(0, 3) or b.s.turn != 0:
 		bad("restart does not reset the stage")
 	# drag: a held mouse moving across tiles paints a stroke
@@ -128,10 +133,10 @@ func _run():
 	b.on_motion(b.ctr(Vector2i(3, 3)), true)
 	if b.s.hero != Vector2i(3, 3) or b.s.ink != 1:
 		bad("dragging does not paint one step per tile (hero %s, ink %d)" % [str(b.s.hero), b.s.ink])
-	b.on_key(KEY_R)
+	key(b, KEY_R)
 	var guard = 0
 	while not b.done and guard < 20:
-		b.on_key(KEY_SPACE)
+		key(b, KEY_SPACE)
 		await frames()
 		guard += 1
 	if b.grade != "lost":
@@ -147,7 +152,7 @@ func _run():
 	main.show_battle(0)
 	await frames(2)
 	b = main.cur
-	b.on_key(KEY_SPACE)
+	key(b, KEY_SPACE)
 	await play(0, false)
 	if b.grade != "ka":
 		bad("winning one stroke over par graded '%s', expected 'ka'" % b.grade)
@@ -178,14 +183,14 @@ func _run():
 		b = main.cur
 		var first = main.grade_of(i) != "jouzu"
 		# the master's hint must show the solution's first stroke from a fresh board
-		b.on_key(KEY_H)
+		key(b, KEY_H)
 		if b.hint_msg != "" and not b.hint_msg.begins_with("The master waits"):
 			bad("stage %d: hint refused on a fresh board: %s" % [i + 1, b.hint_msg])
 		elif b.hint_path.size() < 2 and b.hint_marks.is_empty() and b.hint_msg == "":
 			bad("stage %d: hint shows nothing" % (i + 1))
 		await frames()
 		if lv.get("rules", []).has("koan") or lv.get("rules", []).has("garden"):
-			b.on_key(KEY_SPACE)
+			key(b, KEY_SPACE)
 			if b.grade != "lost":
 				bad("stage %d: sheathing a one-stroke stage unfinished should fail" % (i + 1))
 			# begin the stage afresh: a restart would forfeit the seal for a first attempt
@@ -266,7 +271,7 @@ func _run():
 	main.start_stage(3)
 	await skip_story()
 	b = main.cur
-	b.on_key(KEY_ESCAPE)
+	key(b, KEY_ESCAPE)
 	await frames()
 	if kind() != "map" or main.grade_of(3) != "jouzu":
 		bad("leaving a replayed stage lost its seal or did not return to the map")
@@ -300,7 +305,7 @@ func other_roads():
 	if kind() != "battle" or b.kind_of != "daily":
 		bad("the daily koan does not open")
 		return
-	b.on_key(KEY_H)
+	key(b, KEY_H)
 	if b.hint_path.size() < 2:
 		bad("the daily koan has no hint")
 	await play(-1, true, b.lv)
@@ -341,10 +346,10 @@ func other_roads():
 		if kind() != "battle" or b.kind_of != "daily" or int(b.lv.day) != yday:
 			bad("clicking a past day does not open its koan")
 		else:
-			b.on_key(KEY_SPACE)
+			key(b, KEY_SPACE)
 			if int(main.data.tries.get(str(yday), 0)) != 1:
 				bad("a failed attempt at a daily koan was not counted")
-			b.on_key(KEY_R)
+			key(b, KEY_R)
 			await play(-1, false, b.lv)
 			await frames(2)
 			if int(main.data.days.get(str(yday), 0)) != 2:
@@ -456,9 +461,10 @@ func other_roads():
 	var bc = main.cur
 	if bc.card.size() < 3 or not main.data.met.has("y:chochin"):
 		bad("a stage opens without its goal card, or does not note what was met")
+	var at0 = bc.s.hero
 	bc.on_key(KEY_UP)
-	if not bc.card.is_empty():
-		bad("a key does not put the goal card away")
+	if not bc.card.is_empty() or bc.s.hero != at0:
+		bad("a key should put the goal card away and do nothing else")
 	bc._brief(false)
 	if bc.card.size() < 4:
 		bad("asking for the goal again shows nothing")
@@ -472,7 +478,11 @@ func other_roads():
 		var bp = main.cur
 		if bp.card.is_empty():
 			bad("stage %d opens without its card on a phone" % (st + 1))
-		bp.on_click(bp.ctr(bp.s.hero + Vector2i(1, 0)), MOUSE_BUTTON_LEFT)
+		var tap = InputEventMouseButton.new()
+		tap.button_index = MOUSE_BUTTON_LEFT
+		tap.pressed = true
+		tap.position = bp.ctr(bp.s.hero + Vector2i(1, 0))
+		bp._gui_input(tap)
 		if not bp.card.is_empty() or bp.s.visited.size() != 1:
 			bad("on a phone the first touch should only put the card away")
 		var shown = bp.btns.filter(func(x): return x.show)
@@ -567,7 +577,7 @@ func other_roads():
 	# the seal for a first attempt is lost by a restart as well as by an undo
 	main.show_battle(2)
 	await frames(2)
-	main.cur.on_key(KEY_R)
+	key(main.cur, KEY_R)
 	await play(2, false)
 	await frames(2)
 	if main.cur.grade != "jouzu" or main.cur.seal_mask & 2 != 0:
@@ -577,14 +587,14 @@ func other_roads():
 	main.show_battle(1)
 	await frames(2)
 	var bu = main.cur
-	bu.on_key(KEY_RIGHT)
-	bu.on_key(KEY_Z)
+	key(bu, KEY_RIGHT)
+	key(bu, KEY_Z)
 	if bu.s.hero != Vector2i(0, 3):
 		bad("with undo set to 'this stroke', a step in the stroke in hand cannot be taken back")
-	bu.on_key(KEY_RIGHT)
-	bu.on_key(KEY_SPACE)
+	key(bu, KEY_RIGHT)
+	key(bu, KEY_SPACE)
 	var after = bu.s.turn
-	bu.on_key(KEY_Z)
+	key(bu, KEY_Z)
 	if bu.s.turn != after or bu.b_undo.on:
 		bad("with undo set to 'this stroke', a sheathed stroke was taken back")
 	# no undo at all
@@ -592,13 +602,13 @@ func other_roads():
 	main.show_battle(1)
 	await frames(2)
 	bu = main.cur
-	bu.on_key(KEY_RIGHT)
-	bu.on_key(KEY_Z)
+	key(bu, KEY_RIGHT)
+	key(bu, KEY_Z)
 	if bu.s.hero != Vector2i(1, 3) or bu.b_undo.on:
 		bad("with undo set to 'never', a step was taken back")
 	for k in range(12):
 		if not bu.done:
-			bu.on_key(KEY_SPACE)
+			key(bu, KEY_SPACE)
 			await frames()
 	if bu.grade != "lost" or bu.extra.size() != 1:
 		bad("with undo set to 'never', a loss should offer only to begin again")
@@ -663,7 +673,7 @@ func other_roads():
 		await frames(2)
 		for k in ["music", "motion", "pattern", "filter"]:
 			main.cur.rows[k].cb.call()
-		main.cur.on_key(KEY_ESCAPE)
+		key(main.cur, KEY_ESCAPE)
 		await frames(2)
 		if kind() != "hub" or not main.data.opts.motion:
 			bad("leaving settings misbehaves")
@@ -674,19 +684,19 @@ func other_roads():
 	b = main.cur
 	if b.kind_of != "henro" or b.b_hint.on:
 		bad("a temple offers the master's hint")
-	b.on_key(KEY_UP)
-	b.on_key(KEY_LEFT)
+	key(b, KEY_UP)
+	key(b, KEY_LEFT)
 	var where = b.s.hero
-	b.on_key(KEY_Z)
+	key(b, KEY_Z)
 	if b.s.hero != where:
 		bad("a pilgrim could take a step back")
-	b.on_key(KEY_R)              # give up this temple
+	key(b, KEY_R)              # give up this temple
 	await frames(2)
 	if int(main.data.henro.staffs) != 2 or int(main.data.henro.at) != 0 or kind() != "battle":
 		bad("giving up a temple should cost one staff and stay at it")
-	main.cur.on_key(KEY_R)
+	key(main.cur, KEY_R)
 	await frames()
-	main.cur.on_key(KEY_R)
+	key(main.cur, KEY_R)
 	await frames(2)
 	if int(main.data.henro.staffs) != 3 or int(main.data.henro.at) != 0 or kind() != "hub":
 		bad("losing the last staff should begin the pilgrimage again")
@@ -694,14 +704,14 @@ func other_roads():
 	# walking out mid-temple costs a staff; walking out untouched does not
 	main.show_henro()
 	await frames(2)
-	main.cur.on_key(KEY_ESCAPE)
+	key(main.cur, KEY_ESCAPE)
 	await frames(2)
 	if int(main.data.henro.staffs) != 3:
 		bad("leaving an untouched temple cost a staff")
 	main.show_henro()
 	await frames(2)
-	main.cur.on_key(KEY_UP)
-	main.cur.on_key(KEY_ESCAPE)
+	key(main.cur, KEY_UP)
+	key(main.cur, KEY_ESCAPE)
 	await frames(2)
 	if int(main.data.henro.staffs) != 2 or kind() != "hub":
 		bad("walking out of a temple mid-stroke should cost a staff")
@@ -790,7 +800,7 @@ func other_roads():
 	main.load_save()
 	if main.data.mine != code or int(main.data.henro.done) != 1:
 		bad("the workshop board or the pilgrimage did not survive a reload")
-	e.on_key(KEY_ESCAPE)
+	key(e, KEY_ESCAPE)
 	await frames(2)
 	if kind() != "hub":
 		bad("Escape does not leave the workshop")

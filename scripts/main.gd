@@ -131,8 +131,7 @@ func play_music(nm):
 	if music.stream and data.opts.music:
 		music.play()
 
-# What is heard on a stage. The chapters of stillness (the kōan, the garden, the circle, the ink
-# stone, the written character) have the quiet piece; the rest take the three road pieces in turn,
+# What is heard on a stage. The chapters of stillness (QUIET) have the quiet piece; the rest take the three road pieces in turn,
 # and the last board of a story has drum and shamisen.
 const QUIET = ["Zen Temple", "Stone Garden", "Ensō", "Ink Stone", "Red Thread", "Temple Bell", "The Character", "The Brush"]
 
@@ -232,7 +231,7 @@ func _input(ev):
 			var p = touches.values()
 			var mid = (p[0] + p[1]) * 0.5
 			pinch = {"d": max(1.0, p[0].distance_to(p[1])), "z": zoom, "anchor": (mid - zpos) / zoom}
-		pinching = touches.size() >= 2
+		pinching = touches.size() >= 2 or (pinching and not touches.is_empty())   # the finger left down after a pinch plays nothing
 		if pinching:
 			get_viewport().set_input_as_handled()
 	elif ev is InputEventScreenDrag and touches.has(ev.index):
@@ -342,7 +341,10 @@ func load_save():
 	if FileAccess.file_exists(save_path):
 		var txt = FileAccess.get_file_as_string(save_path)
 		var j = JSON.parse_string(txt)
-		if typeof(j) == TYPE_DICTIONARY and j.has("cleared") and j.has("up"):
+		if typeof(j) != TYPE_DICTIONARY or typeof(j.get("cleared")) != TYPE_DICTIONARY:
+			# unreadable: keep it aside rather than write a fresh save over it
+			DirAccess.copy_absolute(save_path, save_path + ".bad")
+		else:
 			if j.has("sound"):
 				data.sound = bool(j.sound)
 			if j.has("scroll") and typeof(j.scroll) == TYPE_DICTIONARY:
@@ -367,14 +369,23 @@ func load_save():
 					data.seals[k] = int(j.seals[k])
 			for k in j.cleared:
 				data.cleared[k] = str(j.cleared[k])
-			for k in data.up:
-				if j.up.has(k):
-					data.up[k] = int(j.up[k])
+			if typeof(j.get("up")) == TYPE_DICTIONARY:
+				for k in data.up:
+					if j.up.has(k):
+						data.up[k] = max(0, int(j.up[k]))
+			data.henro.at = clamp(data.henro.at, 0, Extra.HENRO.size())
+			data.henro.staffs = clamp(data.henro.staffs, 0, 3)
 
 func write_save():
-	var f = FileAccess.open(save_path, FileAccess.WRITE)
+	# written beside the save and then moved over it, so a write cut short cannot leave half a file
+	var tmp = save_path + ".tmp"
+	var f = FileAccess.open(tmp, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify(data))
+		f.close()
+		if DirAccess.rename_absolute(tmp, save_path) != OK:
+			DirAccess.remove_absolute(save_path)
+			DirAccess.rename_absolute(tmp, save_path)
 
 func erase_save():
 	var snd = data.get("sound", true)
@@ -509,8 +520,9 @@ func show_custom(lv, kind, label, on_win, on_fail, back):
 # ---------------------------------------------------------------- the daily koan
 # One single-stroke board a day, the same for everyone: gentle on Monday, hardest on Sunday.
 
+# the day by the player's own clock, counted from 1970
 func today():
-	return int(Time.get_unix_time_from_system() / 86400.0)
+	return int(floor((Time.get_unix_time_from_system() + Time.get_time_zone_from_system().bias * 60.0) / 86400.0))
 
 func daily_level(day = -1):
 	if day < 0:
@@ -728,10 +740,10 @@ func show_editor():
 	play_music("title")
 	go(load("res://scripts/editor.gd").new())
 
-# the author has cleared their own board: their stroke count becomes its mastery target
-func mine_won(_grade, _mask, turns):
+# the author has cleared their own board unharmed: their stroke count becomes its mastery target
+func mine_won(grade, _mask, turns):
 	var b = board_from_code(data.mine)
-	if not b.is_empty():
+	if not b.is_empty() and grade == "jouzu":
 		b.par = turns if int(b.par) == 0 else min(int(b.par), turns)
 		data.mine = board_code(b)
 		write_save()
