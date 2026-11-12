@@ -11,7 +11,7 @@ Wikimedia Commons; where the uploader attached a licence to the photograph or sc
 
 Each figure was cropped from the painting and its paper made transparent.
 
-- `hero.png` - Utagawa Kuniyoshi, *Ishi-jo, wife of Ōboshi Yoshio*, from *Seichū gishin den*, 1848 (the figure alone, cut from its page of text). Public domain.
+- `hero.png` - Utagawa Kuniyoshi, *Tomoe Gozen*, from *Eiyū hyakuden* (One Hundred Heroes), 1840s (the figure alone, cut from its page). Tokyo Metropolitan Library, CC0.
 - `oni.png` - *Oni no nenbutsu* (demon intoning the Buddha's name), Otsu-e folk painting. Public domain.
 - `oni3.png` - Kawanabe Kyosai, *Oni in priest's robes*. Public domain.
 - `tengu.png` - *Sojobo and Minamoto no Yoshitsune*, hanging scroll. Photograph by Wolfgang Michel, CC BY 3.0.
