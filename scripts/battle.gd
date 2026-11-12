@@ -56,6 +56,7 @@ var b_leap
 var b_ward
 var b_katsu
 var b_bell
+var b_goal
 var b_end
 var b_undo
 var b_restart
@@ -96,13 +97,23 @@ func setup():
 	b_ward = btn(Rect2(PX + 184, 470, 172, 46), "Ward [2]", _mode.bind("ward"), "結界")
 	b_katsu = btn(Rect2(PX + 368, 470, 172, 46), "Shout [3]", _katsu, "喝")
 	b_bell = btn(Rect2(PX, 470, 172, 46), "Bell [5]", _bell, "鐘")
-	btn(Rect2(536, 34, 108, 40), "Goal", func(): _brief(false), "問")
+	b_goal = btn(Rect2(536, 34, 108, 40), "Goal", func(): _brief(false), "問")
 	b_end = btn(Rect2(PX, 526, 264, 50), "Sheathe  [Space]", _end, "納刀")
 	b_undo = btn(Rect2(PX + 276, 526, 264, 50), "Undo  [Z]", _undo, "戻")
 	b_hint = btn(Rect2(PX, 586, 264, 42), "Ask the master  [H]", _hint, "師")
 	b_shiki = btn(Rect2(PX + 276, 586, 264, 42), "Set  [4]", _mode.bind("shiki"), "式神")
 	b_restart = btn(Rect2(PX, 642, 264, 44), "Restart  [R]" if kind_of != "henro" else "Give up this temple", _retry)
 	b_road = btn(Rect2(PX + 276, 642, 264, 44), "Back to the road" if custom == null else "Leave", _leave)
+	if main.touch:
+		# a phone's panel: a few things, large. The legend, the lesson and the saying live in the card (問).
+		b_end.rect = Rect2(PX, 436, 264, 70)
+		b_undo.rect = Rect2(PX + 276, 436, 264, 70)
+		b_hint.rect = Rect2(PX, 518, 264, 62)
+		b_goal.rect = Rect2(PX + 276, 518, 264, 62)
+		b_goal.label = "Goal and notes"
+		b_restart.rect = Rect2(PX, 594, 264, 62)
+		b_road.rect = Rect2(PX + 276, 594, 264, 62)
+		b_road.label = "Leave"
 	_restart()
 	for y in s.yokai:
 		if not kinds.has(y.kind):
@@ -170,8 +181,19 @@ func _brief(first):
 	for n in notes:
 		card.append([n, 27 if big else 17, Ink.a(Ink.AI, 0.95)])
 		chars += n.length()
+	var say = lv.get("say", [])
+	if big and say.size() == 3:
+		# on a phone the stage's saying is read here, not squeezed into the panel
+		card.append(["", 10, Ink.SUMI])
+		card.append([say[0], 30, Ink.SUMI])
+		card.append([say[1], 18, Ink.a(Ink.SUMI, 0.55)])
+		card.append([say[2], 24, Ink.a(Ink.AI, 0.95)])
+		chars += say[2].length() + 30
+		notes = notes + [say[2]]
 	card_t = 0.0
 	card_len = 3.5 if notes.is_empty() else min(24.0, 6.0 + chars * 0.05)
+	if not first:
+		card_len = 120.0   # asked for: it stays until it is sent away
 
 func _card_rect(f):
 	var w = 1120.0 if main.touch else 540.0
@@ -231,9 +253,11 @@ func _sync():
 	b_bell.show = lv.waza.has("bell")
 	# the techniques this stage allows share the row evenly
 	var row = [b_leap, b_ward, b_katsu, b_bell].filter(func(b): return b.show)
+	if main.touch and s.r_shiki:
+		row.append(b_shiki)   # on a phone the shikigami button shares the row of techniques
 	for i in range(row.size()):
 		var bw = (540.0 - 12.0 * (row.size() - 1)) / row.size() if row.size() > 3 else 172.0
-		row[i].rect = Rect2(PX + i * (bw + 12.0), 470, bw, 46)
+		row[i].rect = Rect2(PX + i * (bw + 12.0), 360 if main.touch else 470, bw, 64 if main.touch else 46)
 	var live = not done and s.ink > 0
 	b_bell.on = live and s.bell > 0 and not s.stun
 	b_bell.sel = s.stun
@@ -976,8 +1000,46 @@ func _pips(f, y, kanji, label, n, mx, col):
 			draw_circle(c, rad, col)
 		draw_arc(c, rad, 0, TAU, 20, Ink.SUMI, 1.8, true)
 
+# The side panel on a phone: the count of strokes, ki, ink and momentum, large enough to read at
+# arm's length. Everything explanatory is in the card.
+func _panel_phone(f):
+	Ink.text(self, f, Vector2(PX, 62), "Stroke %d" % (s.turn + (0 if done else 1)), 40, Ink.SUMI)
+	var ok = s.turn < lv.par and s.hits == 0
+	Ink.text(self, f, Vector2(PX + 250, 60), "上手 within %d" % lv.par, 30, Ink.SHU if ok else Ink.a(Ink.SUMI, 0.5))
+	var rows = [["気", s.ki, s.ki + s.hits, Ink.SHU], ["墨", s.ink, Sim.INK_CAP if s.r_stone else max(s.ink_max, s.ink), Ink.SUMI], ["勢", min(2, s.mom), 2, Ink.AI]]
+	for k in range(rows.size()):
+		var y = 130.0 + k * 66.0
+		Ink.text(self, f, Vector2(PX, y + 16), rows[k][0], 46, Ink.SUMI)
+		var mx = rows[k][2]
+		var step = min(54.0, 440.0 / max(1, mx))
+		for i in range(mx):
+			var c = Vector2(PX + 96 + i * step, y)
+			var rad = min(19.0, step * 0.38)
+			if i < rows[k][1]:
+				draw_circle(c, rad, rows[k][3])
+			draw_arc(c, rad, 0, TAU, 24, Ink.SUMI, 2.6, true)
+	Ink.text(self, f, Vector2(PX + 220, 272), "next cut deals %d" % min(3, 1 + s.mom), 26, Ink.a(Ink.SUMI, 0.75))
+	var wz = ""
+	for w in [["leap", "縮地", s.leap], ["ward", "結界", s.ward], ["katsu", "喝", s.katsu], ["bell", "鐘", s.bell]]:
+		if lv.waza.has(w[0]):
+			wz += "%s %d   " % [w[1], w[2]]
+	var note = hint_msg
+	if mode == "leap":
+		note = "縮地: choose a direction to leap two tiles."
+	elif mode == "ward":
+		note = "結界: choose a tile beside you for the ward."
+	elif mode == "shiki":
+		note = "式神: choose a tile beside you for the shikigami."
+	if note != "":
+		Ink.para(self, f, Vector2(PX, 318), main.touch_words(note), 22, Ink.SHU, 540)
+	elif wz != "":
+		Ink.text(self, f, Vector2(PX, 332), "Left:  " + wz, 28, Ink.SUMI)
+
 func _panel(f):
 	Ink.brush(self, [Vector2(PX - 22, 30), Vector2(PX - 23, 250), Vector2(PX - 21, 470), Vector2(PX - 22, 690)], 4.0, Ink.a(Ink.SUMI, 0.45))
+	if main.touch:
+		_panel_phone(f)
+		return
 	Ink.text(self, f, Vector2(PX, 52), "Stroke %d" % (s.turn + (0 if done else 1)), 26, Ink.SUMI)
 	Ink.text(self, f, Vector2(PX + 150, 52), "上手 mastery: within %d, unharmed" % lv.par, 17, Ink.SHU if (s.turn < lv.par and s.hits == 0) else Ink.a(Ink.SUMI, 0.5))
 	_pips(f, 96, "気", "Ki", s.ki, s.ki + s.hits, Ink.SHU)

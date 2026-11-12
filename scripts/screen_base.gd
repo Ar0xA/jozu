@@ -61,7 +61,7 @@ func draw_btns():
 		for k in range(11):
 			pts.append(Vector2(lerp(r.position.x + 2.0, r.end.x - 2.0, k / 10.0), r.end.y - 5.0 + sin(k * 1.3 + r.position.x) * 1.3))
 		Ink.brush(self, pts, 6.0 if hot else 4.0, Ink.a(Ink.SHU if hot else Ink.SUMI, 0.9 * al))
-		var ts = min(22.0, r.size.y * 0.46)
+		var ts = min(30.0 if main.touch else 22.0, r.size.y * 0.46)   # larger where a finger, not a pointer, must find it
 		if b.kanji == "" and label != "" and label.unicode_at(0) >= 0x2E80:
 			ts = min(r.size.y * 0.62, (r.size.x - 6.0) / label.length())  # a tab shows its whole name, as large as fits
 		var base = r.position.y + r.size.y * 0.5 + ts * 0.30

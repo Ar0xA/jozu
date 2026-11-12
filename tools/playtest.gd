@@ -433,6 +433,30 @@ func other_roads():
 		bad("asking for the goal again shows nothing")
 	bc.card = []
 
+	# the phone layout: every button on the page, none on top of another, and the stage still plays
+	main.touch = true
+	for st in [1, Data.CHAPTERS[25].from + 3, Data.CHAPTERS[27].from + 2]:
+		main.show_battle(st)
+		await frames(2)
+		var bp = main.cur
+		if bp.card.is_empty():
+			bad("stage %d opens without its card on a phone" % (st + 1))
+		bp.on_click(bp.ctr(bp.s.hero + Vector2i(1, 0)), MOUSE_BUTTON_LEFT)
+		if not bp.card.is_empty() or bp.s.visited.size() != 1:
+			bad("on a phone the first touch should only put the card away")
+		var shown = bp.btns.filter(func(x): return x.show)
+		for i in range(shown.size()):
+			if not Rect2(0, 0, 1280, 720).encloses(shown[i].rect):
+				bad("stage %d: the %s button is off the page on a phone" % [st + 1, shown[i].label])
+			for j in range(i):
+				if shown[i].rect.intersects(shown[j].rect):
+					bad("stage %d: %s and %s overlap on a phone" % [st + 1, shown[i].label, shown[j].label])
+		await play(st, true)
+		await frames(2)
+		if bp.grade != "jouzu":
+			bad("stage %d does not play through in the phone layout (grade '%s')" % [st + 1, bp.grade])
+	main.touch = false
+
 	# settings
 	main.show_settings(main.show_hub)
 	await frames(2)
