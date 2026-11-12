@@ -22,6 +22,10 @@ func setup():
 func tick(_dt):
 	pass
 
+# A screen with something laid over it (a card, a notice) says here whether that took the press.
+func swallow(_pos, _button):
+	return false
+
 func on_click(_pos, _button):
 	pass
 
@@ -84,6 +88,8 @@ func _gui_input(ev):
 		on_motion(mouse, (ev.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0)
 	elif ev is InputEventMouseButton and ev.pressed:
 		mouse = ev.position
+		if swallow(mouse, ev.button_index):
+			return   # something lying over the page took the press: nothing under it is pressed
 		if ev.button_index == MOUSE_BUTTON_LEFT:
 			# on a touch screen take the button nearest the finger, with a little grace around each
 			var best = null

@@ -757,7 +757,7 @@ func board_from_code(code):
 	for r in parts[2].split(",", false):
 		if known.has(r) and not out.rules.has(r):
 			out.rules.append(r)
-	out.ink = clamp(int(parts[3]), 2, 12)
+	out.ink = clamp(int(parts[3]), 1, 40)   # a stone garden asks for as much ink as it has tiles
 	out.par = clamp(int(parts[4]), 0, 99)
 	return out
 

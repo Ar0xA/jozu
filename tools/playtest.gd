@@ -358,6 +358,15 @@ func other_roads():
 		if not main.daily_line(main.today()).contains("daily kōan") or main.daily_line(main.today() - 20) != "":
 			bad("the daily result line is wrong")
 
+	# every board on the shelf must survive being made into a code and read back
+	var lost = 0
+	for bd in Extra.RANDOM:
+		var rt = main.board_from_code(main.board_code(bd))
+		if rt.is_empty() or rt.rows != bd.rows or rt.rules != bd.rules or rt.waza != bd.waza or int(rt.ink) != int(bd.ink) or int(rt.par) != int(bd.par):
+			lost += 1
+	if lost > 0:
+		bad("%d of the shelf's boards do not survive their own share code" % lost)
+
 	# the unmapped road: one board from each bracket, and its code
 	for br in range(4):
 		main.show_random(br)
@@ -422,6 +431,25 @@ func other_roads():
 		bad("lifting the fingers leaves the pinch on")
 	main.set_zoom(1.0)
 
+	# with a mouse, a click on the card is the card's, and a click beside it goes through
+	main.show_battle(Data.WAZA_FROM["leap"])
+	await frames(2)
+	var bm = main.cur
+	var click = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = bm._card_rect(main.font).get_center()
+	var h0 = bm.s.hero
+	bm._gui_input(click)
+	if not bm.card.is_empty() or bm.s.hero != h0:
+		bad("a click on the card should close it and do nothing else")
+	bm._brief(false)
+	click.position = bm.b_leap.rect.get_center()
+	bm._gui_input(click)
+	if not bm.card.is_empty() or bm.mode != "leap":
+		bad("a click on a button beside the card should close the card and press the button")
+	bm._mode("leap")
+
 	# the card over a stage: there when it opens, gone at a key, back when asked for
 	main.show_battle(0)
 	await frames(2)
@@ -458,6 +486,33 @@ func other_roads():
 		await frames(2)
 		if bp.grade != "jouzu":
 			bad("stage %d does not play through in the phone layout (grade '%s')" % [st + 1, bp.grade])
+	# a touch that puts the card away must not also press the button lying under it
+	var lst = Data.WAZA_FROM["leap"]
+	main.show_battle(lst)
+	await frames(2)
+	var bl = main.cur
+	var press = InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = bl.b_leap.rect.get_center()
+	if bl.card.is_empty() or not bl.b_leap.show:
+		bad("the leap stage has no card or no leap button on a phone")
+	bl._gui_input(press)
+	if not bl.card.is_empty() or bl.mode != "":
+		bad("on a phone, the touch that closes the card also pressed Leap (mode '%s')" % bl.mode)
+	bl._gui_input(press)
+	if bl.mode != "leap":
+		bad("after the card is closed, Leap cannot be pressed")
+	bl._mode("leap")
+	press.position = bl.ctr(bl.s.hero + Vector2i(0, -1))
+	main.show_battle(lst)
+	await frames(2)
+	bl = main.cur
+	var hero0 = bl.s.hero
+	bl._gui_input(press)
+	if bl.s.hero != hero0 or not bl.card.is_empty():
+		bad("on a phone, the touch that closes the card also painted a step")
+
 	# every other page in its phone layout: buttons on the page and clear of one another
 	var pages = [["title", func(): main.show_title()], ["map", func(): main.show_map()],
 		["chapters", func():

@@ -596,6 +596,16 @@ func _try_tile(t):
 	if n == 1 or (n == 2 and mode == "leap"):
 		_dir(dir)
 
+# The card over the stage takes the press that puts it away, so that no button or tile under it
+# is pressed by the same touch. On a phone it covers the page, so any touch is the card's; with a
+# mouse, only a click on the card itself.
+func swallow(pos, _button):
+	if card.is_empty() or done:
+		return false
+	var mine = main.touch or _card_rect(main.font).has_point(pos)
+	card = []
+	return mine
+
 func on_click(pos, button):
 	if not card.is_empty():
 		card = []
