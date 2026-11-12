@@ -15,6 +15,7 @@ const WAIT = [
 var br = 0
 var job = 0
 var waited = 0.0
+var asked = 0.0
 var over = false
 var demo = false      # draw the screen without starting a generator (tools/shots.gd)
 
@@ -60,6 +61,10 @@ func tick(dt):
 	if over or demo:
 		return
 	waited += dt
+	asked += dt
+	if asked < 0.25:
+		return
+	asked = 0.0
 	var got = JavaScriptBridge.eval("(window.jozuGen && window.jozuGen.dead < window.jozuGen.w.length) ? (window.jozuGen.res[%d] === undefined ? null : window.jozuGen.res[%d]) : ''" % [job, job], true)
 	if got == null and waited * 1000.0 < BUDGETS[br] + GRACE:
 		return

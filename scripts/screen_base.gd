@@ -7,6 +7,8 @@ const Data = preload("res://scripts/data.gd")
 var main
 var btns = []
 var hover_btn = -1
+var still = false      # set by a page on which nothing moves unless the player does something
+var wake = 1.0
 var painting = false   # a press that began on the page itself is held: dragging paints
 var time = 0.0
 var mouse = Vector2.ZERO
@@ -39,6 +41,11 @@ func on_key(_code):
 func _process(dt):
 	time += dt
 	tick(dt)
+	if still:
+		# nothing here moves by itself: draw for a moment after it opens or is touched, then rest
+		wake -= dt
+		if wake < 0.0:
+			return
 	queue_redraw()
 
 func btn(rect, label, cb, kanji = ""):
@@ -79,6 +86,7 @@ func draw_btns():
 			Ink.text(self, f, Vector2(r.position.x, base), label, ts, Ink.a(Ink.SUMI, al), HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
 
 func _gui_input(ev):
+	wake = 0.6
 	if main.pinching:
 		return   # two fingers are zooming the page, not playing it
 	if ev is InputEventMouseMotion:
@@ -112,4 +120,5 @@ func _hit(b):
 
 func _unhandled_input(ev):
 	if ev is InputEventKey and ev.pressed and not ev.echo:
+		wake = 0.6
 		on_key(ev.keycode)

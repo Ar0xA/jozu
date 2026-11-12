@@ -11,6 +11,7 @@ var data = {}
 var cur = null
 var fibers = []
 var art = {}
+var _touch_words = {}
 var touch = false   # a phone or tablet: no hover, no right-click, fingers not pointers
 var turn_note
 var paint_rect
@@ -200,10 +201,14 @@ func toggle_fullscreen():
 func touch_words(text):
 	if not touch:
 		return text
+	if _touch_words.has(text):
+		return _touch_words[text]
+	var asked = text
 	for pair in [["Click or drag", "Tap or drag"], ["click or drag", "tap or drag"], [", or use the arrow keys", ""],
 			["Press Space to sheathe", "Tap 納刀 to sheathe"], [": Space, or 納刀", ": tap 納刀"], ["Right-click or Z takes", "戻 takes"],
 			["restart (R)", "restart"], ["Restart (R)", "Restart"], [" (key 5)", ""], ["any key or click", "tap to close"], ["Esc cancels", "tap the button again to cancel"]]:
 		text = text.replace(pair[0], pair[1])
+	_touch_words[asked] = text
 	return text
 
 # Scale the whole page about a point on the screen. `anchor` is the point of the page that should

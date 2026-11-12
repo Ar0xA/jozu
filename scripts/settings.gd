@@ -17,6 +17,7 @@ var back = Callable()
 var rows = {}
 
 func setup():
+	still = true
 	for i in range(ROWS.size()):
 		rows[ROWS[i][0]] = btn(Rect2(910, _y(i) - 8, 260, 56) if main.touch else Rect2(900, _y(i), 260, 50), "", _flip.bind(ROWS[i][0]), ROWS[i][1])
 	btn(Rect2(40, 646, 260, 64) if main.touch else Rect2(40, 648, 220, 50), "Back", back, "戻")

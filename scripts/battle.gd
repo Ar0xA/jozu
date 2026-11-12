@@ -21,6 +21,14 @@ var aim = {}           # where each yokai is being drawn towards while it walks
 var later = []         # sounds waiting for their moment: [{at, nm}]
 var last_inked = 0
 var ki_max = 0
+var rule_line = ""     # these three follow the board, and are worked out when it changes (_sync)
+var lit = {}
+var bound = []
+const WIND_ARROW = {Vector2i(1, 0): "→", Vector2i(-1, 0): "←", Vector2i(0, 1): "↓", Vector2i(0, -1): "↑"}
+const RULE_BRIEF = {"公": "公案 one stroke", "墨": "墨 wet wall", "円": "円相 circle binds", "石": "石庭 rake all", "鳥": "鳥居 reach it",
+	"無": "無刀 no cut", "硯": "硯 ink kept", "式": "式神 set allies", "風": "風 wind", "雨": "雨 rain", "雪": "雪 ice", "夜": "夜 night",
+	"封": "封 in order", "書": "書 write it", "供": "供 offerings lure", "橋": "橋 planks fall", "巣": "巣 webs stop you", "鐘": "鐘 all still"}
+
 # The card laid over the board when a stage opens: what must be done, and anything met here for
 # the first time. It goes by itself after a while, or at a touch.
 var card = []          # [[text, size, colour]]
@@ -296,6 +304,9 @@ func _sync():
 		names.append(Data.LEGEND[k][0].substr(0, 1))
 	b_shiki.label = "Set  [4]   " + ("・".join(names) if not names.is_empty() else "—")
 	dng = {} if done else Sim.danger(s)
+	rule_line = _rule_line()
+	lit = _lit()
+	bound = Sim.enso_bound(s)
 	_guide_update()
 	b_undo.on = _can_undo()
 	b_goal.on = not done
@@ -730,62 +741,12 @@ func _draw():
 			Ink.text(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI)
 		Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 48), ("Station %d" % (idx + 1)) if custom == null else label, 16, Ink.a(Ink.SUMI, 0.6))
 		Ink.text(self, f, Vector2(140 + 44 * lv.kanji.length(), 72), lv.name, 22, Ink.SUMI)
-	var rl = []
-	if rules.has("koan"):
-		rl.append("公案 one stroke only")
-	if rules.has("wet"):
-		rl.append("墨 your last stroke is a wall")
-	if rules.has("enso"):
-		rl.append("円相 close a circle to bind")
-	if rules.has("garden"):
-		rl.append("石庭 rake every tile in one stroke  (%d left)" % max(0, s.open - s.visited.size()))
-	if rules.has("gate"):
-		rl.append("鳥居 reach the gate")
-	if rules.has("nocut"):
-		rl.append("無刀 no cutting")
-	if rules.has("stone"):
-		rl.append("硯 unspent ink is kept (to %d)" % Sim.INK_CAP)
-	if rules.has("shiki"):
-		rl.append("式神 what you bind, you may set down")
-	if s.wind != Vector2i.ZERO:
-		rl.append("風 the wind carries lanterns, umbrellas and ghosts " + {Vector2i(1, 0): "→", Vector2i(-1, 0): "←", Vector2i(0, 1): "↓", Vector2i(0, -1): "↑"}[s.wind])
-	if rules.has("rain"):
-		rl.append("雨 lanterns and fire are out; kappa come ashore")
-	if rules.has("snow"):
-		rl.append("雪 all water is ice")
-	if rules.has("night"):
-		rl.append("夜 you see only near yourself and near light")
-	var ground = "".join(lv.rows)
-	if rules.has("order"):
-		rl.append("封 only the lowest number can be harmed")
-	if rules.has("write"):
-		var left = s.marks
-		for i in range(s.w * s.h):
-			if s.inked & (1 << i):
-				left -= 1
-		rl.append("書 paint every grey tile  (%d left)" % left)
-	if ground.contains("m"):
-		rl.append("供 walking yokai go to an offering, and eat")
-	if ground.contains("b"):
-		rl.append("橋 planks you cross fall after the yokai move")
-	if ground.contains("w"):
-		rl.append("巣 a web ends your stroke")
-	if s.stun:
-		rl.append("鐘 the bell is ringing: nothing strikes, nothing moves")
-	if rl.size() >= 3:
-		# with many rules in force, name each in a word or two so the line stays over the board
-		var brief = {"公": "公案 one stroke", "墨": "墨 wet wall", "円": "円相 circle binds", "石": "石庭 rake all", "鳥": "鳥居 reach it",
-			"無": "無刀 no cut", "硯": "硯 ink kept", "式": "式神 set allies", "風": "風 wind", "雨": "雨 rain", "雪": "雪 ice", "夜": "夜 night",
-			"封": "封 in order", "書": "書 write it", "供": "供 offerings lure", "橋": "橋 planks fall", "巣": "巣 webs stop you", "鐘": "鐘 all still"}
-		for k in range(rl.size()):
-			rl[k] = brief.get(rl[k].substr(0, 1), rl[k])
-	if not rl.is_empty():
-		Ink.text(self, f, Vector2(56 if spare else 124, 90 if spare else 96), "  ·  ".join(rl), 14, Ink.SHU)
+	if rule_line != "":
+		Ink.text(self, f, Vector2(56 if spare else 124, 90 if spare else 96), rule_line, 14, Ink.SHU)
 
 	# board
 	var br = Rect2(ORG, Vector2(s.w, s.h) * TS)
 	draw_rect(br, Ink.a(Ink.GOFUN, 0.40))
-	var lit = _lit()
 	for y in range(s.h):
 		for x in range(s.w):
 			var p = Vector2i(x, y)
@@ -901,7 +862,6 @@ func _draw():
 		Ink.text(self, f, ctr(m[0]) + Vector2(-TS * 0.5, -TS * 0.12), m[1], 22, Ink.SHU, HORIZONTAL_ALIGNMENT_CENTER, TS)
 
 	# a closing circle shows what it would bind
-	var bound = Sim.enso_bound(s)
 	if not bound.is_empty() and not done:
 		var lp = [ctr(s.visited.back()), ctr(s.visited[0])]
 		draw_line(lp[0], lp[1], Ink.a(Ink.KIN, 0.9), 6.0, true)
@@ -1040,10 +1000,60 @@ func _draw():
 		_draw_card(f)
 
 # Night: what Suzu can see. Empty when it is not night.
+# The rules in force, in a line over the board.
+func _rule_line():
+	var rl = []
+	if rules.has("koan"):
+		rl.append("公案 one stroke only")
+	if rules.has("wet"):
+		rl.append("墨 your last stroke is a wall")
+	if rules.has("enso"):
+		rl.append("円相 close a circle to bind")
+	if rules.has("garden"):
+		rl.append("石庭 rake every tile in one stroke  (%d left)" % max(0, s.open - s.visited.size()))
+	if rules.has("gate"):
+		rl.append("鳥居 reach the gate")
+	if rules.has("nocut"):
+		rl.append("無刀 no cutting")
+	if rules.has("stone"):
+		rl.append("硯 unspent ink is kept (to %d)" % Sim.INK_CAP)
+	if rules.has("shiki"):
+		rl.append("式神 what you bind, you may set down")
+	if s.wind != Vector2i.ZERO:
+		rl.append("風 the wind carries lanterns, umbrellas and ghosts " + WIND_ARROW[s.wind])
+	if rules.has("rain"):
+		rl.append("雨 lanterns and fire are out; kappa come ashore")
+	if rules.has("snow"):
+		rl.append("雪 all water is ice")
+	if rules.has("night"):
+		rl.append("夜 you see only near yourself and near light")
+	var ground = "".join(lv.rows)
+	if rules.has("order"):
+		rl.append("封 only the lowest number can be harmed")
+	if rules.has("write"):
+		var left = s.marks
+		for i in range(s.w * s.h):
+			if s.inked & (1 << i):
+				left -= 1
+		rl.append("書 paint every grey tile  (%d left)" % left)
+	if ground.contains("m"):
+		rl.append("供 walking yokai go to an offering, and eat")
+	if ground.contains("b"):
+		rl.append("橋 planks you cross fall after the yokai move")
+	if ground.contains("w"):
+		rl.append("巣 a web ends your stroke")
+	if s.stun:
+		rl.append("鐘 the bell is ringing: nothing strikes, nothing moves")
+	if rl.size() >= 3:
+		# with many rules in force, name each in a word or two so the line stays over the board
+		for k in range(rl.size()):
+			rl[k] = RULE_BRIEF.get(rl[k].substr(0, 1), rl[k])
+	return "  ·  ".join(rl)
+
 func _lit():
-	var lit = {}
+	var out = {}
 	if not s.r_night:
-		return lit
+		return out
 	var src = [[s.hero, 2]]
 	for y in s.yokai:
 		if y.kind == "chochin" or y.kind == "hitodama":
@@ -1058,8 +1068,8 @@ func _lit():
 		for dy in range(-e[1], e[1] + 1):
 			for dx in range(-e[1], e[1] + 1):
 				if abs(dx) + abs(dy) <= e[1]:
-					lit[e[0] + Vector2i(dx, dy)] = true
-	return lit
+					out[e[0] + Vector2i(dx, dy)] = true
+	return out
 
 # rain, snow and wind are painted over the board; they change nothing by themselves
 func _weather(br):

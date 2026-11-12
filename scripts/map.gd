@@ -10,12 +10,19 @@ var road_y = 586.0
 var hover_st = -1
 var pan = -1.0
 var page = 0
+var tally = {}
 var tabs = []
 var nav = []          # the buttons of the road page itself (hidden while chapters are being chosen)
 var picking = false   # phone: the page of chapters is open
 var b_close
 
 func setup():
+	# nothing is cleared while the map is open, so the road's totals are counted once
+	var done = 0
+	for i in range(Data.LEVELS.size()):
+		if main.grade_of(i) != "":
+			done += 1
+	tally = {"done": done, "rank": main.rank(), "seals": main.seal_count(), "points": main.points()}
 	var phone = main.touch
 	if phone:
 		band = Rect2(40, 150, 1200, 236)
@@ -165,15 +172,12 @@ func _draw():
 		return
 	Ink.tategaki(self, f, Vector2(64, 8), "上手", 46, Ink.SUMI)
 	var ch = Data.CHAPTERS[page]
-	var done = 0
-	for i in range(Data.LEVELS.size()):
-		if main.grade_of(i) != "":
-			done += 1
-	var rk = main.rank()
+	var done = tally.done
+	var rk = tally.rank
 	if phone:
 		Ink.text(self, f, Vector2(110, 46), "%s  %s" % [ch.kanji, ch.name], 38, Ink.SUMI)
 		Ink.text(self, f, Vector2(110, 80), "Chapter %d of %d" % [page + 1, Data.CHAPTERS.size()], 24, Ink.a(Ink.SHU, 0.9))
-		Ink.text(self, f, Vector2(110, 116), "%s %s  ·  %d of %d stations  ·  %d points" % [rk[0], rk[1], done, Data.LEVELS.size(), main.points()], 22, Ink.a(Ink.SUMI, 0.75))
+		Ink.text(self, f, Vector2(110, 116), "%s %s  ·  %d of %d stations  ·  %d points" % [rk[0], rk[1], done, Data.LEVELS.size(), tally.points], 22, Ink.a(Ink.SUMI, 0.75))
 	else:
 		Ink.text(self, f, Vector2(110, 52), "The Road of the Blank Scroll", 32, Ink.SUMI)
 		Ink.text(self, f, Vector2(110, 84), "Chapter %d of %d  ·  %s  %s" % [page + 1, Data.CHAPTERS.size(), ch.kanji, ch.name], 19, Ink.a(Ink.SHU, 0.9))
@@ -265,6 +269,6 @@ func _draw():
 		Ink.text(self, f, Vector2(820, 46), lv.kanji, 38, Ink.SUMI, HORIZONTAL_ALIGNMENT_RIGHT, 420)
 		Ink.text(self, f, Vector2(820, 72), "%d · %s" % [show + 1, lv.name], 18, Ink.SUMI, HORIZONTAL_ALIGNMENT_RIGHT, 420)
 		Ink.text(self, f, Vector2(820, 96), sub, 15, Ink.a(Ink.SHU, 0.9), HORIZONTAL_ALIGNMENT_RIGHT, 420)
-		Ink.text(self, f, Vector2(576, 674), "%s %s   Stations %d / %d   Seals %d / %d   Points %d" % [rk[0], rk[1], done, Data.LEVELS.size(), main.seal_count(), 3 * Data.LEVELS.size(), main.points()], 17, Ink.SUMI)
+		Ink.text(self, f, Vector2(576, 674), "%s %s   Stations %d / %d   Seals %d / %d   Points %d" % [rk[0], rk[1], done, Data.LEVELS.size(), tally.seals, 3 * Data.LEVELS.size(), tally.points], 17, Ink.SUMI)
 		Ink.text(self, f, Vector2(566, 700), "Seals: 上手 mastery · 潔 first attempt, nothing taken back · 惜墨 sparing of ink.", 14, Ink.a(Ink.SUMI, 0.6))
 	draw_btns()

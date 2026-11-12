@@ -5,6 +5,7 @@ const MAXLV = 2
 var rows = []
 
 func setup():
+	still = true
 	var bh = 66 if main.touch else 52
 	btn(Rect2(40, 700 - bh - 8, 280 if main.touch else 220, bh), "Back to the road", main.show_map, "道")
 	btn(Rect2(340 if main.touch else 280, 700 - bh - 8, 240 if main.touch else 220, bh), "Unlearn all", _reset, "忘")

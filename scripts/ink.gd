@@ -169,6 +169,14 @@ static func oval(ci, c, rx, ry, fill, lw = 2.0, line = SUMI):
 	pts.remove_at(pts.size() - 1)
 	blob(ci, pts, fill, lw, line)
 
+# Is this four-cornered piece of ribbon crossed over itself, or flat to nothing? Such a piece cannot
+# be filled as a polygon.
+static func folded(q):
+	var area = (q[0].x * q[1].y - q[1].x * q[0].y) + (q[1].x * q[2].y - q[2].x * q[1].y) + (q[2].x * q[3].y - q[3].x * q[2].y) + (q[3].x * q[0].y - q[0].x * q[3].y)
+	if abs(area) < 0.02:
+		return true
+	return Geometry2D.segment_intersects_segment(q[0], q[1], q[2], q[3]) != null or Geometry2D.segment_intersects_segment(q[1], q[2], q[3], q[0]) != null
+
 # a brush stroke as one ribbon: swells in the middle, thins at both ends
 static func brush(ci, pts, w, col):
 	var n = pts.size()
@@ -191,7 +199,7 @@ static func brush(ci, pts, w, col):
 	for i in range(n - 1):
 		if pts[i].distance_to(pts[i + 1]) > 0.01:
 			var quad = PackedVector2Array([lf[i], lf[i + 1], rt[i + 1], rt[i]])
-			if Geometry2D.triangulate_polygon(quad).is_empty():
+			if folded(quad):
 				# a hairpin turn folds the ribbon over itself; fall back to a plain segment
 				ci.draw_line(pts[i], pts[i + 1], col, lf[i].distance_to(rt[i]), true)
 			else:
@@ -353,7 +361,7 @@ static func kaku(ci, pts, w, col, u):
 		rt.append(line[k] - d.orthogonal() * hw)
 	for k in range(upto):
 		var quad = PackedVector2Array([lf[k], lf[k + 1], rt[k + 1], rt[k]])
-		if Geometry2D.triangulate_polygon(quad).is_empty():
+		if folded(quad):
 			ci.draw_line(line[k], line[k + 1], col, lf[k].distance_to(rt[k]), true)
 		else:
 			ci.draw_colored_polygon(quad, col)
@@ -398,10 +406,16 @@ static func tategaki(ci, font, top, s, size, col):
 	for i in range(s.length()):
 		ci.draw_string(font, top + Vector2(-size * 0.5, size * 0.9 + i * size * 1.08), s[i], HORIZONTAL_ALIGNMENT_CENTER, size, size, col)
 
+static var _seal_box = {}   # one box per colour and corner, made once
+
 static func seal(ci, font, c, size, kanji, col = SHU):
-	var sb = StyleBoxFlat.new()
-	sb.bg_color = col
-	sb.set_corner_radius_all(int(size * 0.12))
+	var key = [col, int(size * 0.12)]
+	if not _seal_box.has(key):
+		var made = StyleBoxFlat.new()
+		made.bg_color = col
+		made.set_corner_radius_all(key[1])
+		_seal_box[key] = made
+	var sb = _seal_box[key]
 	var n = kanji.length()
 	var h = size * (0.2 + 0.9 * n)
 	var r = Rect2(c - Vector2(size * 0.55, h * 0.5), Vector2(size * 1.1, h))

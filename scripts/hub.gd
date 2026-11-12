@@ -6,6 +6,7 @@ const TOP = 112
 const STEP = 132
 
 func setup():
+	still = true
 	btn(Rect2(880, TOP + 8, 280, 42), "Sit with it" if not main.daily_done() else "Sit with it again", main.show_daily, "日課")
 	btn(Rect2(880, TOP + 62, 280, 40), "Days gone by", main.show_calendar, "暦")
 	btn(Rect2(880, TOP + STEP + 8, 280, 42), "Walk on" if int(main.data.henro.at) > 0 else "Set out", main.show_henro, "遍路")

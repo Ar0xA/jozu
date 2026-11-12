@@ -9,6 +9,7 @@ var first_day = 0
 var note = ""
 
 func setup():
+	still = true
 	var t = main.today()
 	first_day = t - ((t + 3) % 7) - (WEEKS - 1) * 7     # the Monday four weeks back
 	btn(Rect2(1046, 296, 200, 60) if main.touch else Rect2(1046, 300, 200, 46), "Copy" if main.touch else "Copy the line", _copy, "写")

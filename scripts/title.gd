@@ -50,7 +50,7 @@ func _draw():
 	# title, written top to bottom in the empty panel
 	# the name is written out, stroke by stroke, and then settles into the cut of the typeface
 	var t = time - 0.5
-	var done = 1.0 if not main.data.opts.motion else Ink.title_strokes(self, Vector2(1140, 30), 180, Ink.a(Ink.SUMI, clamp(1.0 - (t - 3.5) / 0.8, 0.0, 1.0)), t)
+	var done = 1.0 if (not main.data.opts.motion or t > 4.4) else Ink.title_strokes(self, Vector2(1140, 30), 180, Ink.a(Ink.SUMI, clamp(1.0 - (t - 3.5) / 0.8, 0.0, 1.0)), t)
 	var settle = 1.0 if not main.data.opts.motion else clamp((t - 3.4) / 0.8, 0.0, 1.0)
 	if done >= 1.0 and settle > 0.0:
 		Ink.tategaki(self, f, Vector2(1140, 30), "上手", 180, Ink.a(Ink.SUMI, settle))
