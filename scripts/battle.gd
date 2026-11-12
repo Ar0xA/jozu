@@ -512,17 +512,14 @@ func _end():
 	_after(true, "sheathe")
 	ending = false
 
-# May the last thing done be taken back? That depends on the Undo setting: freely; only within
-# the stroke in hand (a stroke once sheathed is committed); or not at all.
+# May the last thing done be taken back? Only within the stroke in hand: a stroke once sheathed
+# is committed. With the Undo setting at "never", not at all.
 func _can_undo():
 	if hist.is_empty() or grade == "jouzu" or grade == "ka" or kind_of == "henro":
 		return false   # a pilgrim does not take a step back
-	var rule = int(main.data.opts.undo)
-	if rule == 2:
+	if int(main.data.opts.undo) == 2:
 		return false
-	if rule == 1:
-		return s.status == "play" and int(hist.back().turn) == int(s.turn)
-	return true
+	return s.status == "play" and int(hist.back().turn) == int(s.turn)
 
 func _undo():
 	if not _can_undo():

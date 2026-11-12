@@ -148,9 +148,9 @@ func stage_music(i):
 	return ["battle", "road2", "road3"][c % 3]
 
 # the settings a player can change (scripts/settings.gd)
-# undo: 0 freely, 1 only within the stroke in hand, 2 not at all
+# undo: 1 only within the stroke in hand (a sheathed stroke is committed), 2 not at all
 # style: 0 shodo (spare: bare paper, one seal, a stroke that runs dry), 1 ornate (as it was)
-const OPTS = {"music": true, "motion": true, "pattern": false, "filter": true, "undo": 0, "style": 0}
+const OPTS = {"music": true, "motion": true, "pattern": false, "filter": true, "undo": 1, "style": 0}
 
 # The spare style: what would be on a calligrapher's sheet, and no more.
 func spare():
@@ -357,7 +357,7 @@ func load_save():
 			if j.has("opts") and typeof(j.opts) == TYPE_DICTIONARY:
 				for k in data.opts:
 					if j.opts.has(k):
-						data.opts[k] = clamp(int(j.opts[k]), 0, 2) if k == "undo" else clamp(int(j.opts[k]), 0, 1) if k == "style" else bool(j.opts[k])
+						data.opts[k] = clamp(int(j.opts[k]), 1, 2) if k == "undo" else clamp(int(j.opts[k]), 0, 1) if k == "style" else bool(j.opts[k])
 			for grp in ["days", "tries", "rand", "met"]:
 				if j.has(grp) and typeof(j[grp]) == TYPE_DICTIONARY:
 					for k in j[grp]:

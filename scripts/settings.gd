@@ -7,11 +7,11 @@ const ROWS = [
 	["motion", "動", "Motion", "Yokai move one after another; the board shakes when you are struck."],
 	["pattern", "印", "Mark danger with a cross", "A black cross on the red tiles, if red is hard to tell from the paper."],
 	["filter", "紙", "Painted look", "Ink-bleed and paper grain. Off: sharper, and easier on an old phone."],
-	["undo", "戻", "Taking strokes back", "Freely; only within the stroke in hand; or never, as on the pilgrimage."],
+	["undo", "戻", "Taking strokes back", "Within the stroke in hand, until it is sheathed; or never, as on the pilgrimage."],
 	["style", "書", "Style", "Shodō: bare paper, one seal, a stroke that runs dry. Ornate: clouds, seasons, seals, frames."],
 ]
 const STYLE = ["Shodō", "Ornate"]
-const UNDO = ["Freely", "This stroke", "Never"]
+const UNDO = ["", "This stroke", "Never"]
 var back = Callable()
 var rows = {}
 
@@ -31,7 +31,7 @@ func _labels():
 	for k in rows:
 		if k == "undo":
 			rows[k].label = UNDO[int(main.data.opts.undo)]
-			rows[k].sel = int(main.data.opts.undo) > 0
+			rows[k].sel = int(main.data.opts.undo) == 2
 			continue
 		if k == "style":
 			rows[k].label = STYLE[int(main.data.opts.style)]
@@ -44,7 +44,7 @@ func _flip(k):
 	if k == "sound":
 		main.toggle_sound()
 	elif k == "undo":
-		main.data.opts.undo = (int(main.data.opts.undo) + 1) % 3
+		main.data.opts.undo = 2 if int(main.data.opts.undo) == 1 else 1
 		main.write_save()
 	elif k == "style":
 		main.data.opts.style = (int(main.data.opts.style) + 1) % 2

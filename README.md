@@ -81,7 +81,7 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   Every screen has a phone layout of its own: larger type and buttons, the chapters on a page of
   their own instead of a row of tabs, and the workshop's palette in four pages of large buttons.
 - **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, the
-  painted look, and how strokes may be taken back: freely, only within the stroke in hand, or never.
+  painted look, and how strokes may be taken back: within the stroke in hand (a sheathed stroke is committed), or never.
   **Style** chooses between Shodō, the default (bare paper, one seal, a stroke that pools where the
   brush comes down, pales as its ink is spent and runs dry at the end; the board ruled as a practice
   sheet under a paperweight; the stage signed down the left margin; earlier strokes drying to grey; ink

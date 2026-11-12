@@ -139,7 +139,7 @@ func _run():
 	else:
 		b.extra[0].cb.call()
 		if b.done or b.s.status != "play":
-			bad("'Take it back' after a loss does not resume play")
+			bad("'Begin again' after a loss does not resume play")
 	if main.grade_of(1) != "":
 		bad("a lost stage was recorded as cleared")
 
@@ -602,7 +602,7 @@ func other_roads():
 			await frames()
 	if bu.grade != "lost" or bu.extra.size() != 1:
 		bad("with undo set to 'never', a loss should offer only to begin again")
-	main.data.opts.undo = 0
+	main.data.opts.undo = 1
 
 	# every stage has music that exists, and the quiet chapters have the quiet piece
 	var heard = {}
@@ -643,7 +643,7 @@ func other_roads():
 		if int(main.data.opts.style) != 1:
 			bad("the style setting does not change")
 		main.cur.rows["style"].cb.call()
-		for want in [1, 2, 0]:
+		for want in [2, 1]:
 			main.cur.rows["undo"].cb.call()
 			if int(main.data.opts.undo) != want:
 				bad("the undo setting does not step to %d" % want)
