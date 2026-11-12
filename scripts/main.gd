@@ -12,6 +12,8 @@ var cur = null
 var fibers = []
 var art = {}
 var _touch_words = {}
+var late = []        # music not in the first download, still to be fetched (web only)
+var fetching = ""
 var touch = false   # a phone or tablet: no hover, no right-click, fingers not pointers
 var turn_note
 var paint_rect
@@ -116,8 +118,13 @@ func _setup_audio():
 		var p = AudioStreamPlayer.new()
 		add_child(p)
 		sfx_pool.append(p)
-	for nm in ["title", "battle", "boss", "road2", "road3", "boss2", "zen", "story"]:
-		streams[nm] = load("res://audio/%s.ogg" % nm)
+	for nm in ["title", "story", "battle", "road2", "road3", "zen", "boss", "boss2"]:
+		var path = "res://audio/%s.ogg" % nm
+		if ResourceLoader.exists(path):
+			streams[nm] = load(path)
+		else:
+			late.append(nm)   # the web build leaves the stage music out of its first download
+	_fetch_music()
 	for nm in ["step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2", "brush"]:
 		streams[nm] = load("res://audio/%s.wav" % nm)
 	AudioServer.set_bus_mute(0, not data.sound)
@@ -132,6 +139,37 @@ func play_music(nm):
 	music.volume_db = MUSIC_DB.get(nm, -9.0)
 	if music.stream and data.opts.music:
 		music.play()
+	elif late.has(nm):
+		late.erase(nm)
+		late.push_front(nm)   # wanted now: it is fetched next, and starts when it arrives
+
+# On the web the stage music sits beside the game (music/*.ogg) and is fetched one piece at a time
+# once the title is up, so the first download is smaller. Until a piece arrives its stage is quiet.
+func _fetch_music():
+	if late.is_empty() or fetching != "":
+		return
+	fetching = late.pop_front()
+	var rq = HTTPRequest.new()
+	add_child(rq)
+	rq.request_completed.connect(_music_fetched.bind(rq))
+	var page = str(JavaScriptBridge.eval("window.location.href.split('?')[0].split('#')[0]", true))
+	if rq.request(page.substr(0, page.rfind("/") + 1) + "music/" + fetching + ".ogg") != OK:
+		rq.queue_free()
+		fetching = ""
+
+func _music_fetched(result, code, _headers, body, rq):
+	rq.queue_free()
+	var nm = fetching
+	fetching = ""
+	if result == HTTPRequest.RESULT_SUCCESS and code == 200:
+		var got = AudioStreamOggVorbis.load_from_buffer(body)
+		if got != null:
+			streams[nm] = got
+			if music_name == nm:
+				music.stream = got
+				if data.opts.music:
+					music.play()
+	_fetch_music()
 
 # What is heard on a stage. The chapters of stillness (QUIET) have the quiet piece; the rest take the three road pieces in turn,
 # and the last board of a story has drum and shamisen.

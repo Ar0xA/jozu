@@ -3,8 +3,9 @@
 #
 # 1. trims the typeface to the characters the game's text uses now (tools/subset_font.py)
 # 2. re-imports, so the trimmed font and any changed assets are picked up
-# 3. exports the "Web" preset
-# 4. compiles the board generator to WebAssembly beside it (tools/genweb)
+# 3. exports the "Web" preset, on the trimmed engine in tools/engine (see tools/build_engine.sh)
+# 4. puts the stage music beside it, to be fetched after the title
+# 5. compiles the board generator to WebAssembly beside it (tools/genweb)
 #
 # Needs Godot 4.7 with the web export templates, Python with fonttools, and the .NET 10 SDK with
 # the wasm-tools workload (dotnet workload install wasm-tools). Set GODOT or PYTHON if they are
@@ -28,6 +29,11 @@ if [ ! -s build/web/index.pck ] || [ ! -s build/web/index.wasm ]; then
 	echo "The web export failed: is the Web export template installed?" >&2
 	exit 1
 fi
+
+# the stage music is left out of the pck (see the Web preset's exclude filter) and fetched once the
+# title is up: scripts/main.gd, _fetch_music
+mkdir -p build/web/music
+for n in battle boss boss2 road2 road3 zen; do cp "audio/$n.ogg" build/web/music/; done
 
 if [ "${SKIP_GEN:-0}" != 1 ]; then
 	if ! command -v dotnet >/dev/null 2>&1 || ! dotnet workload list 2>/dev/null | grep -q wasm-tools; then

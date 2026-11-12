@@ -110,6 +110,7 @@ Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-clic
 - `shaders/paint.gdshader` — ink bleed, dry brush and paper grain over the whole frame
 - `art/`, `fonts/` — public-domain paintings and the bundled typeface
 - `tools/build_web.sh` — builds the web version into `build/web` (re-trims the font first); `tools/publish_pages.sh` pushes it to GitHub Pages
+- `tools/engine/web_nothreads_release.zip` — the web engine the game ships with: Godot 4.7.2 compiled without the parts it never uses, about half the size of the stock one. `tools/build_engine.sh` rebuilds it (only needed when the Godot version changes)
 - `tools/web_shell.html` — the web build's loading page (paper, the name, a brush stroke for progress); `art/splash.png` and `art/icon.png` are the splash and the icon
 - `tools/subset_font.py` — trims the typeface to the characters the game uses (the full font is in `fonts/src/`)
 - `tools/make_audio.py` — regenerates the synthesised music (Ogg Vorbis) and sound effects (needs numpy and soundfile)
