@@ -5,6 +5,11 @@ config_version=5
 
 config/name="Jōzu 上手"
 run/main_scene="res://main.tscn"
+config/icon="res://art/icon.png"
+boot_splash/bg_color=Color(0.925, 0.878, 0.76, 1)
+boot_splash/image="res://art/splash.png"
+boot_splash/fullsize=false
+boot_splash/use_filter=true
 config/features=PackedStringArray("4.3")
 
 [display]
