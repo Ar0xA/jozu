@@ -369,8 +369,7 @@ const LEVELS = [
 			["Sōjōbō", "Hm! Then climb. My nephews will fan you off the mountain if you walk in the open."],
 		],
 		"after": [
-			["Sōjōbō", "You used my own cedars against me. Acceptable. I will show you how Ushiwaka crossed the Gojō bridge rail."],
-			["", "Suzu learns 縮地 SHUKUCHI — the shrinking of the earth. Once per stage, leap over one tile of anything."],
+			["Sōjōbō", "You used my own cedars against me. Acceptable. Climb past my nephews, and I will show you how Ushiwaka crossed the Gojō bridge rail."],
 		],
 		"sol": "R R R / U U L L / L L L L / R R U / U U R U",
 	},
@@ -440,6 +439,7 @@ const LEVELS = [
 			["Sōjōbō", "Shukuchi is not jumping. You fold the ground like paper and step across the crease."],
 			["Suzu", "Only once?"],
 			["Sōjōbō", "Once is a technique. Twice is a habit. Spend it where nothing else will do."],
+			["", "Suzu learns 縮地 SHUKUCHI — the shrinking of the earth. Once per stage, leap over one tile of anything."],
 		],
 		"after": [
 			["Sōjōbō", "Hmph. The boy took a month."],
@@ -1108,8 +1108,7 @@ const LEVELS = [
 			["Gennō", "Rocks are for the living. Stand where they must come to you one at a time."],
 		],
 		"after": [
-			["Gennō", "Clean work. Now let me teach you the only sutra I ever finished."],
-			["", "Suzu learns 喝 KATSU — once per stage, a shout that hurls every yokai beside you one tile away. Into water, they are gone. Into a wall, they are hurt."],
+			["Gennō", "Clean work. Cross the withered field, and I will teach you the only sutra I ever finished."],
 		],
 		"sol": " /  / wardR D R U / U R leapL U",
 	},
@@ -1179,6 +1178,7 @@ const LEVELS = [
 			["Gennō", "KATSU! — Like that. From the belly."],
 			["Suzu", "...Katsu."],
 			["Gennō", "That would not frighten a sparrow. Again, when it matters."],
+			["", "Suzu learns 喝 KATSU — once per stage, a shout that hurls every yokai beside you one tile away. Into water, they are gone. Into a wall, they are hurt."],
 		],
 		"after": [
 			["Gennō", "There. Even the stone flinched. She is waiting for you beyond the dead grass."],

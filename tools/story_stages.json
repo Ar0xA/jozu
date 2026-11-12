@@ -223,11 +223,7 @@
   "after": [
    [
     "Sōjōbō",
-    "You used my own cedars against me. Acceptable. I will show you how Ushiwaka crossed the Gojō bridge rail."
-   ],
-   [
-    "",
-    "Suzu learns 縮地 SHUKUCHI — the shrinking of the earth. Once per stage, leap over one tile of anything."
+    "You used my own cedars against me. Acceptable. Climb past my nephews, and I will show you how Ushiwaka crossed the Gojō bridge rail."
    ]
   ]
  },
@@ -260,6 +256,10 @@
    [
     "Sōjōbō",
     "Once is a technique. Twice is a habit. Spend it where nothing else will do."
+   ],
+   [
+    "",
+    "Suzu learns 縮地 SHUKUCHI — the shrinking of the earth. Once per stage, leap over one tile of anything."
    ]
   ],
   "after": [
@@ -712,11 +712,7 @@
   "after": [
    [
     "Gennō",
-    "Clean work. Now let me teach you the only sutra I ever finished."
-   ],
-   [
-    "",
-    "Suzu learns 喝 KATSU — once per stage, a shout that hurls every yokai beside you one tile away. Into water, they are gone. Into a wall, they are hurt."
+    "Clean work. Cross the withered field, and I will teach you the only sutra I ever finished."
    ]
   ]
  },
@@ -751,6 +747,10 @@
    [
     "Gennō",
     "That would not frighten a sparrow. Again, when it matters."
+   ],
+   [
+    "",
+    "Suzu learns 喝 KATSU — once per stage, a shout that hurls every yokai beside you one tile away. Into water, they are gone. Into a wall, they are hurt."
    ]
   ],
   "after": [
