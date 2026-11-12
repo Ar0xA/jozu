@@ -186,14 +186,16 @@ func _draw():
 	draw_rect(Rect2(band.position.x, band.end.y, band.size.x, 3), Ink.KIN)
 
 	# the chapter's name on a slip of paper, as the title is set on a print
-	var kj = ch.kanji
-	var slip = Rect2(band.end.x - 76, band.position.y + 12, 52, kj.length() * 38.0 + 22)
-	draw_rect(slip, Ink.a(Ink.GOFUN, 0.94))
-	draw_rect(slip, Ink.SHU, false, 3.0)
-	Ink.tategaki(self, f, Vector2(slip.position.x + 26, slip.position.y + 6), kj, 34, Ink.SUMI)
+	var spare = main.spare()
+	if not spare:
+		var kj = ch.kanji
+		var slip = Rect2(band.end.x - 76, band.position.y + 12, 52, kj.length() * 38.0 + 22)
+		draw_rect(slip, Ink.a(Ink.GOFUN, 0.94))
+		draw_rect(slip, Ink.SHU, false, 3.0)
+		Ink.tategaki(self, f, Vector2(slip.position.x + 26, slip.position.y + 6), kj, 34, Ink.SUMI)
 
 	# the season drifts across the painting, behind the words
-	if main.data.opts.motion:
+	if main.data.opts.motion and not spare:
 		Ink.season(self, _season(), time, 22)
 
 	# a line of history about this place
@@ -204,7 +206,8 @@ func _draw():
 		else:
 			var nr = Rect2(band.position.x + 14, band.end.y - 96, 860, 82)
 			draw_rect(nr, Ink.a(Ink.PAPER, 0.86))
-			Ink.frame(self, nr, 2.0, Ink.a(Ink.SUMI, 0.6))
+			if not spare:
+				Ink.frame(self, nr, 2.0, Ink.a(Ink.SUMI, 0.6))
 			Ink.para(self, f, nr.position + Vector2(12, 20), note, 14, Ink.SUMI, nr.size.x - 24)
 
 	# the road through this chapter
@@ -223,7 +226,9 @@ func _draw():
 		var r = ((24.0 if phone else 20.0) if small else 28.0 if phone else 26.0) + (2.5 * sin(time * 3.0) if (open and g == "") else 0.0)
 		draw_circle(p, r, Ink.PAPER)
 		Ink.enso(self, p, r, 6.0 if open else 3.5, Ink.SHU if (i == hover_st and open) else Ink.a(Ink.SUMI, 1.0 if open else 0.35), -1.9 + i)
-		if g == "jouzu":
+		if g != "" and spare:
+			draw_circle(p, r * 0.52, Ink.SHU if g == "jouzu" else Ink.AI)
+		elif g == "jouzu":
 			Ink.seal(self, f, p, 13 if small else 17, "上手")
 		elif g != "":
 			Ink.seal(self, f, p, 17 if small else 22, "可", Ink.AI)

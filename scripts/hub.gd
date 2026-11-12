@@ -29,8 +29,11 @@ func on_key(code):
 func _card(f, i, kanji, title, lines):
 	var y = TOP + i * STEP
 	var r = Rect2(100, y, 1080, STEP - 12)
-	draw_rect(r, Ink.a(Ink.GOFUN, 0.6))
-	Ink.frame(self, r, 2.5, Ink.a(Ink.SUMI, 0.7))
+	if main.spare():
+		draw_line(Vector2(r.position.x, r.end.y), Vector2(r.end.x, r.end.y), Ink.a(Ink.SUMI, 0.35), 1.5, true)   # a rule between, and nothing round
+	else:
+		draw_rect(r, Ink.a(Ink.GOFUN, 0.6))
+		Ink.frame(self, r, 2.5, Ink.a(Ink.SUMI, 0.7))
 	Ink.tategaki(self, f, Vector2(150, y + 8), kanji, 40, Ink.SHU)
 	Ink.text(self, f, Vector2(210, y + 38), title, 28, Ink.SUMI)
 	for k in range(lines.size()):

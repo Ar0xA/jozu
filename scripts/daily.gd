@@ -62,7 +62,10 @@ func _draw():
 		var n = int(main.data.days.get(str(day), 0))
 		if n > 0:
 			answered += 1
-			Ink.seal(self, f, r.position + Vector2(r.size.x - 32, 44), 13, "済")
+			if main.spare():
+				draw_circle(r.position + Vector2(r.size.x - 22, 22), 8.0, Ink.SHU)
+			else:
+				Ink.seal(self, f, r.position + Vector2(r.size.x - 32, 44), 13, "済")
 			Ink.text(self, f, r.position + Vector2(8, 62), ("1st" if n == 1 else "try %d" % n) if main.touch else ("first stroke" if n == 1 else "attempt %d" % n), 19 if main.touch else 13, Ink.a(Ink.SUMI, 0.7))
 		elif int(main.data.tries.get(str(day), 0)) > 0:
 			Ink.text(self, f, r.position + Vector2(8, 62), "%d tried" % int(main.data.tries[str(day)]), 19 if main.touch else 13, Ink.a(Ink.SHU, 0.8))

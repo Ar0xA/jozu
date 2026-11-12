@@ -198,6 +198,52 @@ static func brush(ci, pts, w, col):
 			else:
 				ci.draw_colored_polygon(quad, col)
 
+# A stroke as a loaded brush leaves it. Where it touches down the ink pools, a little darker and
+# rounder (nijimi). As it runs the brush empties: each step is paler than the one before, and
+# toward the end the hairs part and bare paper shows through in streaks (kasure).
+# full = how far through its ink the brush is at the end of this stroke, 0 to 1.
+static func fude(ci, pts, w, full):
+	var n = pts.size()
+	if n == 0:
+		return
+	var black = Color(0.11, 0.09, 0.09)
+	if n == 1:
+		ci.draw_circle(pts[0], w * 0.42, black)
+		return
+	for i in range(n - 1):
+		var a0 = pts[i]
+		var b0 = pts[i + 1]
+		var d = (b0 - a0)
+		if d.length() < 0.01:
+			continue
+		var nrm = d.normalized().orthogonal()
+		var u0 = float(i) / float(n - 1) * full
+		var u1 = float(i + 1) / float(n - 1) * full
+		# the ribbon thins as the ink gives out
+		var w0 = w * 0.5 * (1.0 - 0.34 * u0)
+		var w1 = w * 0.5 * (1.0 - 0.34 * u1)
+		var c0 = a(black, 0.96 - 0.42 * u0)
+		var c1 = a(black, 0.96 - 0.42 * u1)
+		ci.draw_polygon(PackedVector2Array([a0 + nrm * w0, b0 + nrm * w1, b0 - nrm * w1, a0 - nrm * w0]), PackedColorArray([c0, c1, c1, c0]))
+		ci.draw_circle(b0, w1, c1)      # the turn of the brush at each corner
+		# dry brush: streaks of paper along the stroke, more of them the emptier the brush
+		var dry = clamp((u1 - 0.45) / 0.55, 0.0, 1.0)
+		if dry > 0.0:
+			for k in range(5):
+				var off = (k - 2) * w1 * 0.36 + sin(i * 3.7 + k * 1.9) * w1 * 0.08
+				var from = a0.lerp(b0, 0.10 + 0.13 * ((k * 3 + i) % 4))
+				var to = a0.lerp(b0, 0.62 + 0.09 * ((k + i * 2) % 4))
+				ci.draw_line(from + nrm * off, to + nrm * off, a(PAPER, 0.80 * dry), 1.0 + 1.8 * dry, true)
+	# where the brush came down
+	blot(ci, pts[0], w * 0.95, w * 0.95, black, 0.30)
+	ci.draw_circle(pts[0], w * 0.56, a(black, 0.97))
+	# and where it lifted: a tail drawn out thin
+	var last = pts[n - 1] - pts[n - 2]
+	if last.length() > 0.01:
+		var tip = pts[n - 1] + last.normalized() * w * 0.55 * (1.0 - 0.3 * full)
+		var side = last.normalized().orthogonal() * w * 0.5 * (1.0 - 0.34 * full)
+		ci.draw_colored_polygon(PackedVector2Array([pts[n - 1] + side, tip, pts[n - 1] - side]), a(black, 0.96 - 0.42 * full))
+
 # The first part of a path, by length: u = 0 nothing, 1 all of it.
 static func part(pts, u):
 	if u >= 1.0 or pts.size() < 2:

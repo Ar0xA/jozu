@@ -262,7 +262,8 @@ func on_key(code):
 
 func _draw():
 	var f = main.font
-	Ink.seal(self, f, Vector2(84, 52), 24, "工房")
+	if not main.spare():
+		Ink.seal(self, f, Vector2(84, 52), 24, "工房")
 	Ink.text(self, f, Vector2(124, 62), "The Workshop", 40, Ink.SUMI)
 	var br = Rect2(ORG, Vector2(7, 7) * TS)
 	draw_rect(br, Ink.a(Ink.GOFUN, 0.40))

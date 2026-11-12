@@ -71,7 +71,9 @@ func _draw():
 		if main.data.scroll.has(key):
 			painted += 1
 			Ink.calligraphy(self, Rect2(r.position + Vector2(14, 8), r.size - Vector2(28, 44)), main.data.scroll[key], lv.rows[0].length(), lv.rows.size(), 1.0 if not main.data.opts.motion else clamp((time - page_t - 0.3 - k * 0.07) / 0.9, 0.0, 1.0))
-			if main.grade_of(i) == "jouzu":
+			if main.grade_of(i) == "jouzu" and main.spare():
+				draw_circle(r.end - Vector2(18, 18), 6.0, Ink.SHU)
+			elif main.grade_of(i) == "jouzu":
 				Ink.seal(self, f, r.end - Vector2(20, 24), 10, "上手")
 			var ks = 19 if rws == 2 else 16
 			Ink.text(self, f, Vector2(r.position.x + 10, r.end.y - 10), lv.kanji, ks, Ink.SUMI)

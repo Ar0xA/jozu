@@ -209,8 +209,11 @@ func _draw_card(f):
 	var r = _card_rect(f)
 	var fade = clamp(card_t / 0.25, 0.0, 1.0) * clamp((card_len - card_t) / 0.4, 0.0, 1.0)
 	draw_rect(r, Ink.a(Ink.PAPER, 0.97 * fade))
-	draw_rect(r.grow(-6), Ink.a(Ink.GOFUN, 0.5 * fade))
-	Ink.frame(self, r, 4.0, Ink.a(Ink.SUMI, 0.85 * fade))
+	if main.spare():
+		draw_rect(Rect2(r.position.x, r.position.y, 5.0, r.size.y), Ink.a(Ink.SHU, 0.85 * fade))   # one red rule down the edge
+	else:
+		draw_rect(r.grow(-6), Ink.a(Ink.GOFUN, 0.5 * fade))
+		Ink.frame(self, r, 4.0, Ink.a(Ink.SUMI, 0.85 * fade))
 	var y = r.position.y + 30.0
 	for line in card:
 		if line[0] == "":
@@ -697,9 +700,11 @@ func _draw():
 	draw_set_transform(off, 0.0, Vector2.ONE)
 
 	# header
-	Ink.kinun(self, Vector2(400, 20), 250.0)
-	Ink.kinun(self, Vector2(1090, 204), 240.0, 0.20)
-	Ink.seal(self, f, Vector2(84, 52), 24, "上手")
+	var spare = main.spare()
+	if not spare:
+		Ink.kinun(self, Vector2(400, 20), 250.0)
+		Ink.kinun(self, Vector2(1090, 204), 240.0, 0.20)
+		Ink.seal(self, f, Vector2(84, 52), 24, "上手")
 	if main.data.opts.motion:
 		Ink.written(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI, time - 0.35)
 	else:
@@ -862,7 +867,10 @@ func _draw():
 	var trail = []
 	for v in s.visited:
 		trail.append(ctr(v))
-	if trail.size() > 1:
+	if trail.size() > 1 and spare:
+		# the stroke in hand, paler and drier the more of the brush's ink it has used
+		Ink.fude(self, trail, 21.0, clamp(1.0 - float(s.ink) / max(1.0, float(max(s.ink_max, s.ink + trail.size() - 1))), 0.0, 1.0))
+	elif trail.size() > 1:
 		Ink.brush(self, trail, 20.0, Color(0.2, 0.18, 0.17))
 		if not done:
 			draw_circle(trail[trail.size() - 1], 7.5 + (1.2 * sin(time * 5.0) if main.data.opts.motion else 0.0), Color(0.12, 0.10, 0.10))
@@ -1156,7 +1164,7 @@ func _panel(f):
 		Ink.para(self, f, Vector2(PX, hy + eh + 8.0), say[1], 13, Ink.a(Ink.SUMI, 0.55), tw)
 	else:
 		Ink.para(self, f, Vector2(PX, hy), main.touch_words(hint), 15, Ink.a(Ink.SHU if hint_msg != "" else Ink.AI, 0.95), 545)
-	if not s.r_shiki:
+	if not s.r_shiki and not main.spare():
 		Ink.text(self, f, Vector2(PX + 282, 604), "click, drag or arrows to paint", 13, Ink.a(Ink.SUMI, 0.55))
 		Ink.text(self, f, Vector2(PX + 282, 622), "right-click undoes", 13, Ink.a(Ink.SUMI, 0.55))
 
@@ -1197,7 +1205,9 @@ func _seals(f):
 	for k in range(main.SEALS.size()):
 		var sl = main.SEALS[k]
 		var c = Vector2(250 + k * 100, 446)
-		if seal_mask & sl[0]:
+		if seal_mask & sl[0] and main.spare():
+			Ink.text(self, f, Vector2(c.x - 40, c.y + 6), sl[1], 16, Ink.SHU, HORIZONTAL_ALIGNMENT_CENTER, 80)
+		elif seal_mask & sl[0]:
 			Ink.seal(self, f, c, 11, sl[1])
 		else:
 			Ink.text(self, f, Vector2(c.x - 40, c.y + 6), sl[1], 15, Ink.a(Ink.SUMI, 0.28), HORIZONTAL_ALIGNMENT_CENTER, 80)

@@ -12,7 +12,7 @@ func _ready():
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _len():
-	return 0.42 if kind == "wash" else 0.62
+	return 0.42 if kind == "wash" else 0.22 if kind == "fade" else 0.62
 
 func start(k = "wash"):
 	kind = k
@@ -46,6 +46,10 @@ func _draw():
 		var open = 650.0 * u * u * (3.0 - 2.0 * u)
 		_door(-open, true)
 		_door(640.0 + open, false)
+		return
+	if kind == "fade":
+		# the page comes up out of bare paper, and that is all
+		draw_rect(Rect2(0, 0, 1280, 720), Ink.a(Ink.PAPER, 1.0 - t / _len()))
 		return
 	var u = t / _len()
 	var x = -200.0 + 1700.0 * u * u * (3.0 - 2.0 * u)

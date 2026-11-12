@@ -82,6 +82,9 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   their own instead of a row of tabs, and the workshop's palette in four pages of large buttons.
 - **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, the
   painted look, and how strokes may be taken back: freely, only within the stroke in hand, or never.
+  **Style** chooses between Shodō, the default (bare paper, one seal, a stroke that pools where the
+  brush comes down, pales as its ink is spent and runs dry at the end) and Ornate (gold clouds,
+  drifting seasons, seals and frames throughout).
 - **Three seals a station:** 上手 mastery, 潔 mastery at the first attempt since entering the stage (no
   undo, no restart), 惜墨 sparing of ink. Seals earn the
   kyū and dan ranks, from 10th kyū to meijin.

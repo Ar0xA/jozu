@@ -149,7 +149,12 @@ func stage_music(i):
 
 # the settings a player can change (scripts/settings.gd)
 # undo: 0 freely, 1 only within the stroke in hand, 2 not at all
-const OPTS = {"music": true, "motion": true, "pattern": false, "filter": true, "undo": 0}
+# style: 0 shodo (spare: bare paper, one seal, a stroke that runs dry), 1 ornate (as it was)
+const OPTS = {"music": true, "motion": true, "pattern": false, "filter": true, "undo": 0, "style": 0}
+
+# The spare style: what would be on a calligrapher's sheet, and no more.
+func spare():
+	return int(data.opts.style) == 0
 
 func apply_opts():
 	paint_rect.visible = data.opts.filter
@@ -351,7 +356,7 @@ func load_save():
 			if j.has("opts") and typeof(j.opts) == TYPE_DICTIONARY:
 				for k in data.opts:
 					if j.opts.has(k):
-						data.opts[k] = clamp(int(j.opts[k]), 0, 2) if k == "undo" else bool(j.opts[k])
+						data.opts[k] = clamp(int(j.opts[k]), 0, 2) if k == "undo" else clamp(int(j.opts[k]), 0, 1) if k == "style" else bool(j.opts[k])
 			for grp in ["days", "tries", "rand", "met"]:
 				if j.has(grp) and typeof(j[grp]) == TYPE_DICTIONARY:
 					for k in j[grp]:
@@ -474,7 +479,7 @@ func go(scr):
 		add_child(wipe)
 	move_child(wipe, -1)
 	if data.opts.motion:
-		wipe.start("fusuma" if stage else "wash")
+		wipe.start("fusuma" if stage else "fade" if spare() else "wash")
 
 func show_title():
 	play_music("title")

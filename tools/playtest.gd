@@ -614,6 +614,20 @@ func other_roads():
 	if heard.size() < 6 or main.stage_music(Data.CHAPTERS[10].from + 1) != "zen":
 		bad("the stages do not spread across the pieces of music: %s" % str(heard.keys()))
 
+	# both styles draw every page and play a stage through without complaint
+	for style in [1, 0]:
+		main.data.opts.style = style
+		for pg in [func(): main.show_title(), func(): main.show_map(), func(): main.show_hub(), func(): main.show_settings(),
+				func(): main.show_calendar(), func(): main.show_scroll(), func(): main.show_editor()]:
+			pg.call()
+			await frames(3)
+		main.show_battle(Data.CHAPTERS[14].from + 2)
+		await frames(2)
+		await play(Data.CHAPTERS[14].from + 2, false)
+		await frames(3)
+		if main.cur.grade != "jouzu":
+			bad("a stage does not play through in style %d" % style)
+
 	# settings
 	main.show_settings(main.show_hub)
 	await frames(2)
@@ -625,6 +639,10 @@ func other_roads():
 			main.cur.rows[k].cb.call()
 			if main.data.opts[k] == was:
 				bad("the %s setting does not change" % k)
+		main.cur.rows["style"].cb.call()
+		if int(main.data.opts.style) != 1:
+			bad("the style setting does not change")
+		main.cur.rows["style"].cb.call()
 		for want in [1, 2, 0]:
 			main.cur.rows["undo"].cb.call()
 			if int(main.data.opts.undo) != want:
