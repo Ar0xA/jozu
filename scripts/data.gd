@@ -110,6 +110,8 @@ const LEVELS = [
 			["", "Heian-kyō, the hour of the Ox. In the temple at the capital's edge hangs the great scroll that bound the Night Parade of a Hundred Demons. Tonight it hangs blank."],
 			["Tessai", "Tamamo-no-Mae has licked the ink from the paper, Suzu. What was painted now walks."],
 			["Tessai", "Take the brush-blade. Every stroke you draw is at once a step and a cut. Paint them back where they belong."],
+			["", "From the temple wall he lifts down a suit of old lacquered armour, and from the stable he leads out the one horse."],
+			["Tessai", "These too. They say they were Tomoe Gozen's, before she laid down the sword and took up the sutras. You are a painter, Suzu, but you are riding to a war. Dress for it."],
 			["Tessai", "千里の道も一歩から. A road of a thousand ri begins with one step. Yours begins with one stroke."],
 			["Suzu", "And if my hand shakes, Master?"],
 			["Tessai", "Then you will be merely strong. Be 上手 — skilled. Strength spills ink. Skill spends none."],
