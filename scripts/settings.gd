@@ -8,7 +8,7 @@ const ROWS = [
 	["motion", "動", "Motion", "Yokai move one after another; the board shakes when you are struck."],
 	["pattern", "印", "Mark danger with a cross", "A black cross on the red tiles, if red is hard to tell from the paper."],
 	["filter", "紙", "Painted look", "Ink-bleed and paper grain. Off: sharper, and easier on an old phone."],
-	["undo", "戻", "Taking strokes back", "Within the stroke in hand, until it is sheathed; or never, as on the pilgrimage."],
+	["undo", "戻", "Taking strokes back", "Within the stroke in hand, until the brush is lifted; or never, as on the pilgrimage."],
 	["style", "書", "Style", "Shodō: bare paper, one seal, a stroke that runs dry. Ornate: clouds, seasons, seals, frames."],
 ]
 const STYLE = ["Shodō", "Ornate"]

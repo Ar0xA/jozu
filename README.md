@@ -83,7 +83,7 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   Every screen has a phone layout of its own: larger type and buttons, the chapters on a page of
   their own instead of a row of tabs, and the workshop's palette in four pages of large buttons.
 - **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, the
-  painted look, and how strokes may be taken back: within the stroke in hand (a sheathed stroke is committed), or never.
+  painted look, and how strokes may be taken back: within the stroke in hand (a finished stroke is committed), or never.
   **Style** chooses between Shodō, the default (bare paper, one seal, a stroke that pools where the
   brush comes down, pales as its ink is spent and runs dry at the end; the board ruled as a practice
   sheet under a paperweight; the stage signed down the left margin; earlier strokes drying to grey; ink
@@ -94,13 +94,13 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   kyū and dan ranks, from 10th kyū to meijin.
 - **Your scroll** 巻 keeps the strokes
   that cleared each station, with the board taken away.
-- **Red tiles** — where you would be struck if you sheathed the brush there.
+- **Red tiles** — where you would be struck if you lifted the brush there.
 - **Waza** learned on the road: 縮地 leap over a tile, 結界 paste a ward, 喝 shout yokai away (into water, they are gone).
 - **上手 seal** — clear a station unharmed within the mastery stroke count. Always possible with no upgrades.
 - **The gate 関** — the last station of a chapter opens once two-thirds of the chapter carries the 上手 seal. Every other station opens when the one before it is passed.
 - **Training 修練** — points from stations buy ink, ki and extra waza uses. Help for the road, never required.
 
-Controls: click / drag / arrow keys to paint, `Space` sheathe, `Z` or right-click take back a step of the stroke in hand, `R` restart, `1 2 3` waza, `4` shikigami, `5` bell.
+Controls: click / drag / arrow keys to paint, `Space` lift the brush (end the stroke), `Z` or right-click take back a step of the stroke in hand, `R` restart, `1 2 3` waza, `4` shikigami, `5` bell.
 
 ## Files
 

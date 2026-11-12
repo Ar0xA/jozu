@@ -203,7 +203,7 @@ static func _inside(loop, q):
 				inside = not inside
 	return inside
 
-# Indices of the yokai the current stroke would bind if it were sheathed now.
+# Indices of the yokai the current stroke would bind if the brush were lifted now.
 static func enso_bound(s):
 	var out = []
 	var n = s.visited.size()
@@ -218,7 +218,7 @@ static func enso_bound(s):
 			out.append(i)
 	return out
 
-# Tiles where sheathing the brush would cost a blow. Where Suzu stands now is exact: the turn
+# Tiles where lifting the brush would cost a blow. Where Suzu stands now is exact: the turn
 # is played out on a copy. Other tiles show the yokai's reach as things stand.
 static func danger(s):
 	var out = {}
@@ -507,7 +507,7 @@ static func _won(s):
 	s.status = "won"
 	s.turn += 1
 
-# Sheathe the brush. In order: the circle binds; soul-flames relight; shikigami strike; the
+# Lift the brush: the stroke ends. In order: the circle binds; soul-flames relight; shikigami strike; the
 # yokai strike (exactly what the red wash showed); the yokai move; the wind blows.
 static func end_stroke(s):
 	if s.status != "play":

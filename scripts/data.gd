@@ -105,7 +105,7 @@ const LEVELS = [
 			"....c..",
 			".......",
 		],
-		"hint": "Click or drag beside Suzu to paint a stroke. Stepping into a yokai cuts it. Press Space to sheathe and end the stroke. Never rest on red.",
+		"hint": "Click or drag beside Suzu to paint a stroke. Stepping into a yokai cuts it. Press Space to lift the brush and end the stroke. Never rest on red.",
 		"say": [],
 		"story": [
 			["", "Heian-kyō, the hour of the Ox. In the temple at the capital's edge hangs the great scroll that bound the Night Parade of a Hundred Demons. Tonight it hangs blank."],
@@ -2560,7 +2560,7 @@ const LEVELS = [
 			".c#.#..",
 			"...H...",
 		],
-		"hint": "Kōan 公案: one stroke, and only one. Nothing moves but you, and whatever copies you. Sheathe the brush with anything left standing and you begin again.",
+		"hint": "Kōan 公案: one stroke, and only one. Nothing moves but you, and whatever copies you. Lift the brush with anything left standing and you begin again.",
 		"say": [],
 		"story": [
 			["", "The scroll is whole and hangs again in its temple. Tessai looks at it for a long time, then takes down a single sheet of blank paper."],
@@ -5212,7 +5212,7 @@ const LEVELS = [
 	},
 	{
 		"kanji": "収め",
-		"name": "The Sheathing",
+		"name": "Putting Away",
 		"par": 4,
 		"waza": ["katsu"],
 		"rules": ["wet", "enso", "nocut"],

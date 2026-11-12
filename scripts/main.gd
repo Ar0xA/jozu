@@ -187,7 +187,7 @@ func stage_music(i):
 	return ["battle", "road2", "road3"][c % 3]
 
 # the settings a player can change (scripts/settings.gd)
-# undo: 1 only within the stroke in hand (a sheathed stroke is committed), 2 not at all
+# undo: 1 only within the stroke in hand (a finished stroke is committed), 2 not at all
 # style: 0 shodo (spare: bare paper, one seal, a stroke that runs dry), 1 ornate (as it was)
 const OPTS = {"music": true, "motion": true, "pattern": false, "filter": true, "undo": 1, "style": 0}
 
@@ -244,7 +244,7 @@ func touch_words(text):
 		return _touch_words[text]
 	var asked = text
 	for pair in [["Click or drag", "Tap or drag"], ["click or drag", "tap or drag"], [", or use the arrow keys", ""],
-			["Press Space to sheathe", "Tap 納刀 to sheathe"], [": Space, or 納刀", ": tap 納刀"], ["Right-click or Z takes", "戻 takes"],
+			["Press Space to lift the brush", "Tap 収筆 to lift the brush"], [": Space, or 収筆", ": tap 収筆"], ["Right-click or Z takes", "戻 takes"],
 			["restart (R)", "restart"], ["Restart (R)", "Restart"], [" (key 5)", ""], ["any key or click", "tap to close"], ["Esc cancels", "tap the button again to cancel"]]:
 		text = text.replace(pair[0], pair[1])
 	_touch_words[asked] = text

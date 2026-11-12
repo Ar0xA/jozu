@@ -104,7 +104,7 @@ func setup():
 	b_katsu = btn(Rect2(PX + 368, 470, 172, 46), "Shout [3]", _katsu, "喝")
 	b_bell = btn(Rect2(), "Bell [5]", _bell, "鐘")   # _sync lays out the row of techniques
 	b_goal = btn(Rect2(536, 34, 108, 40), "Goal", func(): _brief(false), "問")
-	b_end = btn(Rect2(PX, 526, 264, 50), "Sheathe  [Space]", _end, "納刀")
+	b_end = btn(Rect2(PX, 526, 264, 50), "Lift  [Space]", _end, "収筆")
 	b_undo = btn(Rect2(PX + 276, 526, 264, 50), "Undo  [Z]", _undo, "戻")
 	b_shiki = btn(Rect2(PX, 586, 264, 42), "Set  [4]", _mode.bind("shiki"), "式神")
 	b_restart = btn(Rect2(PX, 642, 264, 44), "Restart  [R]" if kind_of != "henro" else "Give up this temple", _retry)
@@ -454,7 +454,7 @@ func _master_line():
 	hint_path = [s.hero]
 	_play_tokens(s.duplicate(true), strokes[s.turn], true)
 	if hint_path.size() == 1 and hint_marks.is_empty():
-		return "The master waits. Sheathe the brush without moving."
+		return "The master waits. Lift the brush without moving."
 	return ""
 
 # While guiding, say what to do next in plain words.
@@ -467,12 +467,12 @@ func _guide_update():
 		if why == "":
 			guide_msg = "Paint the dotted stroke: click or drag from tile to tile, or use the arrow keys."
 		elif why.begins_with("The master waits"):
-			guide_msg = "Here the master waits. Sheathe the brush without moving: Space, or 納刀."
+			guide_msg = "Here the master waits. Lift the brush without moving: Space, or 収筆."
 		else:
 			guide_msg = "You have left the master's line. Carry on, or restart (R) to see it again."
 		return
 	if hint_path.size() > 1 and s.hero == hint_path.back():
-		guide_msg = "Now sheathe the brush to end the stroke: Space, or 納刀. The yokai move after you."
+		guide_msg = "Now lift the brush to end the stroke: Space, or 収筆. The yokai move after you."
 	elif hint_path.size() > 1:
 		guide_msg = "Follow the dots to the ring. Right-click or Z takes a step back."
 
@@ -511,7 +511,7 @@ func _end():
 	if done:
 		return
 	_clear_hint()
-	hist = []   # a sheathed stroke is committed: nothing before it can be taken back
+	hist = []   # a finished stroke is committed: nothing before it can be taken back
 	s.paths.append(s.visited.duplicate())
 	if s.visited.size() > 1 and main.data.opts.motion:
 		var tip = s.visited[s.visited.size() - 1]
