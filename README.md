@@ -70,6 +70,9 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
 - **Brushwork:** the title is written out stroke by stroke; an ink wash turns one screen into the next;
   stage names are brushed in; the seal is stamped; and the strokes that cleared a stage are written out
   again on the result and in your scroll. All of it stops with Motion off.
+- **On a phone:** pinch with two fingers to zoom and drag with two to move about, or tap 拡 on the left
+  edge. Each stage opens with a large card giving the goal and anything met there for the first time;
+  it goes by itself or at a tap, and 問 brings it back.
 - **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, and the
   painted look.
 - **Three seals a station:** 上手 mastery, 潔 no stroke taken back, 惜墨 sparing of ink. Seals earn the

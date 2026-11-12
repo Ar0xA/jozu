@@ -20,6 +20,32 @@ var walk_t = 0.0
 var aim = {}           # where each yokai is being drawn towards while it walks
 var later = []         # sounds waiting for their moment: [{at, nm}]
 var last_inked = 0
+# The card laid over the board when a stage opens: what must be done, and anything met here for
+# the first time. It goes by itself after a while, or at a touch.
+var card = []          # [[text, size, colour]]
+var card_t = 0.0
+var card_len = 0.0
+const RULE_NOTE = {
+	"wet": "墨 Wet ink: the stroke you have just painted is a wall to the yokai for their turn.",
+	"enso": "円相 End a stroke beside where it began, and every yokai inside the loop is bound.",
+	"nocut": "無刀 The brush cannot cut here: bind, drown, or go around.",
+	"stone": "硯 Ink you do not spend is kept for the next stroke.",
+	"shiki": "式神 A yokai you bind can be set down beside you as an ally.",
+	"wind": "風 Each turn the wind carries lanterns, umbrellas and ghosts one tile.",
+	"rain": "雨 Lanterns and fire are out, and the kappa come ashore.",
+	"snow": "雪 All water is frozen to ice.",
+	"night": "夜 You see only near yourself and near light.",
+	"order": "封 Only the lowest number still on the board can be harmed.",
+	"m": "供 Walking yokai go to an offering instead of to you, and stop to eat it.",
+	"b": "橋 Planks you cross fall in after the yokai move, with whatever stands on them.",
+	"w": "巣 Step into a web and your stroke ends there.",
+	"i": "氷 On ice you slide until something stops you.",
+	"f": "火 Fire burns you if you end a stroke standing on it.",
+	"bell": "鐘 The bell, once: no yokai strikes or moves for a turn.",
+	"leap": "縮地 Leap: jump over one tile of anything.",
+	"ward": "結界 Ward: paste a seal beside you that no yokai can enter.",
+	"katsu": "喝 Shout: hurl every yokai beside you one tile away. Into water, they are gone.",
+}
 var done_t = 0.0       # when the stage ended, for the seal and the replay of your strokes
 var flash = 0.0
 var last_drag = Vector2i(-9, -9)
@@ -70,6 +96,7 @@ func setup():
 	b_ward = btn(Rect2(PX + 184, 470, 172, 46), "Ward [2]", _mode.bind("ward"), "結界")
 	b_katsu = btn(Rect2(PX + 368, 470, 172, 46), "Shout [3]", _katsu, "喝")
 	b_bell = btn(Rect2(PX, 470, 172, 46), "Bell [5]", _bell, "鐘")
+	btn(Rect2(536, 34, 108, 40), "Goal", func(): _brief(false), "問")
 	b_end = btn(Rect2(PX, 526, 264, 50), "Sheathe  [Space]", _end, "納刀")
 	b_undo = btn(Rect2(PX + 276, 526, 264, 50), "Undo  [Z]", _undo, "戻")
 	b_hint = btn(Rect2(PX, 586, 264, 42), "Ask the master  [H]", _hint, "師")
@@ -80,6 +107,7 @@ func setup():
 	for y in s.yokai:
 		if not kinds.has(y.kind):
 			kinds.append(y.kind)
+	_brief(true)
 
 # the Restart button and key: on the pilgrimage, starting a temple again costs a staff
 # Walking out of a temple once a step has been painted is the same as giving it up.
@@ -87,6 +115,89 @@ func _leave():
 	if kind_of == "henro" and not done and (s.turn > 0 or s.visited.size() > 1):
 		main.henro_spend()
 	back.call()
+
+# Lay out the card. first = the stage is opening (new things are noted as met); otherwise it has
+# been asked for again, and shows everything.
+func _brief(first):
+	var big = main.touch
+	var goal = "Fell every yokai."
+	if rules.has("koan"):
+		goal = "Clear the board in one stroke."
+	elif rules.has("garden"):
+		goal = "Rake every open tile in one stroke."
+	elif rules.has("gate"):
+		goal = "Reach the torii. Nothing need be cut."
+	elif rules.has("write"):
+		goal = "Paint every grey tile. Nothing need be cut."
+	card = [["目当て  The goal", 20 if big else 15, Ink.a(Ink.SHU, 0.9)], [goal, 40 if big else 26, Ink.SUMI],
+		["上手 mastery: within %d stroke%s, unharmed." % [lv.par, "" if lv.par == 1 else "s"], 24 if big else 16, Ink.a(Ink.SUMI, 0.7)]]
+	# what is here: yokai, rules, ground and techniques
+	var here = []
+	for k in kinds:
+		here.append(["y:" + k, "%s %s: %s" % [Data.LEGEND[k][0], Data.LEGEND[k][1], Data.LEGEND[k][2]]])
+	var ground = "".join(lv.rows)
+	for r in rules:
+		var key = "wind" if r.begins_with("wind") else r
+		if RULE_NOTE.has(key):
+			here.append(["r:" + key, RULE_NOTE[key]])
+	for g in ["i", "f", "m", "b", "w"]:
+		if ground.contains(g):
+			here.append(["g:" + g, RULE_NOTE[g]])
+	for w in lv.waza:
+		if RULE_NOTE.has(w):
+			here.append(["w:" + w, RULE_NOTE[w]])
+	var fresh = []
+	for e in here:
+		if not main.data.met.has(e[0]):
+			fresh.append(e[1])
+			if first and custom == null:
+				main.data.met[e[0]] = 1
+	if first and custom == null and not fresh.is_empty():
+		main.write_save()
+	var notes = []
+	if lv.hint != "":
+		notes = [main.touch_words(lv.hint)]   # the stage's own lesson says it better than the stock lines
+	elif first:
+		notes = fresh
+	else:
+		for e in here:
+			notes.append(e[1])
+	if not notes.is_empty():
+		card.append(["", 10, Ink.SUMI])
+		if first and lv.hint == "":
+			card.append(["初  New here", 20 if big else 15, Ink.a(Ink.SHU, 0.9)])
+	var chars = 0
+	for n in notes:
+		card.append([n, 27 if big else 17, Ink.a(Ink.AI, 0.95)])
+		chars += n.length()
+	card_t = 0.0
+	card_len = 3.5 if notes.is_empty() else min(24.0, 6.0 + chars * 0.05)
+
+func _card_rect(f):
+	var w = 1120.0 if main.touch else 540.0
+	var h = 30.0
+	for line in card:
+		h += f.get_multiline_string_size(line[0], HORIZONTAL_ALIGNMENT_LEFT, w - 60.0, line[1]).y + 8.0 if line[0] != "" else line[1]
+	h += 30.0
+	return Rect2(Vector2(640.0 - w * 0.5, max(16.0, 360.0 - h * 0.5)) if main.touch else Vector2(ORG.x + 24, max(ORG.y + 16.0, ORG.y + 294.0 - h * 0.5)), Vector2(w, h))
+
+func _draw_card(f):
+	var r = _card_rect(f)
+	var fade = clamp(card_t / 0.25, 0.0, 1.0) * clamp((card_len - card_t) / 0.4, 0.0, 1.0)
+	draw_rect(r, Ink.a(Ink.PAPER, 0.97 * fade))
+	draw_rect(r.grow(-6), Ink.a(Ink.GOFUN, 0.5 * fade))
+	Ink.frame(self, r, 4.0, Ink.a(Ink.SUMI, 0.85 * fade))
+	var y = r.position.y + 30.0
+	for line in card:
+		if line[0] == "":
+			y += line[1]
+			continue
+		var sz = f.get_multiline_string_size(line[0], HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 60.0, line[1])
+		Ink.para(self, f, Vector2(r.position.x + 30.0, y + line[1] * 0.85), line[0], line[1], Ink.a(line[2], line[2].a * fade), r.size.x - 60.0)
+		y += sz.y + 8.0
+	# how long it will stay, and how to send it away
+	draw_rect(Rect2(r.position.x + 30.0, r.end.y - 14.0, (r.size.x - 60.0) * clamp(1.0 - card_t / card_len, 0.0, 1.0), 4.0), Ink.a(Ink.SHU, 0.7 * fade))
+	Ink.text(self, f, Vector2(r.position.x, r.end.y - 20.0), "tap to close" if main.touch else "any key or click", 18 if main.touch else 12, Ink.a(Ink.SUMI, 0.5 * fade), HORIZONTAL_ALIGNMENT_RIGHT, r.size.x - 30.0)
 
 func _retry():
 	if kind_of == "henro":
@@ -440,6 +551,10 @@ func _try_tile(t):
 		_dir(dir)
 
 func on_click(pos, button):
+	if not card.is_empty():
+		card = []
+		if main.touch:
+			return   # on a phone the first touch only puts the card away
 	if button == MOUSE_BUTTON_RIGHT:
 		_undo()
 		return
@@ -456,6 +571,7 @@ func on_motion(pos, held):
 		_try_tile(t)
 
 func on_key(code):
+	card = []
 	match code:
 		KEY_RIGHT, KEY_D: _dir(Vector2i(1, 0))
 		KEY_LEFT, KEY_A: _dir(Vector2i(-1, 0))
@@ -485,6 +601,10 @@ func tick(dt):
 	var k = 1.0 - exp(-dt * 18.0)
 	hdisp = hdisp.lerp(Vector2(s.hero), k)
 	walk_t += dt
+	if not card.is_empty():
+		card_t += dt
+		if card_t >= card_len:
+			card = []
 	for b in extra:
 		b.show = time >= done_t
 	while not walk.is_empty() and walk[0].at <= walk_t:
@@ -782,13 +902,19 @@ func _draw():
 
 	_panel(f)
 	if guide_msg != "":
-		Ink.text(self, f, Vector2(ORG.x, 713), "手本  " + guide_msg, 15, Ink.SHU)
+		if main.touch:
+			draw_rect(Rect2(40, 690, 1200, 30), Ink.a(Ink.PAPER, 0.92))
+			Ink.text(self, f, Vector2(52, 714), "手本  " + main.touch_words(guide_msg), 24, Ink.SHU)
+		else:
+			Ink.text(self, f, Vector2(ORG.x, 713), "手本  " + guide_msg, 15, Ink.SHU)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if flash > 0.0:
 		draw_rect(Rect2(0, 0, 1280, 720), Ink.a(Ink.SHU, flash * 0.35))
 	if done and time >= done_t:
 		_result(f)
 	draw_btns()
+	if not card.is_empty() and not done:
+		_draw_card(f)
 
 # Night: what Suzu can see. Empty when it is not night.
 func _lit():
@@ -896,7 +1022,7 @@ func _panel(f):
 		Ink.text(self, f, Vector2(PX, hy + 21), say[1], 13, Ink.a(Ink.SUMI, 0.55))
 		Ink.para(self, f, Vector2(PX, hy + 44), say[2], 15, Ink.a(Ink.AI, 0.95), 545)
 	else:
-		Ink.para(self, f, Vector2(PX, hy), hint, 15, Ink.a(Ink.SHU if hint_msg != "" else Ink.AI, 0.95), 545)
+		Ink.para(self, f, Vector2(PX, hy), main.touch_words(hint), 15, Ink.a(Ink.SHU if hint_msg != "" else Ink.AI, 0.95), 545)
 	if not s.r_shiki:
 		Ink.text(self, f, Vector2(PX + 282, 604), "click, drag or arrows to paint", 13, Ink.a(Ink.SUMI, 0.55))
 		Ink.text(self, f, Vector2(PX + 282, 622), "right-click undoes", 13, Ink.a(Ink.SUMI, 0.55))

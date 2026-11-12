@@ -389,6 +389,50 @@ func other_roads():
 	if not main.live_board("").is_empty() or not main.live_board("x|y|z|1|1|U").is_empty():
 		bad("rubbish from the generator was accepted")
 
+	# zoom: the button's way, the two-finger way, and back
+	main.set_zoom(2.0, Vector2(900, 500))
+	if abs(main.scale.x - 2.0) > 0.01 or main.position.x > 0.0 or main.position.x < -1280.0 or main.position.y < -720.0:
+		bad("zooming in leaves the page out of place: scale %s at %s" % [str(main.scale), str(main.position)])
+	main.set_zoom(1.0)
+	if main.scale != Vector2.ONE or main.position != Vector2.ZERO:
+		bad("zooming back out does not restore the page")
+	for k in range(2):
+		var t = InputEventScreenTouch.new()
+		t.index = k
+		t.pressed = true
+		t.position = Vector2(500 + k * 200, 360)
+		main._input(t)
+	if not main.pinching:
+		bad("two fingers down are not taken as a pinch")
+	var dg = InputEventScreenDrag.new()
+	dg.index = 1
+	dg.position = Vector2(900, 360)
+	main._input(dg)
+	if main.zoom < 1.8 or main.zoom > 2.2:
+		bad("spreading two fingers to twice the distance gives zoom %.2f" % main.zoom)
+	for k in range(2):
+		var t = InputEventScreenTouch.new()
+		t.index = k
+		t.pressed = false
+		main._input(t)
+	if main.pinching:
+		bad("lifting the fingers leaves the pinch on")
+	main.set_zoom(1.0)
+
+	# the card over a stage: there when it opens, gone at a key, back when asked for
+	main.show_battle(0)
+	await frames(2)
+	var bc = main.cur
+	if bc.card.size() < 3 or not main.data.met.has("y:chochin"):
+		bad("a stage opens without its goal card, or does not note what was met")
+	bc.on_key(KEY_UP)
+	if not bc.card.is_empty():
+		bad("a key does not put the goal card away")
+	bc._brief(false)
+	if bc.card.size() < 4:
+		bad("asking for the goal again shows nothing")
+	bc.card = []
+
 	# settings
 	main.show_settings(main.show_hub)
 	await frames(2)

@@ -15,6 +15,13 @@ var touch = false   # a phone or tablet: no hover, no right-click, fingers not p
 var turn_note
 var paint_rect
 var wipe
+# Zoom, for small screens: two fingers pinch and drag, or the button in the corner.
+var zoom = 1.0
+var zpos = Vector2.ZERO
+var touches = {}       # finger -> where it is
+var pinching = false   # two fingers are down: the screens ignore them
+var pinch = {}
+var zoom_btn
 var music
 var music_name = ""
 var sfx_pool = []
@@ -63,6 +70,17 @@ Turn your phone sideways"
 	lb.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	turn_note.add_child(lb)
 	top.add_child(turn_note)
+	zoom_btn = Button.new()
+	zoom_btn.text = "拡"
+	zoom_btn.position = Vector2(0, 314)   # the left edge is clear on every screen
+	zoom_btn.size = Vector2(42, 92)
+	zoom_btn.focus_mode = Control.FOCUS_NONE
+	zoom_btn.modulate = Color(1, 1, 1, 0.8)
+	zoom_btn.add_theme_font_override("font", font)
+	zoom_btn.add_theme_font_size_override("font_size", 24)
+	zoom_btn.pressed.connect(func(): set_zoom(1.0 if zoom > 1.01 else 1.7, Vector2(420, 400)))
+	zoom_btn.visible = touch
+	top.add_child(zoom_btn)
 	var rng = RandomNumberGenerator.new()
 	rng.seed = 1185
 	for i in range(420):
@@ -145,12 +163,65 @@ func toggle_sound():
 	write_save()
 
 func _process(_dt):
+	if zoom > 1.01 or position != Vector2.ZERO:
+		# anchors would otherwise put the page back where it was
+		scale = Vector2(zoom, zoom)
+		position = zpos
 	var ws = get_window().size
 	turn_note.visible = ws.y > ws.x * 1.1
 
 func toggle_fullscreen():
 	var full = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_FULLSCREEN)
+
+# On a phone there is no mouse, no Space bar and no arrow keys: say what a finger does instead.
+func touch_words(text):
+	if not touch:
+		return text
+	for pair in [["Click or drag", "Tap or drag"], ["click or drag", "tap or drag"], [", or use the arrow keys", ""],
+			["Press Space to sheathe", "Tap 納刀 to sheathe"], [": Space, or 納刀", ": tap 納刀"], ["Right-click or Z takes", "戻 takes"],
+			["restart (R)", "restart"], ["Restart (R)", "Restart"], [" (key 5)", ""], ["any key or click", "tap to close"], ["Esc cancels", "tap the button again to cancel"]]:
+		text = text.replace(pair[0], pair[1])
+	return text
+
+# Scale the whole page about a point on the screen. `anchor` is the point of the page that should
+# stay under `at`; left out, it is whatever is under `at` now.
+func set_zoom(z, at = Vector2(640, 360), anchor = null):
+	if anchor == null:
+		anchor = (at - zpos) / zoom
+	zoom = clamp(z, 1.0, 3.0)
+	zpos = at - anchor * zoom
+	# never show past the edge of the paper
+	zpos.x = clamp(zpos.x, 1280.0 * (1.0 - zoom), 0.0)
+	zpos.y = clamp(zpos.y, 720.0 * (1.0 - zoom), 0.0)
+	scale = Vector2(zoom, zoom)
+	position = zpos
+	zoom_btn.text = "1×" if zoom > 1.01 else "拡"
+	zoom_btn.visible = touch or zoom > 1.01
+
+func _input(ev):
+	if ev is InputEventScreenTouch:
+		if ev.pressed:
+			touches[ev.index] = ev.position
+		else:
+			touches.erase(ev.index)
+		if touches.size() == 2:
+			var p = touches.values()
+			var mid = (p[0] + p[1]) * 0.5
+			pinch = {"d": max(1.0, p[0].distance_to(p[1])), "z": zoom, "anchor": (mid - zpos) / zoom}
+		pinching = touches.size() >= 2
+		if pinching:
+			get_viewport().set_input_as_handled()
+	elif ev is InputEventScreenDrag and touches.has(ev.index):
+		touches[ev.index] = ev.position
+		if touches.size() == 2:
+			var p = touches.values()
+			set_zoom(pinch.z * p[0].distance_to(p[1]) / pinch.d, (p[0] + p[1]) * 0.5, pinch.anchor)
+			get_viewport().set_input_as_handled()
+	elif ev is InputEventMagnifyGesture:
+		set_zoom(zoom * ev.factor, ev.position)
+	elif ev is InputEventPanGesture and zoom > 1.01:
+		set_zoom(zoom, Vector2(640, 360) - ev.delta * 12.0, (Vector2(640, 360) - zpos) / zoom)
 
 func _unhandled_input(ev):
 	if ev is InputEventKey and ev.pressed and not ev.echo:
@@ -241,7 +312,7 @@ func _draw():
 
 func fresh():
 	return {"cleared": {}, "scroll": {}, "seals": {}, "daily": {"day": -1, "last": -1, "streak": 0, "best": 0},
-		"henro": {"at": 0, "staffs": 3, "best": 0, "done": 0}, "mine": "", "sound": true, "opts": OPTS.duplicate(), "days": {}, "tries": {}, "rand": {}, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
+		"henro": {"at": 0, "staffs": 3, "best": 0, "done": 0}, "mine": "", "sound": true, "opts": OPTS.duplicate(), "days": {}, "tries": {}, "rand": {}, "met": {}, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
 
 func load_save():
 	data = fresh()
@@ -264,7 +335,7 @@ func load_save():
 				for k in data.opts:
 					if j.opts.has(k):
 						data.opts[k] = bool(j.opts[k])
-			for grp in ["days", "tries", "rand"]:
+			for grp in ["days", "tries", "rand", "met"]:
 				if j.has(grp) and typeof(j[grp]) == TYPE_DICTIONARY:
 					for k in j[grp]:
 						data[grp][k] = int(j[grp][k])

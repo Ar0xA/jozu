@@ -48,6 +48,10 @@ func draw_btns():
 		var b = btns[i]
 		if not b.show:
 			continue
+		var label = b.label
+		if main.touch and label.contains("["):
+			# a phone has no keys to press: leave the key names off
+			label = label.substr(0, label.find("[")).strip_edges() + label.substr(label.find("]") + 1)
 		var r = b.rect
 		var al = 1.0 if b.on else 0.32
 		var hot = (i == hover_btn and b.on) or b.sel
@@ -58,17 +62,19 @@ func draw_btns():
 			pts.append(Vector2(lerp(r.position.x + 2.0, r.end.x - 2.0, k / 10.0), r.end.y - 5.0 + sin(k * 1.3 + r.position.x) * 1.3))
 		Ink.brush(self, pts, 6.0 if hot else 4.0, Ink.a(Ink.SHU if hot else Ink.SUMI, 0.9 * al))
 		var ts = min(22.0, r.size.y * 0.46)
-		if b.kanji == "" and b.label != "" and b.label.unicode_at(0) >= 0x2E80:
-			ts = min(r.size.y * 0.62, (r.size.x - 6.0) / b.label.length())  # a tab shows its whole name, as large as fits
+		if b.kanji == "" and label != "" and label.unicode_at(0) >= 0x2E80:
+			ts = min(r.size.y * 0.62, (r.size.x - 6.0) / label.length())  # a tab shows its whole name, as large as fits
 		var base = r.position.y + r.size.y * 0.5 + ts * 0.30
 		if b.kanji != "":
 			var kw = ts * 1.2 * b.kanji.length() + 14
 			Ink.text(self, f, Vector2(r.position.x + 8, base + 2), b.kanji, ts * 1.2, Ink.a(Ink.SHU, al))
-			Ink.text(self, f, Vector2(r.position.x + kw, base), b.label, ts * 0.9, Ink.a(Ink.SUMI, al), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - kw - 8)
+			Ink.text(self, f, Vector2(r.position.x + kw, base), label, ts * 0.9, Ink.a(Ink.SUMI, al), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - kw - 8)
 		else:
-			Ink.text(self, f, Vector2(r.position.x, base), b.label, ts, Ink.a(Ink.SUMI, al), HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
+			Ink.text(self, f, Vector2(r.position.x, base), label, ts, Ink.a(Ink.SUMI, al), HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
 
 func _gui_input(ev):
+	if main.pinching:
+		return   # two fingers are zooming the page, not playing it
 	if ev is InputEventMouseMotion:
 		mouse = ev.position
 		hover_btn = -1

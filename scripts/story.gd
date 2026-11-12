@@ -66,5 +66,5 @@ func _draw():
 		Ink.para(self, f, Vector2(182, 510), txt.substr(0, int(shown)), 25, Ink.a(Ink.SUMI, 0.85), 916)
 	if int(shown) >= txt.length() and fmod(time, 1.0) < 0.6:
 		draw_colored_polygon(PackedVector2Array([Vector2(1090, 630), Vector2(1106, 630), Vector2(1098, 642)]), Ink.SHU)
-	Ink.text(self, f, Vector2(150, 694), "click or Space to continue", 15, Ink.a(Ink.SUMI, 0.5))
+	Ink.text(self, f, Vector2(150, 694), ("tap to continue" if main.touch else "click or Space to continue"), 15, Ink.a(Ink.SUMI, 0.5))
 	draw_btns()
