@@ -75,6 +75,7 @@ var guide = false      # first visit to a chapter's opening stage: the master's 
 var guide_msg = ""
 var dng = {}
 var undos = 0
+var starts = 0         # how many times the stage has been begun since it was entered
 var seal_mask = 0
 var extra = []
 var rules = []
@@ -232,6 +233,7 @@ func _restart():
 	s["paths"] = []
 	s["spent"] = 0
 	undos = 0
+	starts += 1
 	seal_mask = 0
 	_clear_hint()
 	hist = []
@@ -277,7 +279,7 @@ func _sync():
 	b_shiki.label = "Set  [4]   " + ("・".join(names) if not names.is_empty() else "—")
 	dng = {} if done else Sim.danger(s)
 	_guide_update()
-	b_undo.on = not hist.is_empty() and grade != "jouzu" and grade != "ka" and kind_of != "henro"
+	b_undo.on = _can_undo()
 	b_restart.on = true
 
 func _mode(m):
@@ -500,9 +502,21 @@ func _end():
 	_after(true, "sheathe")
 	ending = false
 
-func _undo():
+# May the last thing done be taken back? That depends on the Undo setting: freely; only within
+# the stroke in hand (a stroke once sheathed is committed); or not at all.
+func _can_undo():
 	if hist.is_empty() or grade == "jouzu" or grade == "ka" or kind_of == "henro":
-		return   # a pilgrim does not take a step back
+		return false   # a pilgrim does not take a step back
+	var rule = int(main.data.opts.undo)
+	if rule == 2:
+		return false
+	if rule == 1:
+		return s.status == "play" and int(hist.back().turn) == int(s.turn)
+	return true
+
+func _undo():
+	if not _can_undo():
+		return
 	s = hist.pop_back()
 	undos += 1
 	mode = ""
@@ -532,7 +546,7 @@ func _finish():
 		var master = 0
 		for st in lv.get("sol", "").split("/"):
 			master += st.split(" ", false).size()
-		seal_mask = (1 if grade == "jouzu" else 0) | (2 if grade == "jouzu" and undos == 0 else 0) | (4 if s.hits == 0 and s.spent <= master else 0)
+		seal_mask = (1 if grade == "jouzu" else 0) | (2 if grade == "jouzu" and undos == 0 and starts == 1 else 0) | (4 if s.hits == 0 and s.spent <= master else 0)
 		if custom != null:
 			var nxt2 = on_win.call(grade, seal_mask, s.turn)   # returns where "Onward" leads
 			extra.append(btn(Rect2(250, 470, 200, 50), "Onward" if kind_of != "random" else "Another", nxt2 if nxt2 is Callable else back, "進"))
@@ -556,8 +570,11 @@ func _finish():
 		if kind_of == "henro":
 			extra.append(btn(Rect2(250, 440, 200, 54), "Rise", on_fail, "起"))
 			return
-		extra.append(btn(Rect2(250, 440, 200, 54), "Take it back", _undo, "戻"))
-		extra.append(btn(Rect2(250, 506, 200, 46), "Restart", _restart))
+		if _can_undo():
+			extra.append(btn(Rect2(250, 440, 200, 54), "Take it back", _undo, "戻"))
+			extra.append(btn(Rect2(250, 506, 200, 46), "Restart", _restart))
+		else:
+			extra.append(btn(Rect2(250, 452, 200, 60), "Begin again", _restart, "再"))
 
 func tile_at(pos):
 	var p = (pos - ORG) / TS

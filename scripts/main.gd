@@ -132,7 +132,8 @@ func play_music(nm):
 		music.play()
 
 # the settings a player can change (scripts/settings.gd)
-const OPTS = {"music": true, "motion": true, "pattern": false, "filter": true}
+# undo: 0 freely, 1 only within the stroke in hand, 2 not at all
+const OPTS = {"music": true, "motion": true, "pattern": false, "filter": true, "undo": 0}
 
 func apply_opts():
 	paint_rect.visible = data.opts.filter
@@ -334,7 +335,7 @@ func load_save():
 			if j.has("opts") and typeof(j.opts) == TYPE_DICTIONARY:
 				for k in data.opts:
 					if j.opts.has(k):
-						data.opts[k] = bool(j.opts[k])
+						data.opts[k] = clamp(int(j.opts[k]), 0, 2) if k == "undo" else bool(j.opts[k])
 			for grp in ["days", "tries", "rand", "met"]:
 				if j.has(grp) and typeof(j[grp]) == TYPE_DICTIONARY:
 					for k in j[grp]:
@@ -388,9 +389,9 @@ func up_cost(key):
 
 # Three seals can be won on every stage:
 #   1  上手 jozu      within the mastery stroke count, unharmed
-#   2  潔   isagiyoshi  mastery with no stroke taken back
+#   2  潔   isagiyoshi  mastery at the first attempt since entering: no stroke taken back, no restart
 #   4  惜墨 sekiboku    unharmed, spending no more ink than the master's line
-const SEALS = [[1, "上手", "mastery"], [2, "潔", "no stroke taken back"], [4, "惜墨", "sparing of ink"]]
+const SEALS = [[1, "上手", "mastery"], [2, "潔", "no undo, no restart"], [4, "惜墨", "sparing of ink"]]
 const RANKS = [
 	["十級", "10th kyū"], ["九級", "9th kyū"], ["八級", "8th kyū"], ["七級", "7th kyū"], ["六級", "6th kyū"],
 	["五級", "5th kyū"], ["四級", "4th kyū"], ["三級", "3rd kyū"], ["二級", "2nd kyū"], ["一級", "1st kyū"],

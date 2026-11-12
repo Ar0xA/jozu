@@ -188,7 +188,10 @@ func _run():
 			b.on_key(KEY_SPACE)
 			if b.grade != "lost":
 				bad("stage %d: sheathing a one-stroke stage unfinished should fail" % (i + 1))
-			b.on_key(KEY_R)
+			# begin the stage afresh: a restart would forfeit the seal for a first attempt
+			main.show_battle(i)
+			await frames()
+			b = main.cur
 		await play(i, i % 2 == 1)
 		await frames(2)
 		if not b.done or b.grade != "jouzu":
@@ -506,6 +509,46 @@ func other_roads():
 	main.cur._clear()
 	main.touch = false
 
+	# the seal for a first attempt is lost by a restart as well as by an undo
+	main.show_battle(2)
+	await frames(2)
+	main.cur.on_key(KEY_R)
+	await play(2, false)
+	await frames(2)
+	if main.cur.grade != "jouzu" or main.cur.seal_mask & 2 != 0:
+		bad("a clear after a restart still earned the first-attempt seal")
+	# undo only within the stroke in hand
+	main.data.opts.undo = 1
+	main.show_battle(1)
+	await frames(2)
+	var bu = main.cur
+	bu.on_key(KEY_RIGHT)
+	bu.on_key(KEY_Z)
+	if bu.s.hero != Vector2i(0, 3):
+		bad("with undo set to 'this stroke', a step in the stroke in hand cannot be taken back")
+	bu.on_key(KEY_RIGHT)
+	bu.on_key(KEY_SPACE)
+	var after = bu.s.turn
+	bu.on_key(KEY_Z)
+	if bu.s.turn != after or bu.b_undo.on:
+		bad("with undo set to 'this stroke', a sheathed stroke was taken back")
+	# no undo at all
+	main.data.opts.undo = 2
+	main.show_battle(1)
+	await frames(2)
+	bu = main.cur
+	bu.on_key(KEY_RIGHT)
+	bu.on_key(KEY_Z)
+	if bu.s.hero != Vector2i(1, 3) or bu.b_undo.on:
+		bad("with undo set to 'never', a step was taken back")
+	for k in range(12):
+		if not bu.done:
+			bu.on_key(KEY_SPACE)
+			await frames()
+	if bu.grade != "lost" or bu.extra.size() != 1:
+		bad("with undo set to 'never', a loss should offer only to begin again")
+	main.data.opts.undo = 0
+
 	# settings
 	main.show_settings(main.show_hub)
 	await frames(2)
@@ -517,6 +560,10 @@ func other_roads():
 			main.cur.rows[k].cb.call()
 			if main.data.opts[k] == was:
 				bad("the %s setting does not change" % k)
+		for want in [1, 2, 0]:
+			main.cur.rows["undo"].cb.call()
+			if int(main.data.opts.undo) != want:
+				bad("the undo setting does not step to %d" % want)
 		if main.paint_rect.visible:
 			bad("turning the painted look off leaves the filter on")
 		main.load_save()

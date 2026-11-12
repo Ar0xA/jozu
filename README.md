@@ -75,9 +75,10 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   it goes by itself or at a tap, and 問 brings it back.
   Every screen has a phone layout of its own: larger type and buttons, the chapters on a page of
   their own instead of a row of tabs, and the workshop's palette in four pages of large buttons.
-- **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, and the
-  painted look.
-- **Three seals a station:** 上手 mastery, 潔 no stroke taken back, 惜墨 sparing of ink. Seals earn the
+- **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, the
+  painted look, and how strokes may be taken back: freely, only within the stroke in hand, or never.
+- **Three seals a station:** 上手 mastery, 潔 mastery at the first attempt since entering the stage (no
+  undo, no restart), 惜墨 sparing of ink. Seals earn the
   kyū and dan ranks, from 10th kyū to meijin.
 - **Ask the master** (`H`) shows the next stroke of a known solution. **Your scroll** 巻 keeps the strokes
   that cleared each station, with the board taken away.

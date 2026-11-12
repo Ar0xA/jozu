@@ -243,5 +243,5 @@ func _draw():
 		Ink.text(self, f, Vector2(820, 72), "%d · %s" % [show + 1, lv.name], 18, Ink.SUMI, HORIZONTAL_ALIGNMENT_RIGHT, 420)
 		Ink.text(self, f, Vector2(820, 96), sub, 15, Ink.a(Ink.SHU, 0.9), HORIZONTAL_ALIGNMENT_RIGHT, 420)
 		Ink.text(self, f, Vector2(576, 674), "%s %s   Stations %d / %d   Seals %d / %d   Points %d" % [rk[0], rk[1], done, Data.LEVELS.size(), main.seal_count(), 3 * Data.LEVELS.size(), main.points()], 17, Ink.SUMI)
-		Ink.text(self, f, Vector2(566, 700), "Seals: 上手 mastery · 潔 no stroke taken back · 惜墨 sparing of ink.", 14, Ink.a(Ink.SUMI, 0.6))
+		Ink.text(self, f, Vector2(566, 700), "Seals: 上手 mastery · 潔 first attempt, nothing taken back · 惜墨 sparing of ink.", 14, Ink.a(Ink.SUMI, 0.6))
 	draw_btns()
