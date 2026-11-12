@@ -71,7 +71,6 @@ var b_end
 var b_undo
 var b_restart
 var b_road
-var b_hint
 var b_shiki
 # A board from outside the story (daily koan, pilgrimage, workshop) is passed in as `custom`,
 # with what to do when it is won or lost and where "back" leads.
@@ -92,7 +91,6 @@ var rules = []
 var my_paths = []
 var hint_path = []
 var hint_marks = []
-var hint_msg = ""
 var ending = false
 
 func setup():
@@ -111,16 +109,14 @@ func setup():
 	b_goal = btn(Rect2(536, 34, 108, 40), "Goal", func(): _brief(false), "問")
 	b_end = btn(Rect2(PX, 526, 264, 50), "Sheathe  [Space]", _end, "納刀")
 	b_undo = btn(Rect2(PX + 276, 526, 264, 50), "Undo  [Z]", _undo, "戻")
-	b_hint = btn(Rect2(PX, 586, 264, 42), "Ask the master  [H]", _hint, "師")
-	b_shiki = btn(Rect2(PX + 276, 586, 264, 42), "Set  [4]", _mode.bind("shiki"), "式神")
+	b_shiki = btn(Rect2(PX, 586, 264, 42), "Set  [4]", _mode.bind("shiki"), "式神")
 	b_restart = btn(Rect2(PX, 642, 264, 44), "Restart  [R]" if kind_of != "henro" else "Give up this temple", _retry)
 	b_road = btn(Rect2(PX + 276, 642, 264, 44), "Back to the road" if custom == null else "Leave", _leave)
 	if main.touch:
 		# a phone's panel: a few things, large. The legend, the lesson and the saying live in the card (問).
 		b_end.rect = Rect2(PX, 436, 264, 70)
 		b_undo.rect = Rect2(PX + 276, 436, 264, 70)
-		b_hint.rect = Rect2(PX, 518, 264, 62)
-		b_goal.rect = Rect2(PX + 276, 518, 264, 62)
+		b_goal.rect = Rect2(PX, 518, 540, 62)
 		b_goal.label = "Goal and notes"
 		b_restart.rect = Rect2(PX, 594, 264, 62)
 		b_road.rect = Rect2(PX + 276, 594, 264, 62)
@@ -295,7 +291,6 @@ func _sync():
 	b_leap.sel = mode == "leap"
 	b_ward.sel = mode == "ward"
 	b_end.on = not done
-	b_hint.on = not done and kind_of != "henro" and lv.get("sol", "") != ""
 	b_shiki.show = s.r_shiki
 	b_shiki.on = live and not s.hand.is_empty()
 	b_shiki.sel = mode == "shiki"
@@ -403,7 +398,6 @@ func _after(ok, quiet = "step"):
 func _clear_hint():
 	hint_path = []
 	hint_marks = []
-	hint_msg = ""
 
 func _same_board(a, b):
 	if a.hero != b.hero or a.yokai.size() != b.yokai.size() or a.wards != b.wards or a.rows != b.rows or a.inked != b.inked or a.bell != b.bell:
@@ -446,12 +440,13 @@ func _play_tokens(st, stroke, track):
 		if track and hint_path.back() != st.hero:
 			hint_path.append(st.hero)
 
-# The next stroke of the known solution, if the board is still on its line. Returns a reason
-# when it cannot be shown.
+# The next stroke of the known solution, if the board is still on its line: shown only as the
+# lesson of a chapter's opening stage (`guide`), never on asking. Returns a reason when it cannot
+# be shown.
 func _master_line():
 	_clear_hint()
 	if not hist.is_empty():
-		return "Finish or undo this stroke first; the master shows whole strokes."
+		return "The stroke is already begun."
 	var strokes = lv.get("sol", "").split(" / ")
 	var ref = Sim.new_state(lv.rows, Data.base_stats(lv), rules)
 	for k in range(min(s.turn, strokes.size())):
@@ -464,12 +459,6 @@ func _master_line():
 	if hint_path.size() == 1 and hint_marks.is_empty():
 		return "The master waits. Sheathe the brush without moving."
 	return ""
-
-func _hint():
-	if done:
-		return
-	hint_msg = _master_line()
-	main.sfx("click")
 
 # While guiding, say what to do next in plain words.
 func _guide_update():
@@ -654,8 +643,6 @@ func on_key(code):
 		KEY_SPACE, KEY_ENTER: _end()
 		KEY_Z, KEY_BACKSPACE: _undo()
 		KEY_R: _retry()
-		KEY_H:
-			if b_hint.on: _hint()
 		KEY_1:
 			if b_leap.show and b_leap.on: _mode("leap")
 		KEY_2:
@@ -1158,7 +1145,7 @@ func _panel_phone(f):
 	for w in [["leap", "縮地", s.leap], ["ward", "結界", s.ward], ["katsu", "喝", s.katsu], ["bell", "鐘", s.bell]]:
 		if lv.waza.has(w[0]):
 			wz += "%s %d   " % [w[1], w[2]]
-	var note = hint_msg
+	var note = ""
 	if mode == "leap":
 		note = "縮地: choose a direction to leap two tiles."
 	elif mode == "ward":
@@ -1208,8 +1195,6 @@ func _panel(f):
 		hint = "結界 — choose a tile beside you for the ward. Esc cancels."
 	elif mode == "shiki":
 		hint = "式神 — choose a tile beside you for the shikigami. Esc cancels."
-	if hint_msg != "":
-		hint = hint_msg
 	var hy = max(y + 24.0, 388.0)
 	var say = lv.get("say", [])
 	if hint == "" and say.size() == 3:
@@ -1227,7 +1212,7 @@ func _panel(f):
 		var eh = f.get_multiline_string_size(say[2], HORIZONTAL_ALIGNMENT_LEFT, tw, 15).y
 		Ink.para(self, f, Vector2(PX, hy + eh + 8.0), say[1], 13, Ink.a(Ink.SUMI, 0.55), tw)
 	else:
-		Ink.para(self, f, Vector2(PX, hy), main.touch_words(hint), 15, Ink.a(Ink.SHU if hint_msg != "" else Ink.AI, 0.95), 545)
+		Ink.para(self, f, Vector2(PX, hy), main.touch_words(hint), 15, Ink.a(Ink.AI, 0.95), 545)
 	if not s.r_shiki and not main.spare():
 		Ink.text(self, f, Vector2(PX + 282, 604), "click, drag or arrows to paint", 13, Ink.a(Ink.SUMI, 0.55))
 		Ink.text(self, f, Vector2(PX + 282, 622), "right-click undoes", 13, Ink.a(Ink.SUMI, 0.55))

@@ -795,7 +795,7 @@ func show_henro():
 	var lv = Extra.HENRO[at].duplicate(true)
 	lv["kanji"] = "第%d番" % (at + 1)
 	lv["name"] = province(at)[2]
-	lv["hint"] = "Temple %d of 88. No stroke can be taken back here, and there is no master to ask. Staffs left: %d." % [at + 1, int(h.staffs)]
+	lv["hint"] = "Temple %d of 88. No stroke can be taken back here. Staffs left: %d." % [at + 1, int(h.staffs)]
 	lv["story"] = []
 	lv["after"] = []
 	lv["say"] = []

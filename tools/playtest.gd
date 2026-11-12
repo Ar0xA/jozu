@@ -207,12 +207,19 @@ func _run():
 			continue
 		b = main.cur
 		var first = main.grade_of(i) != "jouzu"
-		# the master's hint must show the solution's first stroke from a fresh board
-		key(b, KEY_H)
-		if b.hint_msg != "" and not b.hint_msg.begins_with("The master waits"):
-			bad("stage %d: hint refused on a fresh board: %s" % [i + 1, b.hint_msg])
-		elif b.hint_path.size() < 2 and b.hint_marks.is_empty() and b.hint_msg == "":
-			bad("stage %d: hint shows nothing" % (i + 1))
+		# the stored solution's first stroke must be showable from a fresh board (the lesson of a
+		# chapter's opening stage is drawn from it), and nothing must offer it on asking
+		var why = b._master_line()
+		if why != "" and not why.begins_with("The master waits"):
+			bad("stage %d: the master's line cannot be shown on a fresh board: %s" % [i + 1, why])
+		elif b.hint_path.size() < 2 and b.hint_marks.is_empty() and why == "":
+			bad("stage %d: the master's line shows nothing" % (i + 1))
+		b._clear_hint()
+		b._sync()
+		if not b.guide:
+			key(b, KEY_H)
+			if b.hint_path.size() > 0:
+				bad("stage %d: H still shows the answer" % (i + 1))
 		await frames()
 		if lv.get("rules", []).has("koan") or lv.get("rules", []).has("garden"):
 			key(b, KEY_SPACE)
@@ -330,9 +337,8 @@ func other_roads():
 	if kind() != "battle" or b.kind_of != "daily":
 		bad("the daily koan does not open")
 		return
-	key(b, KEY_H)
-	if b.hint_path.size() < 2:
-		bad("the daily koan has no hint")
+	if b.btns.any(func(x): return x.label.contains("master")):
+		bad("the daily koan still offers the master's answer")
 	await play(-1, true, b.lv)
 	await frames(2)
 	if b.grade != "jouzu":
@@ -707,8 +713,8 @@ func other_roads():
 	main.show_henro()
 	await frames(2)
 	b = main.cur
-	if b.kind_of != "henro" or b.b_hint.on:
-		bad("a temple offers the master's hint")
+	if b.kind_of != "henro":
+		bad("the pilgrimage does not open on a temple")
 	key(b, KEY_UP)
 	key(b, KEY_LEFT)
 	var where = b.s.hero

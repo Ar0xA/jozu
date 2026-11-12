@@ -75,7 +75,7 @@ func _draw():
 	var at = int(h.at)
 	var pr = main.province(min(at, 87))
 	_card(f, 1, "遍路", "The 88 Temples", [
-		"A pilgrimage of 88 boards: no stroke taken back, no master to ask, three staffs.",
+		"A pilgrimage of 88 boards: no stroke taken back, three staffs.",
 		"Next: temple %d, in %s.   Staffs: %d of 3.   Furthest: %d.%s" % [min(at + 1, 88), pr[2], int(h.staffs), int(h.best), ("   Completed: %d." % int(h.done)) if int(h.done) > 0 else ""]])
 
 	var won = []
