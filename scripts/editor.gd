@@ -29,6 +29,13 @@ var tool_btns = {}
 var rule_btns = {}
 var waza_btns = {}
 var last_tile = Vector2i(-9, -9)
+# On a phone the palette is four pages of large buttons, not one page of small ones.
+const PAGES = [["地", "Ground"], ["妖", "Yokai"], ["則", "Rules"], ["渡", "Share"]]
+var tab = 0
+var tab_btns = []
+var paged = []        # [button, the page it belongs to]
+var b_minus
+var b_plus
 
 func setup():
 	st = main.board_from_code(main.data.mine)
@@ -42,21 +49,82 @@ func setup():
 		rule_btns[RULES[i][0]] = btn(Rect2(PX + (i % 7) * 77, 282 + (i / 7) * 42, 73, 36), RULES[i][1], _rule.bind(RULES[i][0]))
 	for i in range(WAZA.size()):
 		waza_btns[WAZA[i][0]] = btn(Rect2(PX + i * 80, 398, 76, 36), WAZA[i][1], _waza.bind(WAZA[i][0]))
-	btn(Rect2(PX + 330, 398, 40, 36), "−", _ink.bind(-1))
-	btn(Rect2(PX + 446, 398, 40, 36), "+", _ink.bind(1))
-	btn(Rect2(PX, 494, 264, 50), "Play it", _test, "試")
-	btn(Rect2(PX + 276, 494, 264, 50), "Wipe the board", _clear, "消")
-	btn(Rect2(PX, 602, 264, 40), "Copy the code", _copy, "写")
-	btn(Rect2(PX + 276, 602, 264, 40), "Load a code", _load, "読")
-	btn(Rect2(PX + 276, 656, 264, 44), "Back", main.show_hub, "道")
+	b_minus = btn(Rect2(PX + 330, 398, 40, 36), "−", _ink.bind(-1))
+	b_plus = btn(Rect2(PX + 446, 398, 40, 36), "+", _ink.bind(1))
+	var b_play = btn(Rect2(PX, 494, 264, 50), "Play it", _test, "試")
+	var b_wipe = btn(Rect2(PX + 276, 494, 264, 50), "Wipe the board", _clear, "消")
+	var b_copy = btn(Rect2(PX, 602, 264, 40), "Copy the code", _copy, "写")
+	var b_load = btn(Rect2(PX + 276, 602, 264, 40), "Load a code", _load, "読")
+	var b_back = btn(Rect2(PX + 276, 656, 264, 44), "Back", main.show_hub, "道")
+	if main.touch:
+		for k in range(PAGES.size()):
+			tab_btns.append(btn(Rect2(PX + k * 137, 26, 129, 56), PAGES[k][1], _tab.bind(k)))
+		for i in range(GROUND.size()):
+			var b = tool_btns[GROUND[i][0]]
+			b.rect = Rect2(PX + (i % 5) * 110, 100 + (i / 5) * 72, 100, 62)
+			paged.append([b, 0])
+		for i in range(PIECES.size()):
+			var b = tool_btns[PIECES[i][0]]
+			b.rect = Rect2(PX + (i % 5) * 110, 100 + (i / 5) * 68, 100, 58)
+			paged.append([b, 1])
+		for i in range(RULES.size()):
+			var b = rule_btns[RULES[i][0]]
+			b.rect = Rect2(PX + (i % 5) * 110, 100 + (i / 5) * 68, 100, 58)
+			paged.append([b, 2])
+		for i in range(WAZA.size()):
+			var b = waza_btns[WAZA[i][0]]
+			b.rect = Rect2(PX + i * 137, 318, 129, 58)
+			paged.append([b, 2])
+		b_minus.rect = Rect2(PX + 250, 392, 90, 58)
+		b_plus.rect = Rect2(PX + 450, 392, 90, 58)
+		paged.append([b_minus, 2])
+		paged.append([b_plus, 2])
+		b_wipe.rect = Rect2(PX, 100, 264, 66)
+		b_wipe.label = "Wipe it"
+		b_copy.label = "Copy code"
+		b_load.label = "Load code"
+		b_copy.rect = Rect2(PX, 250, 264, 66)
+		b_load.rect = Rect2(PX + 276, 250, 264, 66)
+		for b in [b_wipe, b_copy, b_load]:
+			paged.append([b, 3])
+		b_play.rect = Rect2(PX, 632, 264, 70)
+		b_back.rect = Rect2(PX + 276, 632, 264, 70)
 	line = LineEdit.new()
 	line.position = Vector2(PX, 556)
 	line.size = Vector2(540, 38)
 	line.placeholder_text = "a board's code appears here; paste someone else's and press Load"
 	line.add_theme_font_override("font", main.font)
 	line.add_theme_font_size_override("font_size", 15)
+	if main.touch:
+		line.position = Vector2(PX, 184)
+		line.size = Vector2(540, 54)
+		line.placeholder_text = "the code appears here; paste one and tap Load"
+		line.add_theme_font_size_override("font_size", 22)
 	add_child(line)
+	_tab(0)
 	_sync()
+
+func _tab(k):
+	tab = k
+	if not main.touch:
+		return
+	for i in range(tab_btns.size()):
+		tab_btns[i].sel = i == k
+	for e in paged:
+		e[0].show = e[1] == k
+	line.visible = k == 3
+
+# the palette side of the page, as a phone draws it
+func _draw_phone(f):
+	if tab == 2:
+		Ink.text(self, f, Vector2(PX, 430), "Ink in a stroke", 24, Ink.a(Ink.SUMI, 0.75))
+		Ink.text(self, f, Vector2(PX + 340, 434), str(int(st.ink)), 38, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 110)
+	if tab <= 1:
+		Ink.text(self, f, Vector2(PX, 492 if tab == 1 else 280), "Brush: " + note + ".  Tap or drag on the board.", 24, Ink.SHU)
+	var status = msg
+	if status == "":
+		status = "Cleared in %d stroke%s. Its code is on the Share page." % [int(st.par), "" if int(st.par) == 1 else "s"] if int(st.par) > 0 else "Ready. Play it and clear it to turn it into a code."
+	Ink.para(self, f, Vector2(PX, 548), status, 22, Ink.a(Ink.SHU, 0.95), 540)
 
 func _wind():
 	for r in st.rules:
@@ -240,6 +308,10 @@ func _draw():
 				main.piece(self, Sim.DEF[ch][0], c, TS, time, Sim.DEF[ch][1] >= 3 or ch == "T", false, {"S": 1.3, "G": 1.45, "P": 1.25}.get(ch, 1.0))
 				Ink.hp_pips(self, c, TS, Sim.DEF[ch][1], Sim.DEF[ch][1])
 	Ink.brush(self, [Vector2(PX - 22, 30), Vector2(PX - 23, 250), Vector2(PX - 21, 470), Vector2(PX - 22, 690)], 4.0, Ink.a(Ink.SUMI, 0.45))
+	if main.touch:
+		_draw_phone(f)
+		draw_btns()
+		return
 	Ink.text(self, f, Vector2(PX, 80), "Ground", 16, Ink.a(Ink.SUMI, 0.7))
 	Ink.text(self, f, Vector2(PX + 320, 118), "brush: " + note, 16, Ink.SHU)
 	Ink.text(self, f, Vector2(PX, 152), "Suzu and the yokai  (click or drag on the board to place)", 16, Ink.a(Ink.SUMI, 0.7))

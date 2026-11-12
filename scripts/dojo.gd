@@ -5,8 +5,9 @@ const MAXLV = 2
 var rows = []
 
 func setup():
-	btn(Rect2(40, 640, 220, 52), "Back to the road", main.show_map, "道")
-	btn(Rect2(280, 640, 220, 52), "Unlearn all", _reset, "忘")
+	var bh = 66 if main.touch else 52
+	btn(Rect2(40, 700 - bh - 8, 280 if main.touch else 220, bh), "Back to the road", main.show_map, "道")
+	btn(Rect2(340 if main.touch else 280, 700 - bh - 8, 240 if main.touch else 220, bh), "Unlearn all", _reset, "忘")
 	for i in range(Data.UPGRADES.size()):
 		var u = Data.UPGRADES[i]
 		var b = btn(Rect2(960, 176 + i * 86, 220, 54), "", _buy.bind(u[0]))
@@ -54,8 +55,8 @@ func _draw():
 	draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false, Color(1, 1, 1, 0.45))
 	Ink.tategaki(self, f, Vector2(70, 30), "修練", 60, Ink.SUMI)
 	Ink.text(self, f, Vector2(130, 76), "Training", 34, Ink.SUMI)
-	Ink.text(self, f, Vector2(130, 110), "Points to spend: %d" % main.points(), 22, Ink.SHU)
-	Ink.para(self, f, Vector2(130, 140), "Every station can be mastered with nothing from this page. Training is for the road, not the proof.", 16, Ink.a(Ink.SUMI, 0.7), 760)
+	Ink.text(self, f, Vector2(130, 112), "Points to spend: %d" % main.points(), 28 if main.touch else 22, Ink.SHU)
+	Ink.para(self, f, Vector2(130, 140), "Every station can be mastered with nothing from this page. Training is for the road, not the proof.", 20 if main.touch else 16, Ink.a(Ink.SUMI, 0.7), 1040 if main.touch else 760)
 	for i in range(Data.UPGRADES.size()):
 		var u = Data.UPGRADES[i]
 		var y = 176 + i * 86
@@ -63,7 +64,7 @@ func _draw():
 		draw_line(Vector2(130, y + 70), Vector2(1180, y + 70), Ink.a(Ink.SUMI, 0.2), 1.0)
 		Ink.text(self, f, Vector2(130, y + 42), u[1], 40, Ink.SUMI if _known(u[0]) else Ink.a(Ink.SUMI, 0.3))
 		Ink.text(self, f, Vector2(250, y + 28), u[2], 24, Ink.SUMI)
-		Ink.text(self, f, Vector2(250, y + 54), u[3], 17, Ink.a(Ink.SUMI, 0.7))
+		Ink.text(self, f, Vector2(250, y + (58 if main.touch else 54)), u[3], 21 if main.touch else 17, Ink.a(Ink.SUMI, 0.7))
 		for k in range(MAXLV):
 			var c = Vector2(820 + k * 44, y + 28)
 			if k < lv:

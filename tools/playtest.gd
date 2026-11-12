@@ -455,6 +455,55 @@ func other_roads():
 		await frames(2)
 		if bp.grade != "jouzu":
 			bad("stage %d does not play through in the phone layout (grade '%s')" % [st + 1, bp.grade])
+	# every other page in its phone layout: buttons on the page and clear of one another
+	var pages = [["title", func(): main.show_title()], ["map", func(): main.show_map()],
+		["chapters", func():
+			main.show_map()
+			main.cur._pick()],
+		["hub", func(): main.show_hub()], ["settings", func(): main.show_settings()], ["calendar", func(): main.show_calendar()],
+		["training", func(): main.show_dojo()], ["scroll", func(): main.show_scroll()],
+		["workshop ground", func(): main.show_editor()],
+		["workshop yokai", func():
+			main.show_editor()
+			main.cur._tab(1)],
+		["workshop rules", func():
+			main.show_editor()
+			main.cur._tab(2)],
+		["workshop share", func():
+			main.show_editor()
+			main.cur._tab(3)]]
+	for pg in pages:
+		pg[1].call()
+		await frames(2)
+		var shown = main.cur.btns.filter(func(x): return x.show)
+		if shown.is_empty():
+			bad("the %s page has no buttons on a phone" % pg[0])
+		for i in range(shown.size()):
+			if not Rect2(0, 0, 1280, 720).encloses(shown[i].rect):
+				bad("%s: the %s button is off the page on a phone" % [pg[0], shown[i].label])
+			if shown[i].rect.size.y < 48.0:
+				bad("%s: the %s button is too short for a finger (%d)" % [pg[0], shown[i].label, int(shown[i].rect.size.y)])
+			for j in range(i):
+				if shown[i].rect.intersects(shown[j].rect):
+					bad("%s: %s and %s overlap on a phone" % [pg[0], shown[i].label, shown[j].label])
+	# choosing a chapter from the page of chapters, and painting in the workshop
+	main.show_map()
+	await frames(2)
+	main.cur._pick()
+	main.cur.tabs[0].cb.call()
+	if main.cur.picking or main.cur.page != 0:
+		bad("picking a chapter on a phone does not go to it")
+	main.cur._step(1)
+	if main.cur.page != 1:
+		bad("the phone's next-chapter arrow does not turn the chapter")
+	main.show_editor()
+	await frames(2)
+	main.cur._tab(1)
+	main.cur.tool_btns["o"].cb.call()
+	main.cur.on_click(main.cur.ORG + Vector2(2.5, 2.5) * main.cur.TS, MOUSE_BUTTON_LEFT)
+	if main.cur.st.rows[2][2] != "o":
+		bad("placing a yokai in the phone workshop does not work")
+	main.cur._clear()
 	main.touch = false
 
 	# settings

@@ -13,6 +13,13 @@ func setup():
 	var tw = 1200.0 / per
 	for c in range(n):
 		tabs.append(btn(Rect2(40 + (c % per) * tw + 4, 606 + (c / per) * 30 if n > 17 else 614, tw - 8, 27 if n > 17 else 38), Data.CHAPTERS[c].kanji, _page.bind(c)))
+	if main.touch:
+		# a phone turns the chapters with two large arrows instead of a row of small tabs
+		for b in tabs:
+			b.show = false
+		btns[0].rect = Rect2(40, 636, 300, 68)
+		btn(Rect2(960, 636, 140, 68), "Back", func(): on_key(KEY_LEFT), "前")
+		btn(Rect2(1110, 636, 130, 68), "On", func(): on_key(KEY_RIGHT), "次")
 	for c in range(n):
 		if main.grade_of(Data.CHAPTERS[c].from) != "":
 			page = c
@@ -44,7 +51,10 @@ func _draw():
 	Ink.tategaki(self, f, Vector2(64, 6), "巻", 50, Ink.SUMI)
 	Ink.text(self, f, Vector2(110, 50), "Your Scroll", 32, Ink.SUMI)
 	var ch = Data.CHAPTERS[page]
-	Ink.text(self, f, Vector2(110, 82), "%s  %s  ·  the strokes that cleared each station, and nothing else" % [ch.kanji, ch.name], 17, Ink.a(Ink.SHU, 0.9))
+	if main.touch:
+		Ink.text(self, f, Vector2(110, 86), "%s  %s" % [ch.kanji, ch.name], 26, Ink.a(Ink.SHU, 0.9))
+	else:
+		Ink.text(self, f, Vector2(110, 82), "%s  %s  ·  the strokes that cleared each station, and nothing else" % [ch.kanji, ch.name], 17, Ink.a(Ink.SHU, 0.9))
 	var rg = _range(page)
 	var painted = 0
 	for i in range(rg[0], rg[1]):
@@ -69,5 +79,9 @@ func _draw():
 		else:
 			Ink.text(self, f, Vector2(r.position.x, r.position.y + r.size.y * 0.58), str(i + 1), 36, Ink.a(Ink.SUMI, 0.12), HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
 	var total = main.data.scroll.size()
-	Ink.text(self, f, Vector2(290, 700), "%d of %d painted in this chapter   ·   %d of %d in all   ·   ← → turn chapters" % [painted, rg[1] - rg[0], total, Data.LEVELS.size()], 17, Ink.SUMI)
+	if main.touch:
+		Ink.text(self, f, Vector2(360, 666), "Chapter %d of %d" % [page + 1, Data.CHAPTERS.size()], 26, Ink.SUMI)
+		Ink.text(self, f, Vector2(360, 696), "%d of %d painted here  ·  %d of %d in all" % [painted, rg[1] - rg[0], total, Data.LEVELS.size()], 22, Ink.a(Ink.SUMI, 0.75))
+	else:
+		Ink.text(self, f, Vector2(290, 700), "%d of %d painted in this chapter   ·   %d of %d in all   ·   ← → turn chapters" % [painted, rg[1] - rg[0], total, Data.LEVELS.size()], 17, Ink.SUMI)
 	draw_btns()

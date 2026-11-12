@@ -73,6 +73,8 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
 - **On a phone:** pinch with two fingers to zoom and drag with two to move about, or tap 拡 on the left
   edge. Each stage opens with a large card giving the goal and anything met there for the first time;
   it goes by itself or at a tap, and 問 brings it back.
+  Every screen has a phone layout of its own: larger type and buttons, the chapters on a page of
+  their own instead of a row of tabs, and the workshop's palette in four pages of large buttons.
 - **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, and the
   painted look.
 - **Three seals a station:** 上手 mastery, 潔 no stroke taken back, 惜墨 sparing of ink. Seals earn the

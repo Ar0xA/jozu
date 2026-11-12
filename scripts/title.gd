@@ -15,6 +15,16 @@ func setup():
 		btn(Rect2(940, 646, 290, 44), "Full screen", main.toggle_fullscreen, "全")
 	else:
 		btn(Rect2(940, 646, 290, 44), "Leave", func(): get_tree().quit(), "去")
+	if main.touch:
+		_grow()
+
+# a phone's thumbs want taller buttons
+func _grow():
+	var y = 420.0
+	for b in btns:
+		if b.show:
+			b.rect = Rect2(900, y, 340, 64)
+			y += 72.0
 
 func _anew():
 	if not armed:
