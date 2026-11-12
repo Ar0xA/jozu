@@ -115,7 +115,7 @@ func _setup_audio():
 		var p = AudioStreamPlayer.new()
 		add_child(p)
 		sfx_pool.append(p)
-	for nm in ["title", "battle", "boss", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink"]:
+	for nm in ["title", "battle", "boss", "step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2"]:
 		streams[nm] = load("res://audio/%s.wav" % nm)
 	streams["story"] = load("res://audio/story.ogg")
 	AudioServer.set_bus_mute(0, not data.sound)
@@ -445,6 +445,8 @@ func stats_for(i):
 # ---------------------------------------------------------------- screens
 
 func go(scr):
+	# into a stage and out of one, the doors slide; between other pages, a wash of ink
+	var stage = scr.get_script().resource_path.ends_with("battle.gd") or (cur != null and cur.get_script().resource_path.ends_with("battle.gd"))
 	if cur:
 		cur.queue_free()
 	cur = scr
@@ -452,10 +454,11 @@ func go(scr):
 	add_child(scr)
 	if wipe == null:
 		wipe = load("res://scripts/wipe.gd").new()
+		wipe.main = self
 		add_child(wipe)
 	move_child(wipe, -1)
 	if data.opts.motion:
-		wipe.start()
+		wipe.start("fusuma" if stage else "wash")
 
 func show_title():
 	play_music("title")

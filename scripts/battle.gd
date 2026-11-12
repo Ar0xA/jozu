@@ -46,6 +46,7 @@ const RULE_NOTE = {
 	"ward": "結界 Ward: paste a seal beside you that no yokai can enter.",
 	"katsu": "喝 Shout: hurl every yokai beside you one tile away. Into water, they are gone.",
 }
+var born_t = 0.0       # when the stage was last begun: the yokai gather out of the ink from then
 var done_t = 0.0       # when the stage ended, for the seal and the replay of your strokes
 var flash = 0.0
 var last_drag = Vector2i(-9, -9)
@@ -234,6 +235,9 @@ func _restart():
 	s["spent"] = 0
 	undos = 0
 	starts += 1
+	born_t = time
+	if starts == 1:
+		main.sfx("ki2")   # the two cracks of the wooden clappers that open a scene
 	seal_mask = 0
 	_clear_hint()
 	hist = []
@@ -538,6 +542,7 @@ func _finish():
 		done_t = time + 1.5
 	if s.status == "won":
 		grade = "jouzu" if (s.hits == 0 and s.turn <= lv.par) else "ka"
+		main.sfx("ki")
 		main.sfx("win")
 		var first = main.grade_of(idx) == ""
 		my_paths = s.paths.duplicate()
@@ -647,7 +652,7 @@ func tick(dt):
 		if card_t >= card_len:
 			card = []
 	for b in extra:
-		b.show = time >= done_t
+		b.show = time >= done_t + (0.45 if main.data.opts.motion else 0.0)
 	while not walk.is_empty() and walk[0].at <= walk_t:
 		aim[walk[0].id] = walk[0].to
 		walk.pop_front()
@@ -682,6 +687,8 @@ func _draw():
 	draw_set_transform(off, 0.0, Vector2.ONE)
 
 	# header
+	Ink.kinun(self, Vector2(400, 20), 250.0)
+	Ink.kinun(self, Vector2(1090, 204), 240.0, 0.20)
 	Ink.seal(self, f, Vector2(84, 52), 24, "上手")
 	if main.data.opts.motion:
 		Ink.written(self, f, Vector2(124, 62), lv.kanji, 44, Ink.SUMI, time - 0.35)
@@ -887,6 +894,10 @@ func _draw():
 			mod = Color(0.05, 0.05, 0.08, 0.85)   # a shape in the dark, nothing more
 		elif y.down:
 			mod = Color(1, 1, 1, 0.4)
+		var born = 1.0 if not main.data.opts.motion else clamp((time - born_t - 0.55 - (y.id % 9) * 0.07) / 0.4, 0.0, 1.0)
+		if born < 1.0:
+			Ink.blot(self, e[2], TS * (0.75 - 0.25 * born), TS * (0.75 - 0.25 * born), Ink.SUMI, 0.75 * (1.0 - born) * min(1.0, (time - born_t) * 3.0))
+			mod.a *= born
 		main.piece(self, e[1], e[2], TS, time + y.id, y.max >= 3 or y.ch == "T", false, {"S": 1.3, "G": 1.45, "P": 1.25}.get(y.ch, 1.0), mod)
 		if y.down:
 			Ink.text(self, f, e[2] + Vector2(-TS * 0.5, TS * 0.1), "倒", 26, Ink.SHU, HORIZONTAL_ALIGNMENT_CENTER, TS)
@@ -927,10 +938,12 @@ func _draw():
 		elif e.k == "kill" and e.has("quiet"):
 			draw_arc(c, TS * (0.2 + 0.4 * u), 0, TAU, 32, Ink.a(Ink.AI, 1.0 - u), 4.0, true)
 		elif e.k == "kill":
-			draw_arc(c, TS * (0.2 + 0.5 * u), 0, TAU, 32, Ink.a(Ink.SUMI, 1.0 - u), 6.0 * (1.0 - u) + 1.0, true)
-			for i in range(7):
-				var ang = i * 0.9 + 0.3
-				draw_circle(c + Vector2(cos(ang), sin(ang)) * TS * (0.25 + 0.5 * u), 5.0 * (1.0 - u), Ink.a(Ink.SUMI, 1.0 - u))
+			# what was cut comes apart into ink, and the ink drifts up and thins
+			for i in range(6):
+				var drift = c + Vector2((i - 2.5) * TS * 0.13 + sin(i * 2.1 + u * 3.0) * 7.0, -TS * u * (0.35 + 0.12 * (i % 3)))
+				var rad = TS * (0.20 + 0.16 * u + 0.03 * (i % 2))
+				Ink.blot(self, drift, rad, rad, Ink.SUMI, 0.55 * (1.0 - u))
+			draw_arc(c, TS * (0.2 + 0.5 * u), 0, TAU, 32, Ink.a(Ink.SUMI, 0.6 * (1.0 - u)), 3.0 * (1.0 - u) + 1.0, true)
 			Ink.text(self, f, c + Vector2(-20, 14 - 30 * u), "祓", 40, Ink.a(Ink.SHU, 1.0 - u))
 		elif e.k == "cut":
 			draw_line(c + Vector2(-30, -30), c + Vector2(-30 + 60 * min(1.0, u * 2.5), -30 + 60 * min(1.0, u * 2.5)), Ink.a(Ink.GOFUN, 1.0 - u), 7.0, true)
@@ -984,9 +997,12 @@ func _weather(br):
 	var w = br.size.x
 	var h = br.size.y
 	if rules.has("rain"):
-		for k in range(46):
-			var p = br.position + Vector2(fmod(k * 97.0 + time * 60.0, w), fmod(k * 53.0 + time * 420.0, h))
-			draw_line(p, p + Vector2(-5, 18), Ink.a(Ink.AI, 0.38), 1.3, true)
+		for k in range(54):
+			var slant = Vector2(-0.26 if k % 5 != 0 else -0.40, 1.0)
+			var p = br.position + Vector2(fmod(k * 97.0 + time * 90.0, w + 60.0), fmod(k * 53.0 + time * 520.0, h + 80.0) - 80.0)
+			var q = p + slant * (70.0 + 30.0 * (k % 3))
+			if br.has_point(p) and br.has_point(q):
+				draw_line(p, q, Ink.a(Ink.SUMI, 0.30 if k % 5 != 0 else 0.18), 1.2, true)
 	if rules.has("snow"):
 		for k in range(40):
 			var p = br.position + Vector2(fmod(k * 83.0 + sin(time * 0.7 + k) * 14.0 + w, w), fmod(k * 61.0 + time * 34.0, h))
@@ -1013,9 +1029,16 @@ func _pips(f, y, kanji, label, n, mx, col):
 		var step = 30.0 if mx <= 8 else 240.0 / mx
 		var c = Vector2(PX + 150 + i * step, y - 9)
 		var rad = min(10.0, step * 0.36)
-		if i < n:
-			draw_circle(c, rad, col)
-		draw_arc(c, rad, 0, TAU, 20, Ink.SUMI, 1.8, true)
+		if kanji == "気":
+			if i > 0:
+				draw_line(c - Vector2(step, 0), c, Ink.a(Ink.SUMI, 0.5), 1.5, true)   # the string of the rosary
+			Ink.bead(self, c, rad, i < n)
+		elif kanji == "墨":
+			Ink.drop(self, c + Vector2(0, 2), rad * 0.92, i < n)
+		else:
+			if i < n:
+				draw_circle(c, rad, col)
+			draw_arc(c, rad, 0, TAU, 20, Ink.SUMI, 1.8, true)
 
 # The side panel on a phone: the count of strokes, ki, ink and momentum, large enough to read at
 # arm's length. Everything explanatory is in the card.
@@ -1032,9 +1055,16 @@ func _panel_phone(f):
 		for i in range(mx):
 			var c = Vector2(PX + 96 + i * step, y)
 			var rad = min(19.0, step * 0.38)
-			if i < rows[k][1]:
-				draw_circle(c, rad, rows[k][3])
-			draw_arc(c, rad, 0, TAU, 24, Ink.SUMI, 2.6, true)
+			if k == 0:
+				if i > 0:
+					draw_line(c - Vector2(step, 0), c, Ink.a(Ink.SUMI, 0.5), 2.0, true)
+				Ink.bead(self, c, rad, i < rows[k][1])
+			elif k == 1:
+				Ink.drop(self, c + Vector2(0, 3), rad * 0.9, i < rows[k][1])
+			else:
+				if i < rows[k][1]:
+					draw_circle(c, rad, rows[k][3])
+				draw_arc(c, rad, 0, TAU, 24, Ink.SUMI, 2.6, true)
 	Ink.text(self, f, Vector2(PX + 220, 272), "next cut deals %d" % min(3, 1 + s.mom), 26, Ink.a(Ink.SUMI, 0.75))
 	var wz = ""
 	for w in [["leap", "縮地", s.leap], ["ward", "結界", s.ward], ["katsu", "喝", s.katsu], ["bell", "鐘", s.bell]]:
@@ -1097,9 +1127,17 @@ func _panel(f):
 	if hint == "" and say.size() == 3:
 		# a stage with no lesson of its own carries an old saying instead
 		hy = max(y + 30.0, 372.0)
-		Ink.text(self, f, Vector2(PX, hy), say[0], 22 if say[0].length() <= 14 else 17, Ink.SUMI)
-		Ink.text(self, f, Vector2(PX, hy + 21), say[1], 13, Ink.a(Ink.SUMI, 0.55))
-		Ink.para(self, f, Vector2(PX, hy + 44), say[2], 15, Ink.a(Ink.AI, 0.95), 545)
+		var floor_y = 458.0 if (lv.waza.size() > 0) else 512.0
+		var per = max(3, int((floor_y - hy + 20.0) / 25.0))
+		var cols = int(ceil(say[0].length() / float(per)))
+		for i in range(say[0].length()):
+			var cx = PX + 528.0 - (i / per) * 28.0
+			draw_string(f, Vector2(cx - 12.0, hy + (i % per) * 25.0), say[0][i], HORIZONTAL_ALIGNMENT_CENTER, 24.0, 22, Ink.SUMI)
+		draw_line(Vector2(PX + 548.0, hy - 20.0), Vector2(PX + 548.0, hy - 20.0 + min(per, say[0].length()) * 25.0), Ink.a(Ink.SHU, 0.8), 2.0, true)
+		var tw = 540.0 - cols * 28.0 - 26.0
+		Ink.para(self, f, Vector2(PX, hy), say[2], 15, Ink.a(Ink.AI, 0.95), tw)
+		var eh = f.get_multiline_string_size(say[2], HORIZONTAL_ALIGNMENT_LEFT, tw, 15).y
+		Ink.para(self, f, Vector2(PX, hy + eh + 8.0), say[1], 13, Ink.a(Ink.SUMI, 0.55), tw)
 	else:
 		Ink.para(self, f, Vector2(PX, hy), main.touch_words(hint), 15, Ink.a(Ink.SHU if hint_msg != "" else Ink.AI, 0.95), 545)
 	if not s.r_shiki:
@@ -1108,15 +1146,17 @@ func _panel(f):
 
 func _result(f):
 	var box = Rect2(150, 200, 400, 380)
-	draw_rect(box, Ink.a(Ink.PAPER, 0.9))
-	Ink.slip(self, box, 5.0)
+	var open = _since(0.0, 0.45)
+	Ink.kakejiku(self, box, open)
+	if open < 1.0:
+		return
 	if grade == "jouzu":
-		Ink.stamp(self, f, Vector2(232, 296), 50, "上手", _since(0.15, 0.3))
+		Ink.stamp(self, f, Vector2(232, 296), 50, "上手", _since(0.55, 0.3))
 		_my_scroll()
 		_seals(f)
 		Ink.text(self, f, Vector2(150, 408), "Mastered in %d stroke%s, unharmed." % [s.turn, "" if s.turn == 1 else "s"], 19, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 400)
 	elif grade == "ka":
-		Ink.stamp(self, f, Vector2(232, 290), 58, "可", _since(0.15, 0.3), Ink.AI)
+		Ink.stamp(self, f, Vector2(232, 290), 58, "可", _since(0.55, 0.3), Ink.AI)
 		_my_scroll()
 		_seals(f)
 		var why = "%d strokes; mastery asks %d." % [s.turn, lv.par]
@@ -1151,7 +1191,7 @@ func _my_scroll():
 	var r = Rect2(318, 222, 196, 160)
 	draw_rect(r, Ink.a(Ink.GOFUN, 0.9))
 	Ink.frame(self, r, 2.5, Ink.a(Ink.SUMI, 0.7))
-	Ink.calligraphy(self, r.grow(-10), my_paths, s.w, s.h, _since(0.45, 0.28 * max(1, my_paths.size())))
+	Ink.calligraphy(self, r.grow(-10), my_paths, s.w, s.h, _since(0.85, 0.28 * max(1, my_paths.size())))
 
 # how far along something is that began `after` seconds past the end of the stage and takes `length`
 func _since(after, length):

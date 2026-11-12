@@ -69,7 +69,10 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   shelf of some 1,500 proven boards the story never used. Each has a code to pass on.
 - **Brushwork:** the title is written out stroke by stroke; an ink wash turns one screen into the next;
   stage names are brushed in; the seal is stamped; and the strokes that cleared a stage are written out
-  again on the result and in your scroll. All of it stops with Motion off.
+  again on the result and in your scroll. The seasons drift over the title and the road (petals,
+  fireflies, maple leaves, snow); painted sliding doors open onto each stage; yokai gather out of ink
+  and come apart into it; a cleared stage hangs as a scroll; sayings are set top to bottom; wooden
+  clappers open and close a scene. All of the motion stops with Motion off.
 - **On a phone:** pinch with two fingers to zoom and drag with two to move about, or tap 拡 on the left
   edge. Each stage opens with a large card giving the goal and anything met there for the first time;
   it goes by itself or at a tap, and 問 brings it back.

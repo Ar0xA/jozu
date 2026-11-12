@@ -241,4 +241,18 @@ def late_sfx():
     # a tile of the character painted: one wet touch of the brush
     one('ink', [(0, swish(0.2, 500, 1400, 0.6)), (0.03, pluck(hz('A3'), 0.3, 0.1, 0.96, 0.2))], 0.3)
 
+def clappers():
+    """Hyoshigi: the two blocks of hard wood struck together to open and close a scene."""
+    def clack(amp):
+        t = np.arange(int(0.16 * SR)) / SR
+        wood = np.sin(2 * np.pi * 1650 * t) * np.exp(-t * 55) + 0.6 * np.sin(2 * np.pi * 2480 * t) * np.exp(-t * 70) + 0.35 * np.sin(2 * np.pi * 3900 * t) * np.exp(-t * 95)
+        crack = np.random.default_rng(7).standard_normal(len(t)) * np.exp(-t * 320)
+        return (wood + 0.7 * crack) * amp
+    for name, hits, length in (('ki', [(0, 0.9)], 0.3), ('ki2', [(0, 0.7), (0.24, 1.0)], 0.55)):
+        m = Mix(length)
+        for at, amp in hits:
+            m.add(at, clack(amp))
+        m.save(name, length, peak=0.7)
+
 late_sfx()
+clappers()

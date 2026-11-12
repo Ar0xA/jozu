@@ -42,6 +42,8 @@ func _draw():
 	var f = main.font
 	draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false)
 	Ink.sun(self, Vector2(150, 150), 62)
+	if main.data.opts.motion:
+		Ink.season(self, Ink.season_now(), time, 30)
 	# title, written top to bottom in the empty panel
 	# the name is written out, stroke by stroke, and then settles into the cut of the typeface
 	var t = time - 0.5

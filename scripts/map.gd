@@ -92,6 +92,13 @@ func _sync():
 		nav[4].on = page > 0
 		nav[6].on = page + 1 < Data.CHAPTERS.size() and main.unlocked(Data.CHAPTERS[page + 1].from)
 
+# The road runs through the year: each chapter has its season, and the snow chapters their snow.
+func _season():
+	var nm = Data.CHAPTERS[page].name
+	if nm == "Snow Country" or nm == "Deep Snow" or nm == "Mount Osore":
+		return "yuki"
+	return ["sakura", "hotaru", "momiji", "yuki"][page % 4]
+
 func st_pos(i):
 	var rg = _range(page)
 	var n = rg[1] - rg[0]
@@ -177,6 +184,17 @@ func _draw():
 	draw_rect(Rect2(band.position.x, band.end.y, band.size.x, 12), Ink.AI)
 	draw_rect(Rect2(band.position.x, band.position.y - 3, band.size.x, 3), Ink.KIN)
 	draw_rect(Rect2(band.position.x, band.end.y, band.size.x, 3), Ink.KIN)
+
+	# the chapter's name on a slip of paper, as the title is set on a print
+	var kj = ch.kanji
+	var slip = Rect2(band.end.x - 76, band.position.y + 12, 52, kj.length() * 38.0 + 22)
+	draw_rect(slip, Ink.a(Ink.GOFUN, 0.94))
+	draw_rect(slip, Ink.SHU, false, 3.0)
+	Ink.tategaki(self, f, Vector2(slip.position.x + 26, slip.position.y + 6), kj, 34, Ink.SUMI)
+
+	# the season drifts across the painting, behind the words
+	if main.data.opts.motion:
+		Ink.season(self, _season(), time, 22)
 
 	# a line of history about this place
 	var note = ch.get("note", "")

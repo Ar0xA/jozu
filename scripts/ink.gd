@@ -47,6 +47,100 @@ static func blot(ci, c, rx, ry, col, alpha):
 		var t1 = TAU * (i + 1) / n
 		ci.draw_polygon(PackedVector2Array([c, c + Vector2(cos(t0) * rx, sin(t0) * ry), c + Vector2(cos(t1) * rx, sin(t1) * ry)]), PackedColorArray([c0, c1, c1]))
 
+# The season, drifting over the page: cherry petals, fireflies, maple leaves or snow.
+static func season(ci, kind, t, n = 26):
+	for k in range(n):
+		var h1 = fmod(k * 0.6180339, 1.0)
+		var h2 = fmod(k * 0.7548777, 1.0)
+		if kind == "hotaru":
+			# fireflies wander and blink
+			var p = Vector2(80 + h1 * 1120 + sin(t * 0.31 + k * 1.7) * 70, 150 + h2 * 480 + cos(t * 0.23 + k * 2.3) * 50)
+			var glow = max(0.0, sin(t * 1.1 + k * 2.1))
+			blot(ci, p, 16, 16, Color(0.80, 0.92, 0.42), 0.42 * glow)
+			ci.draw_circle(p, 2.2, Color(0.96, 1.0, 0.75, 0.25 + 0.75 * glow))
+			continue
+		var fall = (26.0 + 34.0 * h2) if kind != "yuki" else (16.0 + 20.0 * h2)
+		var p = Vector2(fmod(h1 * 1280.0 + sin(t * 0.6 + k) * 46.0 + t * (12.0 if kind != "yuki" else 3.0) + 1280.0, 1280.0), fmod(h2 * 720.0 + t * fall, 760.0) - 20.0)
+		if kind == "yuki":
+			ci.draw_circle(p, 2.0 + 2.4 * h1, a(GOFUN, 0.9))
+			continue
+		ci.draw_set_transform(p, t * (0.7 + h1) + k, Vector2.ONE)
+		if kind == "sakura":
+			var pink = Color(0.96, 0.74 + 0.1 * h2, 0.80, 0.9)
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(0, -7), Vector2(5, -2), Vector2(3.5, 5), Vector2(0, 2.5), Vector2(-3.5, 5), Vector2(-5, -2)]), pink)
+		else:
+			var red = Color(0.80, 0.26 + 0.25 * h2, 0.10, 0.9)
+			var leaf = PackedVector2Array()
+			for i in range(10):
+				var ang = TAU * i / 10.0 - PI * 0.5
+				leaf.append(Vector2(cos(ang), sin(ang)) * (9.0 if i % 2 == 0 else 3.6))
+			ci.draw_colored_polygon(leaf, red)
+			ci.draw_line(Vector2(0, 3), Vector2(0, 11), a(red, 0.9), 1.4, true)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+# Which season the calendar says it is.
+static func season_now():
+	var m = Time.get_date_dict_from_system().month
+	return "sakura" if m >= 3 and m <= 5 else "hotaru" if m >= 6 and m <= 8 else "momiji" if m >= 9 and m <= 11 else "yuki"
+
+# A hanging scroll unrolling: u = 0 only the rod, 1 fully open. r is the paper when it is open.
+static func kakejiku(ci, r, u):
+	var wood = Color(0.27, 0.18, 0.12)
+	var top = r.position.y
+	var bot = lerp(top + 26.0, r.end.y, clamp(u, 0.0, 1.0))
+	var x0 = r.position.x
+	var w = r.size.x
+	var hang = Vector2(x0 + w * 0.5, top - 74)
+	ci.draw_line(hang, Vector2(x0 + 26, top - 42), a(SUMI, 0.8), 2.0, true)
+	ci.draw_line(hang, Vector2(x0 + w - 26, top - 42), a(SUMI, 0.8), 2.0, true)
+	ci.draw_rect(Rect2(x0 - 6, top - 46, w + 12, 8), wood)
+	ci.draw_rect(Rect2(x0, top - 38, w, 30), AI)                       # the upper cloth
+	ci.draw_rect(Rect2(x0, top - 8, w, 8), KIN)                        # and its strip of gold
+	ci.draw_rect(Rect2(x0, top, w, bot - top), a(PAPER, 0.98))
+	ci.draw_rect(Rect2(x0 + 8, top, w - 16, bot - top), a(GOFUN, 0.45))
+	ci.draw_rect(Rect2(x0, top, 8, bot - top), AI)
+	ci.draw_rect(Rect2(x0 + w - 8, top, 8, bot - top), AI)
+	ci.draw_rect(Rect2(x0, bot, w, 8), KIN)
+	ci.draw_rect(Rect2(x0, bot + 8, w, 20), AI)
+	ci.draw_rect(Rect2(x0 - 18, bot + 28, w + 36, 14), wood)           # the roller, with its two knobs
+	for sx in [x0 - 18, x0 + w + 18]:
+		ci.draw_circle(Vector2(sx, bot + 35), 10.0, Color(0.48, 0.15, 0.11))
+		ci.draw_arc(Vector2(sx, bot + 35), 10.0, 0, TAU, 20, SUMI, 1.5, true)
+
+# Bands of gold cloud, as they drift across a folding screen.
+static func kinun(ci, c, w, alpha = 0.26):
+	var gold = a(KIN, alpha)
+	var rows = [[-0.50, 0.70], [-0.30, 0.95], [-0.42, 0.62], [-0.12, 0.50]]
+	for k in range(rows.size()):
+		var x0 = c.x + rows[k][0] * w
+		var len = rows[k][1] * w
+		var y = c.y + k * 11.0
+		ci.draw_rect(Rect2(x0, y - 5.0, len, 10.0), gold)
+		ci.draw_circle(Vector2(x0, y), 5.0, gold)
+		ci.draw_circle(Vector2(x0 + len, y), 5.0, gold)
+
+# One bead of a rosary: ki that is held. An empty place on the string is ki that is spent.
+static func bead(ci, c, r, full):
+	if full:
+		ci.draw_circle(c, r, Color(0.56, 0.15, 0.11))
+		ci.draw_circle(c + Vector2(-r * 0.32, -r * 0.34), r * 0.26, a(GOFUN, 0.6))
+		ci.draw_arc(c, r, 0, TAU, 22, SUMI, 1.6, true)
+	else:
+		ci.draw_arc(c, r * 0.9, 0, TAU, 22, a(SUMI, 0.4), 1.4, true)
+
+# One drop of ink.
+static func drop(ci, c, r, full):
+	var pts = PackedVector2Array([c + Vector2(0, -r * 1.5)])
+	for i in range(13):
+		var ang = lerp(-PI * 0.18, PI * 1.18, i / 12.0)
+		pts.append(c + Vector2(cos(ang) * r, sin(ang) * r + r * 0.12))
+	if full:
+		ci.draw_colored_polygon(pts, SUMI)
+		ci.draw_circle(c + Vector2(-r * 0.32, r * 0.05), r * 0.2, a(GOFUN, 0.5))
+	else:
+		pts.append(pts[0])
+		ci.draw_polyline(pts, a(SUMI, 0.5), 1.6, true)
+
 # enso: a circle drawn in one breath, never quite closed
 static func enso(ci, c, r, w, col, phase = -1.9):
 	var pts = []
@@ -354,6 +448,13 @@ static func water(ci, r, t):
 				continue
 			for k in range(3):
 				ci.draw_arc(c, s * (0.16 - k * 0.05), PI, TAU, 12, a(AI, 0.8 - k * 0.15), 2.0 - k * 0.4, true)
+	# one crest curling over, with its claws of foam
+	var cc = r.position + Vector2(s * (0.30 + 0.06 * sin(t * 0.9 + r.position.x)), s * 0.24)
+	ci.draw_arc(cc, s * 0.13, PI * 0.9, PI * 2.15, 14, a(GOFUN, 0.95), 3.0, true)
+	ci.draw_arc(cc, s * 0.13, PI * 0.9, PI * 2.15, 14, a(AI, 0.7), 1.2, true)
+	for k in range(4):
+		var ang = PI * 2.15 + k * 0.22
+		ci.draw_circle(cc + Vector2(cos(ang), sin(ang)) * s * (0.14 + 0.02 * k), 2.3 - k * 0.3, a(GOFUN, 0.95))
 
 # The strokes that cleared a stage, with the board taken away: what is left is handwriting.
 # A stroke that never moved is a single dot.
