@@ -58,6 +58,7 @@ const RULE_NOTE = {
 }
 var born_t = 0.0       # when the stage was last begun: the yokai gather out of the ink from then
 var done_t = 0.0       # when the stage ended, for the seal and the replay of your strokes
+var share_note = ""    # what became of the day's card when it was passed on
 var flash = 0.0
 var last_drag = Vector2i(-9, -9)
 var done = false
@@ -574,6 +575,9 @@ func _finish():
 				extra.append(btn(Rect2(346, 526, 196, 44), "Copy its code", func(): DisplayServer.clipboard_set(lv.code), "写"))
 			elif kind_of != "henro":
 				extra.append(btn(Rect2(250, 526, 200, 44), "Try again", _restart))
+			if kind_of == "daily":
+				# the day's answer as a picture to pass on
+				extra.append(btn(Rect2(250, 580, 200, 44), "Share", _share, "写"))
 			return
 		main.record(idx, grade, my_paths, seal_mask)
 		var nxt = main.show_map
@@ -590,6 +594,10 @@ func _finish():
 			extra.append(btn(Rect2(250, 440, 200, 54), "Rise", on_fail, "起"))
 			return
 		extra.append(btn(Rect2(250, 452, 200, 60), "Begin again", _restart, "再"))
+
+func _share():
+	share_note = "…"
+	share_note = await main.share_daily(lv.get("day", main.today()), my_paths, s.w, s.h)
 
 # Is mastery still within reach (or, once the stage is done, was it kept)?
 func _on_par():
@@ -996,6 +1004,8 @@ func _draw():
 		draw_rect(Rect2(0, 0, 1280, 720), Ink.a(Ink.SHU, flash * 0.35))
 	if done and time >= done_t:
 		_result(f)
+		if share_note != "":
+			Ink.text(self, f, Vector2(110, 650), share_note, 16, Ink.SHU, HORIZONTAL_ALIGNMENT_CENTER, 480)
 	draw_btns()
 	if not card.is_empty() and not done:
 		_draw_card(f)

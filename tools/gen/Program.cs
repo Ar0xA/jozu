@@ -1123,7 +1123,7 @@ static class Gen
             if (!string.IsNullOrEmpty(must) && res.par > 0)
             {
                 // and mastery must need it: without it the same count must be out of reach
-                var bare = new Sim(rows, ink, 3, L && must != "leap", Wd && must != "ward", K && must != "katsu", rules, B).Solve(250_000, res.par, secs * 4);
+                var bare = new Sim(rows, ink, 3, L && must != "leap", Wd && must != "ward", K && must != "katsu", rules, B && must != "bell").Solve(250_000, res.par, secs * 4);
                 if (bare.capped || bare.par > 0) return null;
             }
             var lv = new LevelOut { chapter = g.chapter, seg = g.seg, name = kanjiName ?? "", rows = rows, waza = waza, rules = rules, ink = ink, par = res.par, ways = res.ways, states = res.states, trace = res.trace, score = score };

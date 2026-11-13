@@ -4,6 +4,7 @@ extends Control
 const Ink = preload("res://scripts/ink.gd")
 const Data = preload("res://scripts/data.gd")
 const Extra = preload("res://scripts/extra.gd")
+const Koyomi = preload("res://scripts/koyomi.gd")
 var save_path = "user://jozu_save.json"
 
 var font
@@ -774,6 +775,17 @@ func show_custom(lv, kind, label, on_win, on_fail, back):
 # ---------------------------------------------------------------- the daily koan
 # One single-stroke board a day, the same for everyone: gentle on Monday, hardest on Sunday.
 
+const SEASONED_FROM = 20770   # 13 November 2026: from this day the board is chosen by the season
+
+# Does a board suit a season (0 spring .. 3 winter)? Winter has ice and summer has water; spring
+# has thawed; autumn is dry, and the foxes are about.
+func _in_season(rows, season):
+	match season:
+		0: return not rows.contains("i")
+		1: return rows.contains("~")
+		2: return rows.contains("k") and not rows.contains("~")
+	return rows.contains("i")
+
 # the day by the player's own clock, counted from 1970
 func today():
 	return int(floor((Time.get_unix_time_from_system() + Time.get_time_zone_from_system().bias * 60.0) / 86400.0))
@@ -784,10 +796,23 @@ func daily_level(day = -1):
 	var bank = Extra.DAILY
 	var weekday = (day + 3) % 7              # day 0 was a Thursday; 0 = Monday
 	var slice = bank.size() / 7
-	var lv = bank[weekday * slice + (day / 7) % slice].duplicate(true)
+	var pick = weekday * slice + (day / 7) % slice
+	var d = Time.get_date_dict_from_unix_time(day * 86400)
+	var koyomi = Koyomi.on(d.month, d.day)
+	if day >= SEASONED_FROM:
+		# the board suits the season the almanac gives the day; days before this was so keep theirs
+		var fit = []
+		for k in range(slice):
+			if _in_season("".join(bank[weekday * slice + k].rows), koyomi[4]):
+				fit.append(weekday * slice + k)
+		if not fit.is_empty():
+			pick = fit[(day / 7) % fit.size()]
+	var lv = bank[pick].duplicate(true)
 	lv["kanji"] = "日課"
 	lv["name"] = day_name(day)
-	lv["hint"] = "Today's kōan. One stroke, and only one. It is the same board for everyone today." if day == today() else "The kōan of a day gone by. One stroke, and only one."
+	var season = "%s %s, %s" % [koyomi[0], koyomi[2], koyomi[3].to_lower()] if koyomi[2] != "" else "%s, %s" % [koyomi[0], koyomi[3].to_lower()]
+	lv["hint"] = ("Today's kōan, for %s. One stroke, and only one. It is the same board for everyone today." if day == today() else "The kōan of a day gone by: %s. One stroke, and only one.") % season
+	lv["koyomi"] = koyomi
 	lv["story"] = []
 	lv["after"] = []
 	lv["say"] = []
@@ -840,6 +865,47 @@ func daily_line(day):
 	if day == today() and int(data.daily.streak) > 1:
 		line += " · %d days running" % int(data.daily.streak)
 	return line + " · https://ar0xa.github.io/jozu/"
+
+# The day's answer as a picture to pass on (scripts/card.gd). It is painted off screen.
+func daily_card(day, paths, cols, rows):
+	var vp = SubViewport.new()
+	vp.size = Vector2i(1080, 1080)
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	var c = load("res://scripts/card.gd").new()
+	var d = Time.get_date_dict_from_unix_time(day * 86400)
+	c.font = font
+	c.day_name = day_name(day)
+	c.koyomi = Koyomi.on(d.month, d.day)
+	c.paths = paths
+	c.cols = cols
+	c.rows = rows
+	c.tries = int(data.days.get(str(day), 1))
+	c.streak = int(data.daily.streak) if day == today() else 0
+	vp.add_child(c)
+	add_child(vp)
+	await RenderingServer.frame_post_draw
+	await RenderingServer.frame_post_draw
+	var img = vp.get_texture().get_image()
+	vp.queue_free()
+	return img
+
+# Passes the card on: a phone's own share sheet where the browser has one, otherwise a picture
+# saved (to the downloads in a browser, to Pictures on a desktop) with the line of words copied.
+# Returns what to tell the player.
+func share_daily(day, paths, cols, rows):
+	var img = await daily_card(day, paths, cols, rows)
+	var line = daily_line(day)
+	var file = "jozu-%s.png" % day_name(day)
+	if OS.has_feature("web"):
+		var b64 = Marshalls.raw_to_base64(img.save_png_to_buffer())
+		var js = "(function(b,t,n){var s=atob(b),u=new Uint8Array(s.length);for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);var f=new File([u],n,{type:'image/png'});function dl(){var a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=n;document.body.appendChild(a);a.click();a.remove();}if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],text:t}).catch(function(e){if(e&&e.name!=='AbortError')dl();});return 1;}dl();return 0;})(%s,%s,%s)" % [JSON.stringify(b64), JSON.stringify(line), JSON.stringify(file)]
+		var shared = JavaScriptBridge.eval(js, true)
+		return "" if int(shared) == 1 else "Saved as %s." % file
+	DisplayServer.clipboard_set(line)
+	var dir = OS.get_system_dir(OS.SYSTEM_DIR_PICTURES)
+	if dir == "" or img.save_png(dir.path_join(file)) != OK:
+		return "The line is copied; the picture could not be saved."
+	return "Saved to Pictures as %s; the line is copied." % file
 
 # ---------------------------------------------------------------- the unmapped road
 # A board drawn at random from the proven boards the story never used, by how hard it is.
