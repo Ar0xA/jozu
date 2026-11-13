@@ -8,6 +8,8 @@ Reads, from tools/:
   generated.json    - the story chapters' boards, from `tools/gen gen generated.json <seed>`
   pool.json         - boards for the style chapters, from `tools/gen gen pool.json <seed> pool`
   daily_pool.json   - extra koan boards for the daily bank (optional)
+  swaps.json        - boards that take the place of others on the road (optional): each names the
+                      board it replaces by its rows, joined
 Four paths given on the command line replace the first four.
 
 Writes the WAZA_FROM, CHAPTERS, BOSSES and LEVELS parts of scripts/data.gd (the rest of that file
@@ -22,6 +24,9 @@ hand = {b['kanji']: b for b in json.load(open(args[0], encoding='utf-8'))}
 solved = {''.join(l['rows']): l for l in json.load(open(args[1], encoding='utf-8'))}
 gen = json.load(open(args[2], encoding='utf-8'))
 pool = json.load(open(args[3], encoding='utf-8')) if len(args) > 3 else []
+# boards put in the place of others after the road was laid: the stage keeps its place and its name
+sp = os.path.join(root, 'tools', 'swaps.json')
+SWAPS = {b['replaces']: b for b in json.load(open(sp, encoding='utf-8'))} if os.path.exists(sp) else {}
 YOKAI = 'coOStTkyQupPnWGdaAeXK'
 
 MAX_PER_STYLE = 18   # the most stages a style chapter may hold
@@ -715,6 +720,7 @@ for c in ORDER:
                 sys.exit('chapter %d segment %d ran out of boards' % (c, seg))
             else:
                 g = pools[seg].pop(0)
+            g = SWAPS.get(''.join(g['rows']), g)
             b = {'kanji': '', 'name': '', 'par': g['par'], 'waza': g['waza'], 'rows': g['rows'], 'hint': '', 'story': [], 'after': [],
                  'rules': g.get('rules') or [], 'ink': g.get('ink') or 4}
             trace = g['trace']

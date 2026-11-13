@@ -1027,6 +1027,9 @@ static class Gen
             if (rows == null) return null;
             string kanjiName = lastName;
             var waza = g.wazaSets[r.Next(g.wazaSets.Length)].Split(',', StringSplitOptions.RemoveEmptyEntries);
+            // JOZU_WAZA=ward: only boards that grant that technique are tried
+            var must = Environment.GetEnvironmentVariable("JOZU_WAZA");
+            if (!string.IsNullOrEmpty(must) && !waza.Contains(must)) return null;
             var feats = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith("+") && x != "+brush").ToArray();
             if (feats.Contains("+bell")) waza = waza.Append("bell").ToArray();
             var rules = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => !x.StartsWith("+"))
@@ -1147,7 +1150,8 @@ static class Gen
                 if (best != null) pick.Add(best);
             }
             pick = pick.OrderBy(p => p.score).ToList();
-            if (pool) pick = found.GroupBy(f => string.Join("", f.rows)).Select(x => x.First()).ToList();
+            // one chapter asked for by number: every board found is kept, to be chosen from by hand
+            if (pool || only >= 0) pick = found.GroupBy(f => string.Join("", f.rows)).Select(x => x.First()).ToList();
             Console.Out.Flush();
             Console.WriteLine($"ch{g.chapter} seg{g.seg}: tried {attempts}, kept {found.Count}, picked {pick.Count}/{g.count}  pars [{string.Join(",", pick.Select(p => p.par))}]  ({sw.Elapsed.TotalSeconds:0}s)");
             all.AddRange(pick);
