@@ -529,6 +529,50 @@ func write_save():
 			DirAccess.remove_absolute(save_path)
 			DirAccess.rename_absolute(tmp, save_path)
 
+# The whole save as one line of text, to be kept somewhere safe or carried to another device:
+# the save file, packed and written in letters and digits.
+const SAVE_MARK = "JOZU1:"
+
+func save_code():
+	write_save()
+	var raw = FileAccess.get_file_as_bytes(save_path)
+	return SAVE_MARK + Marshalls.raw_to_base64(raw.compress(FileAccess.COMPRESSION_DEFLATE))
+
+# What a save code holds, or null if it is not one: the save as a dictionary.
+func read_code(code):
+	code = str(code).strip_edges()
+	var at = code.find(SAVE_MARK)
+	if at < 0:
+		return null
+	var packed = Marshalls.base64_to_raw(code.substr(at + SAVE_MARK.length()).replace(" ", "").replace("\n", ""))
+	if packed.is_empty():
+		return null
+	var raw = packed.decompress_dynamic(8 * 1024 * 1024, FileAccess.COMPRESSION_DEFLATE)
+	if raw.is_empty():
+		return null
+	var j = JSON.parse_string(raw.get_string_from_utf8())
+	if typeof(j) != TYPE_DICTIONARY or typeof(j.get("cleared")) != TYPE_DICTIONARY:
+		return null
+	return j
+
+# Takes a save code in place of the progress here. What was here is kept beside it (.before).
+func take_code(code):
+	var j = read_code(code)
+	if j == null:
+		return false
+	if FileAccess.file_exists(save_path):
+		DirAccess.copy_absolute(save_path, save_path + ".before")
+	var f = FileAccess.open(save_path, FileAccess.WRITE)
+	if not f:
+		return false
+	f.store_string(JSON.stringify(j))
+	f.close()
+	gate_told = -1
+	load_save()
+	write_save()
+	apply_opts()
+	return true
+
 func erase_save():
 	var snd = data.get("sound", true)
 	var opts = data.get("opts", OPTS.duplicate())

@@ -339,6 +339,17 @@ func _run():
 		if main.grade_of(stn) != "jouzu" or main.seals_of(stn) != 1:
 			bad("a replaced board did not leave its clear behind: %s" % str(main.data.cleared))
 		main.erase_save()
+	# a save goes out as a line of text and comes back whole
+	main.erase_save()
+	main.record(3, "jouzu", null, 3)
+	main.record(4, "ka", null, 0)
+	var code9 = main.save_code()
+	main.erase_save()
+	if main.read_code("hello") != null or main.take_code("JOZU1:not a save"):
+		bad("something that is not a save was taken for one")
+	if not main.take_code("  " + code9 + "\n") or main.grade_of(3) != "jouzu" or main.grade_of(4) != "ka" or main.seals_of(3) != 3:
+		bad("a save did not come back from its code: %s" % str(main.data.cleared))
+	main.erase_save()
 	print("playtest finished: %d problem(s)" % fails.size())
 	for f in fails:
 		print("  - ", f)

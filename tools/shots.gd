@@ -48,6 +48,9 @@ func _initialize():
 		["title", func():
 			main.show_title()
 			main.cur.time = 9.0],
+		["settings", func():
+			main.show_settings()
+			main.cur._copy()],
 	]
 
 func _process(_dt):
