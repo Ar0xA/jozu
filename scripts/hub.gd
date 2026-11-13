@@ -27,6 +27,22 @@ func on_key(code):
 	if code == KEY_ESCAPE:
 		main.show_map()
 
+# Upright: each road's words, and under them its buttons.
+func tall_parts(_h):
+	if not main.touch:
+		return super.tall_parts(_h)
+	var parts = [{"src": [Rect2(30, 0, 420, 64)], "s": 1.2}]
+	for i in range(4):
+		var y = TOP + i * STEP
+		if i == 2:
+			parts.append({"src": [Rect2(110, y, 510, 118)], "s": 0.95})
+			parts.append({"src": [Rect2(622, y + 46, 564, 72)], "s": 1.22})
+		else:
+			parts.append({"src": [Rect2(110, y, 740, 118)], "s": 0.95})
+			parts.append({"src": [Rect2(872, y, 296, 118)], "s": 1.15})
+	parts.append({"src": [Rect2(36, 640, 560, 76)], "s": 1.2})
+	return parts
+
 func _card(f, i, kanji, title, lines):
 	var y = TOP + i * STEP
 	var r = Rect2(100, y, 1080, STEP - 12)
@@ -45,10 +61,11 @@ func _card(f, i, kanji, title, lines):
 
 func _draw():
 	var f = main.font
-	draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false, Color(1, 1, 1, 0.4))
+	backdrop(0.4)
 	Ink.tategaki(self, f, Vector2(64, 4), "別", 46, Ink.SUMI)
 	Ink.text(self, f, Vector2(110, 46), "Other Roads", 32, Ink.SUMI)
-	Ink.text(self, f, Vector2(110, 78), "Four ways to keep the brush moving once the scroll is not enough.", 21 if main.touch else 16, Ink.a(Ink.SUMI, 0.7))
+	if not main.tall:
+		Ink.text(self, f, Vector2(110, 78), "Four ways to keep the brush moving once the scroll is not enough.", 21 if main.touch else 16, Ink.a(Ink.SUMI, 0.7))
 
 	var d = main.data.daily
 	var names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]

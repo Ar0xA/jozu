@@ -80,7 +80,7 @@ func tick(dt):
 
 func _draw():
 	var f = main.font
-	draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false, Color(1, 1, 1, 0.4))
+	backdrop(0.4)
 	Ink.tategaki(self, f, Vector2(64, 4), "乱", 46, Ink.SUMI)
 	Ink.text(self, f, Vector2(110, 46), "The Unmapped Road", 32, Ink.SUMI)
 	Ink.text(self, f, Vector2(110, 76), main.BRACKETS[br][1] + "  ·  a board no one has seen", 16, Ink.a(Ink.SUMI, 0.7))

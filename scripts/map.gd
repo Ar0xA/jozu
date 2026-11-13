@@ -58,7 +58,65 @@ func setup():
 		tabs.append(btn(r, Data.CHAPTERS[c].kanji, _page.bind(c)))
 	if phone:
 		b_close = btn(Rect2(44 + 4 * 240, 78 + 7 * 78, 232, 60), "Back", _pick, "道")
+	for b in btns:
+		b["home"] = b.rect
+	_place()
 	_sync()
+
+# Upright, the page is cut into parts and stacked (scripts/tall.gd), so its halves are laid out as
+# two columns that never meet: the scroll, the road and four buttons on the left; the place's
+# history, the next station and the other three buttons on the right.
+func tall_changed():
+	_place()
+
+func _place():
+	for b in btns:
+		b.rect = b.home
+	band = Rect2(40, 150, 1200, 236) if main.touch else BAND
+	if not main.tall or not main.touch:
+		return
+	band = Rect2(40, 150, 640, 236)
+	var at = [Rect2(40, 632, 222, 72), Rect2(266, 632, 148, 72), Rect2(418, 632, 136, 72), Rect2(558, 632, 136, 72),
+		Rect2(706, 632, 150, 72), Rect2(866, 632, 210, 72), Rect2(1086, 632, 130, 72)]
+	for k in range(nav.size()):
+		nav[k].rect = at[k]
+	for c in range(tabs.size()):
+		# two blocks of chapters, three across: 21 on the left, the rest on the right
+		var k = c if c < 21 else c - 21
+		tabs[c].rect = Rect2((16 if c < 21 else 652) + (k % 3) * 206, 78 + (k / 3) * 78, 198, 50)
+	var left = max(0, tabs.size() - 21)
+	b_close.rect = Rect2(652 + 206, 78 + (left / 3 + (0 if left % 3 == 1 else 1)) * 78, 404, 60) if left % 3 != 0 else Rect2(652, 78 + (left / 3) * 78, 404, 60)
+
+func _note_h():
+	var note = Data.CHAPTERS[page].get("note", "")
+	return 0.0 if note == "" else main.font.get_multiline_string_size(note, HORIZONTAL_ALIGNMENT_LEFT, 540, 21).y
+
+func tall_modal():
+	return notice != ""
+
+func tall_parts(_h):
+	if not main.touch:
+		return super.tall_parts(_h)
+	if notice != "":
+		return [{"src": [_notice_rect(main.font)], "s": 1.05}]
+	if picking:
+		var rows2 = int(ceil(max(0, tabs.size() - 21) / 3.0)) + 1
+		return [{"src": [Rect2(30, 0, 400, 62)], "s": 1.2}, {"src": [Rect2(10, 66, 630, 7 * 78 + 4)], "s": 1.12}, {"src": [Rect2(646, 66, 630, rows2 * 78 + 4)], "s": 1.12}]
+	var parts = [{"src": [Rect2(30, 4, 660, 122)], "s": 1.06}, {"src": [Rect2(34, 136, 652, 264)], "s": 1.08}]
+	if _note_h() > 0.0:
+		parts.append({"src": [Rect2(696, 140, 560, _note_h() + 24.0)], "s": 1.25})
+	parts.append({"src": [Rect2(700, 8, 560, 120)], "s": 1.2})
+	var rg = _range(page)
+	var rows = int(ceil((rg[1] - rg[0]) / float(_per())))
+	parts.append({"src": [Rect2(40, 404, 640, rows * 74.0 + 14.0)], "s": 1.1})
+	parts.append({"src": [Rect2(700, 628, 524, 80)], "s": 1.3})
+	parts.append({"src": [Rect2(34, 628, 664, 80)], "s": 1.07})
+	return parts
+
+# upright, how many stations to a row of the road
+func _per():
+	var rg = _range(page)
+	return 5 if rg[1] - rg[0] <= 10 else 6
 
 func _next_open():
 	for i in range(Data.LEVELS.size()):
@@ -114,8 +172,20 @@ func st_pos(i):
 	var rg = _range(page)
 	var n = rg[1] - rg[0]
 	var k = i - rg[0]
+	if main.tall and main.touch:
+		# the road doubles back on itself, row under row
+		var a = floor(k)
+		return _row_pos(int(a)).lerp(_row_pos(min(int(a) + 1, n - 1)), k - a)
 	var step = min(118.0, 1080.0 / max(1, n - 1))
 	return Vector2(640 - step * (n - 1) * 0.5 + k * step, road_y + 14 * sin(k * 0.9 + 0.4))
+
+func _row_pos(k):
+	var per = _per()
+	var row = k / per
+	var col = k % per
+	if row % 2 == 1:
+		col = per - 1 - col
+	return Vector2(96 + col * (528.0 / (per - 1)), 446 + row * 74 + 5 * sin(k * 0.9 + 0.4))
 
 func _focus():
 	if hover_st >= 0:
@@ -178,10 +248,11 @@ func on_key(code):
 
 # phone: every chapter on one page, with its English name under it
 func _draw_chapters(f):
-	draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false, Color(1, 1, 1, 0.35))
+	backdrop(0.35)
 	Ink.tategaki(self, f, Vector2(64, 4), "章", 40, Ink.SUMI)
 	Ink.text(self, f, Vector2(110, 48), "Chapters", 34, Ink.SUMI)
-	Ink.text(self, f, Vector2(300, 46), "Tap one to go to it. The pale ones are still ahead.", 22, Ink.a(Ink.SUMI, 0.7))
+	if not main.tall:
+		Ink.text(self, f, Vector2(300, 46), "Tap one to go to it. The pale ones are still ahead.", 22, Ink.a(Ink.SUMI, 0.7))
 	for c in range(tabs.size()):
 		var r = tabs[c].rect
 		Ink.text(self, f, Vector2(r.position.x, r.end.y + 18), Data.CHAPTERS[c].name, 18, Ink.a(Ink.SUMI, 0.8 if tabs[c].on else 0.3), HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
@@ -229,7 +300,9 @@ func _draw():
 	# a line of history about this place
 	var note = ch.get("note", "")
 	if note != "":
-		if phone:
+		if phone and main.tall:
+			Ink.para(self, f, Vector2(706, 166), note, 21, Ink.a(Ink.SUMI, 0.9), 540)
+		elif phone:
 			Ink.para(self, f, Vector2(48, 426), note, 21, Ink.a(Ink.SUMI, 0.9), 1184)
 		else:
 			var nr = Rect2(band.position.x + 14, band.end.y - 96, 860, 82)
@@ -293,7 +366,11 @@ func _draw():
 			sub = "Mastered — 上手."
 		elif g != "":
 			sub = "Passed, not mastered.  上手: %d strokes, unharmed." % lv.par
-	if phone:
+	if phone and main.tall:
+		Ink.text(self, f, Vector2(700, 50), lv.kanji, 44, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 560)
+		Ink.text(self, f, Vector2(700, 84), "%d · %s" % [show + 1, lv.name], 24, Ink.SUMI, HORIZONTAL_ALIGNMENT_CENTER, 560)
+		Ink.text(self, f, Vector2(700, 116), sub, 21, Ink.a(Ink.SHU, 0.9), HORIZONTAL_ALIGNMENT_CENTER, 560)
+	elif phone:
 		Ink.text(self, f, Vector2(760, 50), lv.kanji, 44, Ink.SUMI, HORIZONTAL_ALIGNMENT_RIGHT, 480)
 		Ink.text(self, f, Vector2(760, 84), "%d · %s" % [show + 1, lv.name], 24, Ink.SUMI, HORIZONTAL_ALIGNMENT_RIGHT, 480)
 		Ink.text(self, f, Vector2(760, 116), sub, 21, Ink.a(Ink.SHU, 0.9), HORIZONTAL_ALIGNMENT_RIGHT, 480)
@@ -308,12 +385,17 @@ func _draw():
 		_draw_notice(f)
 
 # The gate explained, on a slip of paper over the road.
+func _notice_rect(f):
+	var big = main.touch
+	var w = 680.0 if main.tall else 1000.0 if big else 720.0
+	var h = f.get_multiline_string_size(notice, HORIZONTAL_ALIGNMENT_LEFT, w - 80.0, 26 if big else 19).y + (150.0 if big else 120.0)
+	return Rect2(640.0 - w * 0.5, 360.0 - h * 0.5, w, h)
+
 func _draw_notice(f):
 	var big = main.touch
-	var w = 1000.0 if big else 720.0
 	var size = 26 if big else 19
-	var h = f.get_multiline_string_size(notice, HORIZONTAL_ALIGNMENT_LEFT, w - 80.0, size).y + (150.0 if big else 120.0)
-	var r = Rect2(640.0 - w * 0.5, 360.0 - h * 0.5, w, h)
+	var r = _notice_rect(f)
+	var w = r.size.x
 	draw_rect(Rect2(0, 0, 1280, 720), Ink.a(Ink.PAPER, 0.55))
 	draw_rect(r, Ink.a(Ink.PAPER, 0.98))
 	draw_rect(Rect2(r.position.x, r.position.y, 5.0, r.size.y), Ink.a(Ink.SHU, 0.85))

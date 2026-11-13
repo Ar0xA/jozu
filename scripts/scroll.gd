@@ -25,6 +25,22 @@ func setup():
 			page = c
 	_page(page)
 
+# Upright: the chapter's paintings in two blocks, one under the other.
+func tall_parts(_h):
+	if not main.touch:
+		return super.tall_parts(_h)
+	var rg = _range(page)
+	var parts = [{"src": [Rect2(30, 0, 500, 96)], "s": 1.2}]
+	if rg[1] - rg[0] <= 10:
+		parts.append({"src": [Rect2(56, 98, 700, 500)], "s": 1.0})
+		parts.append({"src": [Rect2(752, 98, 476, 500)], "s": 1.0})
+	else:
+		parts.append({"src": [Rect2(56, 98, 584, 500)], "s": 1.2})
+		parts.append({"src": [Rect2(636, 98, 588, 500)], "s": 1.2})
+	parts.append({"src": [Rect2(350, 638, 480, 68)], "s": 1.2})
+	parts.append({"src": [Rect2(36, 632, 312, 78), Rect2(950, 632, 300, 78)], "s": 1.1})
+	return parts
+
 func _page(c):
 	page = c
 	page_t = time

@@ -15,6 +15,18 @@ func setup():
 		rows.append(b)
 	_refresh()
 
+# Upright: each skill's words, and under them how far it is trained and the button.
+func tall_parts(_h):
+	if not main.touch:
+		return super.tall_parts(_h)
+	var parts = [{"src": [Rect2(30, 24, 570, 150)], "s": 1.1}]
+	for i in range(Data.UPGRADES.size()):
+		var y = 176 + i * 86
+		parts.append({"src": [Rect2(120, y, 680, 72)], "s": 1.0})
+		parts.append({"src": [Rect2(796, y + 2, 120, 62), Rect2(950, y + 2, 240, 62)], "s": 1.2})
+	parts.append({"src": [Rect2(36, 620, 309, 80), Rect2(345, 620, 245, 80)], "s": 1.15})
+	return parts
+
 func _known(key):
 	if not Data.WAZA_FROM.has(key):
 		return true
@@ -53,11 +65,12 @@ func on_key(code):
 
 func _draw():
 	var f = main.font
-	draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false, Color(1, 1, 1, 0.45))
+	backdrop(0.45)
 	Ink.tategaki(self, f, Vector2(70, 30), "修練", 60, Ink.SUMI)
 	Ink.text(self, f, Vector2(130, 76), "Training", 34, Ink.SUMI)
 	Ink.text(self, f, Vector2(130, 112), "Points to spend: %d" % main.points(), 28 if main.touch else 22, Ink.SHU)
-	Ink.para(self, f, Vector2(130, 140), "Every station can be mastered with nothing from this page. Training is for the road, not the proof.", 20 if main.touch else 16, Ink.a(Ink.SUMI, 0.7), 1040 if main.touch else 760)
+	if not main.tall:
+		Ink.para(self, f, Vector2(130, 140), "Every station can be mastered with nothing from this page. Training is for the road, not the proof.", 20 if main.touch else 16, Ink.a(Ink.SUMI, 0.7), 1040 if main.touch else 760)
 	for i in range(Data.UPGRADES.size()):
 		var u = Data.UPGRADES[i]
 		var y = 176 + i * 86

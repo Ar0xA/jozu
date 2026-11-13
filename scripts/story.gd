@@ -20,6 +20,15 @@ func setup():
 func tick(dt):
 	shown += dt * 60.0
 
+# Upright: the scroll, the words under it, and the way past them. A tap anywhere reads on.
+func tall_parts(_h):
+	if not main.touch:
+		return super.tall_parts(_h)
+	return [{"src": [Rect2(34, 50, 662, 358)], "s": 1.08}, {"src": [Rect2(10, 400, 690, 318)], "s": 1.04}, {"src": [Rect2(1050, 0, 200, 60)], "s": 1.3}]
+
+func tall_modal():
+	return true
+
 func _finish():
 	after.call()
 
@@ -51,14 +60,16 @@ func _draw():
 	var txt = lines[at][1]
 	# the scroll unrolls a little with every line
 	var span = main.band_len("hyakki") - BAND.size.x * 400.0 / BAND.size.y
-	main.band(self, "hyakki", BAND, where * span + at * 90.0 + time * 6.0)
-	draw_rect(Rect2(BAND.position.x, BAND.position.y - 12, BAND.size.x, 12), Ink.AI)
-	draw_rect(Rect2(BAND.position.x, BAND.end.y, BAND.size.x, 12), Ink.AI)
-	draw_rect(Rect2(BAND.position.x, BAND.position.y - 3, BAND.size.x, 3), Ink.KIN)
-	draw_rect(Rect2(BAND.position.x, BAND.end.y, BAND.size.x, 3), Ink.KIN)
+	var up = main.tall and main.touch
+	var bd = Rect2(40, 64, 650, 330) if up else BAND
+	main.band(self, "hyakki", bd, where * span + at * 90.0 + time * 6.0)
+	draw_rect(Rect2(bd.position.x, bd.position.y - 12, bd.size.x, 12), Ink.AI)
+	draw_rect(Rect2(bd.position.x, bd.end.y, bd.size.x, 12), Ink.AI)
+	draw_rect(Rect2(bd.position.x, bd.position.y - 3, bd.size.x, 3), Ink.KIN)
+	draw_rect(Rect2(bd.position.x, bd.end.y, bd.size.x, 3), Ink.KIN)
 	var big = main.touch
-	var box = Rect2(70, 420, 1140, 276) if big else Rect2(150, 452, 980, 206)
-	var ts = 33 if big else 25
+	var box = Rect2(14, 404, 682, 310) if up else Rect2(70, 420, 1140, 276) if big else Rect2(150, 452, 980, 206)
+	var ts = 29 if up else 33 if big else 25
 	var tx = box.position.x + 32
 	Ink.slip(self, box, 4.0)
 	if WHO.has(who):

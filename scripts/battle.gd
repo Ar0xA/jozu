@@ -207,12 +207,26 @@ func _brief(first):
 	if not first:
 		card_len = 120.0   # asked for: it stays until it is sent away
 
+# Upright, the card is cut out and shown alone, so it is drawn narrow, and its writing a little smaller.
+func _card_k():
+	return 0.86 if main.tall else 1.0
+
+func tall_parts(_h):
+	if not card.is_empty() and not done:
+		return [{"src": [_card_rect(main.font).grow(6.0)], "s": 1.03}]
+	return [{"src": [Rect2(0, 30, 668, 672)], "s": 1.078}, {"src": [Rect2(676, 14, 604, 646)], "s": 1.19}]
+
+func tall_modal():
+	return not card.is_empty() and not done
+
 func _card_rect(f):
-	var w = 1120.0 if main.touch else 540.0
+	var w = 680.0 if main.tall else 1120.0 if main.touch else 540.0
 	var h = 30.0
 	for line in card:
-		h += f.get_multiline_string_size(line[0], HORIZONTAL_ALIGNMENT_LEFT, w - 60.0, line[1]).y + 8.0 if line[0] != "" else line[1]
+		h += f.get_multiline_string_size(line[0], HORIZONTAL_ALIGNMENT_LEFT, w - 60.0, int(line[1] * _card_k())).y + 8.0 if line[0] != "" else line[1]
 	h += 30.0
+	if main.tall:
+		return Rect2(Vector2(10.0, max(8.0, 360.0 - h * 0.5)), Vector2(w, h))
 	return Rect2(Vector2(640.0 - w * 0.5, max(16.0, 360.0 - h * 0.5)) if main.touch else Vector2(ORG.x + 24, max(ORG.y + 16.0, ORG.y + 294.0 - h * 0.5)), Vector2(w, h))
 
 func _draw_card(f):
@@ -229,8 +243,9 @@ func _draw_card(f):
 		if line[0] == "":
 			y += line[1]
 			continue
-		var sz = f.get_multiline_string_size(line[0], HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 60.0, line[1])
-		Ink.para(self, f, Vector2(r.position.x + 30.0, y + line[1] * 0.85), line[0], line[1], Ink.a(line[2], line[2].a * fade), r.size.x - 60.0)
+		var ts = int(line[1] * _card_k())
+		var sz = f.get_multiline_string_size(line[0], HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 60.0, ts)
+		Ink.para(self, f, Vector2(r.position.x + 30.0, y + ts * 0.85), line[0], ts, Ink.a(line[2], line[2].a * fade), r.size.x - 60.0)
 		y += sz.y + 8.0
 	# how long it will stay, and how to send it away
 	draw_rect(Rect2(r.position.x + 30.0, r.end.y - 14.0, (r.size.x - 60.0) * clamp(1.0 - card_t / card_len, 0.0, 1.0), 4.0), Ink.a(Ink.SHU, 0.7 * fade))

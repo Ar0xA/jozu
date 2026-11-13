@@ -24,6 +24,30 @@ func _ready():
 func setup():
 	pass
 
+# Held upright, a phone shows the page in parts, stacked (scripts/tall.gd). A page says here which
+# parts: each {"src": [Rect2, ...] (cut from the wide page, set side by side), "s": how much larger}.
+# `h` is how tall the upright sheet is, 720 across. Left alone, the whole page is shown small.
+var tall_art = 0.0     # how strongly Tohaku's pines show behind the parts
+var tall_at = 0.5      # and which part of the painting, 0 left to 1 right
+func tall_parts(_h):
+	return [{"src": [Rect2(0, 0, 1280, 720)], "s": 0.5625}]
+
+# The phone was turned (or the window reshaped) while this page was open: put things where they now go.
+func tall_changed():
+	pass
+
+# Is something laid over the page that a tap anywhere should answer? Upright, a tap that falls on
+# no part is then passed on all the same.
+func tall_modal():
+	return false
+
+# Tohaku's pines behind a page. Upright they are painted behind the parts instead.
+func backdrop(alpha):
+	if main.tall:
+		tall_art = alpha
+	else:
+		draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false, Color(1, 1, 1, alpha))
+
 func tick(_dt):
 	pass
 
@@ -131,6 +155,8 @@ func _hit(b):
 	return b.rect.grow(9.0) if main.touch else b.rect
 
 func _unhandled_input(ev):
+	if main.tall:
+		return   # upright, keys come by way of main
 	if ev is InputEventKey and ev.pressed and not ev.echo:
 		wake = 0.6
 		on_key(ev.keycode)

@@ -62,6 +62,19 @@ func _paste():
 	b_take.label = "Yes, take it"
 	note = "That save holds %d stations; here there are %d. It replaces what is here. Press again to take it." % [j.cleared.size(), main.data.cleared.size()]
 
+# Upright: each setting's name beside its switch, then the save, then the way back.
+func tall_parts(_h):
+	if not main.touch:
+		return super.tall_parts(_h)
+	var parts = [{"src": [Rect2(30, 0, 400, 66)], "s": 1.2}]
+	for i in range(ROWS.size()):
+		parts.append({"src": [Rect2(120, _y(i) - 14, 420, 72), Rect2(905, _y(i) - 14, 275, 72)], "s": 1.0})
+	if note != "":
+		parts.append({"src": [Rect2(552, 2, 696, 58)], "s": 1.0})
+	parts.append({"src": [Rect2(552, 640, 304, 76), Rect2(872, 640, 316, 76)], "s": 1.1})
+	parts.append({"src": [Rect2(36, 640, 270, 76)], "s": 1.2})
+	return parts
+
 func _y(i):
 	return (76 + i * 80) if main.touch else (104 + i * 76)
 
@@ -102,7 +115,7 @@ func on_key(code):
 
 func _draw():
 	var f = main.font
-	draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false, Color(1, 1, 1, 0.4))
+	backdrop(0.4)
 	Ink.tategaki(self, f, Vector2(64, 8), "設", 50, Ink.SUMI)
 	Ink.text(self, f, Vector2(110, 52), "Settings", 34, Ink.SUMI)
 	var big = main.touch
@@ -115,7 +128,10 @@ func _draw():
 			draw_rect(r, Ink.a(Ink.GOFUN, 0.6))
 			Ink.frame(self, r, 2.0, Ink.a(Ink.SUMI, 0.6))
 		Ink.text(self, f, Vector2(130, y + 14), ROWS[i][2], 27 if big else 24, Ink.SUMI)
-		Ink.text(self, f, Vector2(130, y + (42 if big else 38)), ROWS[i][3], 19 if big else 15, Ink.a(Ink.SUMI, 0.7))
-	if note != "":
+		if not main.tall:
+			Ink.text(self, f, Vector2(130, y + (42 if big else 38)), ROWS[i][3], 19 if big else 15, Ink.a(Ink.SUMI, 0.7))
+	if note != "" and main.tall:
+		Ink.para(self, f, Vector2(560, 24), note, 17, Ink.SHU, 680)
+	elif note != "":
 		Ink.text(self, f, Vector2(560, 636 if big else 640), note, 17 if big else 15, Ink.SHU)
 	draw_btns()

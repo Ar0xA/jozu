@@ -52,7 +52,7 @@ func _draw():
 		return
 	if kind == "fade":
 		# the page comes up out of bare paper, and that is all
-		draw_rect(Rect2(0, 0, 1280, 720), Ink.a(Ink.PAPER, 1.0 - t / _len()))
+		draw_rect(Rect2(Vector2.ZERO, size), Ink.a(Ink.PAPER, 1.0 - t / _len()))
 		return
 	var u = t / _len()
 	var x = -200.0 + 1700.0 * u * u * (3.0 - 2.0 * u)

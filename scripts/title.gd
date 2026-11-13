@@ -21,6 +21,12 @@ func setup():
 	if main.touch:
 		_grow()
 
+# Upright: the name, then the day and the words, then the buttons, over the pines.
+func tall_parts(_h):
+	if not main.touch:
+		return super.tall_parts(_h)
+	return [{"src": [Rect2(990, 20, 262, 392)], "s": 1.25}, {"src": [Rect2(50, 478, 644, 240)], "s": 1.08}, {"src": [Rect2(890, 412, 362, 304)], "s": 1.45}]
+
 # a phone's thumbs want taller buttons
 func _grow():
 	var y = 420.0
@@ -50,7 +56,7 @@ func on_key(code):
 
 func _draw():
 	var f = main.font
-	draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false)
+	backdrop(1.0)
 	Ink.sun(self, Vector2(150, 150), 62)
 	if main.data.opts.motion:
 		Ink.season(self, Ink.season_now(), time, 30)
@@ -70,9 +76,13 @@ func _draw():
 	Ink.text(self, f, Vector2(64 + f.get_string_size("%s  %s" % [koyomi[0], koyomi[2]], HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x + 16.0, 532), "%s · %s" % [koyomi[1], koyomi[3]], 17, Ink.a(Ink.SUMI, 0.7))
 	Ink.text(self, f, Vector2(60, 592), "J Ō Z U", 52, Ink.SUMI)
 	Ink.text(self, f, Vector2(64, 628), "the upper hand", 24, Ink.a(Ink.SUMI, 0.8))
-	Ink.text(self, f, Vector2(64, 668), "A puzzle of single strokes. No dice, no luck — only the measure of distance.", 19, Ink.a(Ink.SUMI, 0.75))
+	if main.tall and main.touch:
+		Ink.para(self, f, Vector2(64, 668), "A puzzle of single strokes. No dice, no luck — only the measure of distance.", 19, Ink.a(Ink.SUMI, 0.75), 600)
+	else:
+		Ink.text(self, f, Vector2(64, 668), "A puzzle of single strokes. No dice, no luck — only the measure of distance.", 19, Ink.a(Ink.SUMI, 0.75))
 	if not main.data.cleared.is_empty():
 		var rk = main.rank()
 		Ink.text(self, f, Vector2(420, 594), "%s  %s" % [rk[0], rk[1]], 26, Ink.SHU)
-	Ink.text(self, f, Vector2(64, 700), "Paintings: Hasegawa Tōhaku · Sesshū Tōyō · Hyakki Yagyō Emaki", 14, Ink.a(Ink.SUMI, 0.5))
+	if not (main.tall and main.touch):
+		Ink.text(self, f, Vector2(64, 700), "Paintings: Hasegawa Tōhaku · Sesshū Tōyō · Hyakki Yagyō Emaki", 14, Ink.a(Ink.SUMI, 0.5))
 	draw_btns()

@@ -16,6 +16,9 @@ var _touch_words = {}
 var late = []        # music and paintings not in the first download, still to be fetched (web only)
 var art_parts = {}   # the halves of a long scroll that have arrived so far
 var newer = false    # a newer build of the game is waiting to be taken (web only)
+var tall = false     # the window is upright: the page is painted off screen and re-stacked (scripts/tall.gd)
+var stage_vp         # where the page is painted then
+var tall_view        # and what shows it
 var tip = -1         # whether the title names the home screen this visit: -1 not yet decided, 0 no, 1 yes
 var fetching = ""
 var touch = false   # a phone or tablet: no hover, no right-click, fingers not pointers
@@ -113,7 +116,55 @@ Turn your phone sideways"
 			art["p_" + nm] = ImageTexture.create_from_image(img)
 	load_save()
 	_setup_audio()
+	stage_vp = SubViewport.new()
+	stage_vp.transparent_bg = true
+	stage_vp.size = Vector2i(1280, 720)
+	stage_vp.size_2d_override = Vector2i(1280, 720)
+	stage_vp.size_2d_override_stretch = true
+	stage_vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	add_child(stage_vp)
+	tall_view = load("res://scripts/tall.gd").new()
+	tall_view.main = self
+	tall_view.visible = false
+	add_child(tall_view)
+	get_window().size_changed.connect(_fit)
+	_fit()
 	show_title()
+
+# Wide or upright? Upright, the sheet is 720 across and as tall as the screen makes it, and the
+# page moves off screen to be cut up (scripts/tall.gd); wide, everything is as it always was.
+func _fit():
+	var ws = get_window().size
+	var want = ws.y > ws.x * 1.1
+	if want != tall:
+		tall = want
+		var win = get_tree().root
+		win.content_scale_size = Vector2i(720, 1280) if tall else Vector2i(1280, 720)
+		win.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP_WIDTH if tall else Window.CONTENT_SCALE_ASPECT_KEEP
+		set_zoom(1.0)
+		if tall:
+			zoom_btn.visible = false
+		tall_view.visible = tall
+		stage_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS if tall else SubViewport.UPDATE_DISABLED
+		if cur != null and is_instance_valid(cur):
+			cur.get_parent().remove_child(cur)
+			_hold(cur)
+			cur.wake = 0.6
+			cur.tall_changed()
+		queue_redraw()
+	if tall:
+		# painted at about the size it will be shown, so the writing stays sharp
+		var ss = clamp(ceil(ws.x / 720.0 * 1.2 * 2.0) / 2.0, 1.0, 2.0)
+		stage_vp.size = Vector2i(int(1280 * ss), int(720 * ss))
+
+# puts a page where pages go: on the sheet itself, or off screen when the phone is upright
+func _hold(scr):
+	if tall:
+		stage_vp.add_child(scr)
+	else:
+		add_child(scr)
+		if wipe != null:
+			move_child(wipe, -1)
 
 # ---------------------------------------------------------------- sound
 
@@ -279,8 +330,6 @@ func _process(_dt):
 		# anchors would otherwise put the page back where it was
 		scale = Vector2(zoom, zoom)
 		position = zpos
-	var ws = get_window().size
-	turn_note.visible = ws.y > ws.x * 1.1
 
 func toggle_fullscreen():
 	var full = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
@@ -316,6 +365,8 @@ func set_zoom(z, at = Vector2(640, 360), anchor = null):
 	zoom_btn.visible = touch or zoom > 1.01
 
 func _input(ev):
+	if tall:
+		return   # upright, the page is already as large as the phone: no pinching
 	if ev is InputEventScreenTouch:
 		if ev.pressed:
 			touches[ev.index] = ev.position
@@ -341,6 +392,9 @@ func _input(ev):
 
 func _unhandled_input(ev):
 	if ev is InputEventKey and ev.pressed and not ev.echo:
+		if tall and cur != null and is_instance_valid(cur):
+			cur.wake = 0.6
+			cur.on_key(ev.keycode)   # the page is off screen and hears no keys of its own
 		if ev.keycode == KEY_M:
 			toggle_sound()
 		elif ev.keycode == KEY_F11:
@@ -417,6 +471,8 @@ func band_len(nm):
 	return n
 
 func _draw():
+	if tall:
+		return   # the upright sheet paints its own paper
 	draw_rect(Rect2(0, 0, 1280, 720), Ink.PAPER)
 	for i in range(fibers.size()):
 		var f = fibers[i]
@@ -727,14 +783,14 @@ func go(scr):
 		cur.queue_free()
 	cur = scr
 	scr.main = self
-	add_child(scr)
+	_hold(scr)
 	if wipe == null:
 		wipe = load("res://scripts/wipe.gd").new()
 		wipe.main = self
 		add_child(wipe)
 	move_child(wipe, -1)
 	if data.opts.motion:
-		wipe.start("fusuma" if stage else "fade" if spare() else "wash")
+		wipe.start("fade" if tall else "fusuma" if stage else "fade" if spare() else "wash")
 
 # The web build is kept by a service worker, so it opens at once and without a network. A newer
 # build waits behind the one in use; it is taken (the page reloads) only at the title, never mid-play.

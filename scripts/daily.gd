@@ -15,6 +15,13 @@ func setup():
 	btn(Rect2(1046, 296, 200, 60) if main.touch else Rect2(1046, 300, 200, 46), "Copy" if main.touch else "Copy the line", _copy, "写")
 	btn(Rect2(40, 642, 260, 66) if main.touch else Rect2(40, 656, 220, 46), "Back", main.show_hub, "道")
 
+# Upright: the five weeks, then the run of days and today's line, then the way back.
+func tall_parts(_h):
+	if not main.touch:
+		return super.tall_parts(_h)
+	return [{"src": [Rect2(30, 0, 420, 62)], "s": 1.2}, {"src": [Rect2(100, 118, 930, 456)], "s": 0.76},
+		{"src": [Rect2(1036, 150, 244, 370)], "s": 1.3}, {"src": [Rect2(36, 638, 270, 74)], "s": 1.2}]
+
 func _copy():
 	var line = main.daily_line(main.today())
 	if line == "":
@@ -41,10 +48,11 @@ func on_key(code):
 
 func _draw():
 	var f = main.font
-	draw_texture_rect(main.art["tohaku"], Rect2(0, 0, 1280, 720), false, Color(1, 1, 1, 0.4))
+	backdrop(0.4)
 	Ink.tategaki(self, f, Vector2(64, 4), "暦", 46, Ink.SUMI)
 	Ink.text(self, f, Vector2(110, 46), "Days Gone By", 32, Ink.SUMI)
-	Ink.text(self, f, Vector2(110, 78), "Tap a day to sit with its kōan. Only today's counts toward the run." if main.touch else "Every day's kōan stays where it was. Choose a day to sit with it; only today's counts toward the run of days.", 22 if main.touch else 16, Ink.a(Ink.SUMI, 0.7))
+	if not main.tall:
+		Ink.text(self, f, Vector2(110, 78), "Tap a day to sit with its kōan. Only today's counts toward the run." if main.touch else "Every day's kōan stays where it was. Choose a day to sit with it; only today's counts toward the run of days.", 22 if main.touch else 16, Ink.a(Ink.SUMI, 0.7))
 	var names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 	for k in range(7):
 		Ink.text(self, f, Vector2(ORG.x + k * CW, ORG.y - 14), names[k], 17, Ink.a(Ink.SUMI, 0.7), HORIZONTAL_ALIGNMENT_CENTER, CW - 8)
