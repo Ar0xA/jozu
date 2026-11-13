@@ -213,7 +213,7 @@ func _card_k():
 
 func tall_parts(_h):
 	if not card.is_empty() and not done:
-		return [{"src": [_card_rect(main.font).grow(6.0)], "s": 1.03}]
+		return [{"src": [_card_rect(main.font)], "s": 1.05}]
 	return [{"src": [Rect2(0, 30, 668, 672)], "s": 1.078}, {"src": [Rect2(676, 14, 604, 646)], "s": 1.19}]
 
 func tall_modal():
@@ -1186,10 +1186,7 @@ func _panel_phone(f):
 				draw_arc(c, rad, 0, TAU, 24, Ink.SUMI, 2.6, true)
 	if s.mom > 0 or not main.spare():
 		Ink.text(self, f, Vector2(PX + 220, 272), "next cut deals %d" % min(3, 1 + s.mom), 26, Ink.a(Ink.SUMI, 0.75))
-	var wz = ""
-	for w in [["leap", "縮地", s.leap], ["ward", "結界", s.ward], ["katsu", "喝", s.katsu], ["bell", "鐘", s.bell]]:
-		if lv.waza.has(w[0]):
-			wz += "%s %d   " % [w[1], w[2]]
+	var wz = _waza_left()
 	var note = ""
 	if mode == "leap":
 		note = "縮地: choose a direction to leap two tiles."
@@ -1200,7 +1197,15 @@ func _panel_phone(f):
 	if note != "":
 		Ink.para(self, f, Vector2(PX, 318), main.touch_words(note), 22, Ink.SHU, 540)
 	elif wz != "":
-		Ink.text(self, f, Vector2(PX, 332), "Left:  " + wz, 28, Ink.SUMI)
+		Ink.text(self, f, Vector2(PX, 332), wz, 26 if lv.waza.size() < 3 else 21, Ink.SUMI)
+
+# What is left of each technique the stage grants, named as its button names it: "Leap 1 left".
+func _waza_left():
+	var parts = []
+	for w in [["leap", "縮地 Leap", s.leap], ["ward", "結界 Ward", s.ward], ["katsu", "喝 Shout", s.katsu], ["bell", "鐘 Bell", s.bell]]:
+		if lv.waza.has(w[0]):
+			parts.append("%s %d left" % [w[1], w[2]])
+	return "   ".join(parts)
 
 func _panel(f):
 	Ink.brush(self, [Vector2(PX - 22, 30), Vector2(PX - 23, 250), Vector2(PX - 21, 470), Vector2(PX - 22, 690)], 4.0, Ink.a(Ink.SUMI, 0.45))
@@ -1214,17 +1219,9 @@ func _panel(f):
 	if s.mom > 0 or not main.spare():
 		_pips(f, 172, "勢", "Momentum", min(2, s.mom), 2, Ink.AI)
 		Ink.text(self, f, Vector2(PX + 230, 170), "a straight cut now deals %d" % min(3, 1 + s.mom), 16, Ink.a(Ink.SUMI, 0.7))
-	var wz = ""
-	if lv.waza.has("leap"):
-		wz += "縮地 %d   " % s.leap
-	if lv.waza.has("ward"):
-		wz += "結界 %d   " % s.ward
-	if lv.waza.has("katsu"):
-		wz += "喝 %d   " % s.katsu
-	if lv.waza.has("bell"):
-		wz += "鐘 %d" % s.bell
+	var wz = _waza_left()
 	if wz != "":
-		Ink.text(self, f, Vector2(PX, 206), "Waza left:  " + wz, 18, Ink.SUMI)
+		Ink.text(self, f, Vector2(PX, 206), wz, 18, Ink.SUMI)
 	var y = 226.0
 	for k in (new_kinds if main.spare() else kinds):
 		var L = Data.LEGEND[k]

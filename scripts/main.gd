@@ -135,7 +135,8 @@ Turn your phone sideways"
 # Wide or upright? Upright, the sheet is 720 across and as tall as the screen makes it, and the
 # page moves off screen to be cut up (scripts/tall.gd); wide, everything is as it always was.
 func _fit():
-	var ws = get_window().size
+	var ws = _win_size()
+	_seen_size = ws
 	var want = ws.y > ws.x * 1.1
 	if want != tall:
 		tall = want
@@ -153,6 +154,7 @@ func _fit():
 			cur.wake = 0.6
 			cur.tall_changed()
 		queue_redraw()
+		_again = 4
 	if tall:
 		# painted at about the size it will be shown, so the writing stays sharp
 		var ss = clamp(ceil(ws.x / 720.0 * 1.2 * 2.0) / 2.0, 1.0, 2.0)
@@ -326,7 +328,43 @@ func toggle_sound():
 	AudioServer.set_bus_mute(0, not data.sound)
 	write_save()
 
+var _seen_size = Vector2i.ZERO   # the window as it was when the page was last fitted to it
+var _look = 0.0                  # seconds until the window is next measured
+var _again = 0                   # frames for which the picture is still to be put back on the window
+
+# In a browser, a change of layout made after the window was turned leaves the picture drawn into
+# the window's old shape. This says again where on the window it goes: all of it upright, and
+# centred with bars at the sides or above and below when wide.
+func _reattach():
+	if not OS.has_feature("web"):
+		return
+	var ws = Vector2(get_window().size)
+	var rect = Rect2(Vector2.ZERO, ws)
+	if not tall:
+		var k = min(ws.x / 1280.0, ws.y / 720.0)
+		var sz = (Vector2(1280, 720) * k).floor()
+		rect = Rect2(((ws - sz) * 0.5).floor(), sz)
+	RenderingServer.viewport_attach_to_screen(get_tree().root.get_viewport_rid(), rect, DisplayServer.MAIN_WINDOW_ID)
+
+# The window in real pixels. In a browser the page itself is asked: the engine's own figure can be
+# one turn of the phone behind.
+func _win_size():
+	if OS.has_feature("web"):
+		var packed = JavaScriptBridge.eval("Math.round(window.innerWidth * window.devicePixelRatio) * 100000 + Math.round(window.innerHeight * window.devicePixelRatio)", true)
+		if packed != null and int(packed) > 100000:
+			return Vector2i(int(packed) / 100000, int(packed) % 100000)
+	return get_window().size
+
 func _process(_dt):
+	# a browser does not always tell the engine the window has been turned: look for ourselves
+	if _again > 0:
+		_again -= 1
+		_reattach()
+	_look -= _dt
+	if _look <= 0.0:
+		_look = 0.4 if OS.has_feature("web") else 0.0
+		if _win_size() != _seen_size:
+			_fit()
 	if zoom > 1.01 or position != Vector2.ZERO:
 		# anchors would otherwise put the page back where it was
 		scale = Vector2(zoom, zoom)
