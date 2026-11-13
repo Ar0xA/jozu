@@ -77,13 +77,14 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   fireflies, maple leaves, snow); painted sliding doors open onto each stage; yokai gather out of ink
   and come apart into it; a cleared stage hangs as a scroll; sayings are set top to bottom; wooden
   clappers open and close a scene. All of the motion stops with Motion off.
-- **The almanac 暦:** the title names the day by the old calendar of seventy-two seasons (七十二候), such as 立冬 地始凍, the earth begins to freeze.
+- **The almanac 暦:** the title names the day by the old calendar of seventy-two seasons (七十二候), such as 立冬 地始凍, the earth begins to freeze. The daily kōan follows it: its board suits the season (ice in winter, water in summer, thawed ground in spring, dry ground and foxes in autumn), its note names the day, and a cleared day can be shared as a card: the stroke that answered it with the board taken away, the day's name, and how many attempts it took.
 - **Offline:** in a browser the game is kept by a service worker, so after the first visit it opens at once and without a network. A newer build is taken at the title, never mid-play. The stage music and the two long scrolls are fetched after the title.
-- **On a phone:** pinch with two fingers to zoom and drag with two to move about, or tap 拡 on the left
+- **On a phone:** held upright, each page is cut into its parts and stacked: the board above and the brush's state and buttons below, the road doubled back on itself row under row (`scripts/tall.gd`; the page is still painted as for a wide screen, off screen). Held sideways, pinch with two fingers to zoom and drag with two to move about, or tap 拡 on the left
   edge. Each stage opens with a large card giving the goal and anything met there for the first time;
   it goes by itself or at a tap, and 問 brings it back.
   Every screen has a phone layout of its own: larger type and buttons, the chapters on a page of
   their own instead of a row of tabs, and the workshop's palette in four pages of large buttons.
+- **Keeping a save:** Settings copies the whole save out as one line of text (and, in a browser, a file) and takes one back in, so progress can be kept safe or carried to another device.
 - **Settings** 設: sound, music, motion, a cross on danger tiles that does not rely on colour, the
   painted look, and how strokes may be taken back: within the stroke in hand (a finished stroke is committed), or never.
   **Style** chooses between Shodō, the default (bare paper, one seal, a stroke that pools where the

@@ -263,6 +263,12 @@ func on_key(code):
 	if code == KEY_ESCAPE and not line.has_focus():
 		main.show_hub()
 
+# Upright: the board, and under it the tools.
+func tall_parts(_h):
+	if not main.touch:
+		return super.tall_parts(_h)
+	return [{"src": [Rect2(0, 20, 672, 684)], "s": 1.07}, {"src": [Rect2(686, 14, 594, 700)], "s": 1.2}]
+
 func _draw():
 	var f = main.font
 	if not main.spare():

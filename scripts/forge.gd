@@ -78,6 +78,12 @@ func tick(dt):
 	lv["hint"] = "Painted this moment: no one has seen this board before you. Mastery asks %d stroke%s. Clear it and you can copy its code to pass on." % [int(lv.par), "" if int(lv.par) == 1 else "s"]
 	main._play_random(lv, br)
 
+# Upright: the name of the road, the ink being ground, and the way back.
+func tall_parts(_h):
+	if not main.touch:
+		return super.tall_parts(_h)
+	return [{"src": [Rect2(30, 0, 660, 92)], "s": 1.05}, {"src": [Rect2(290, 150, 700, 400)], "s": 1.02}, {"src": [Rect2(36, 630, 270, 78)], "s": 1.2}]
+
 func _draw():
 	var f = main.font
 	backdrop(0.4)

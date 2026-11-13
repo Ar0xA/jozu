@@ -66,6 +66,7 @@ func _initialize():
 		["settings", func(): main.show_settings()],
 		["scroll", func(): main.show_scroll()],
 		["dojo", func(): main.show_dojo()],
+		["editor", func(): main.show_editor()],
 	]
 	var want = OS.get_cmdline_user_args()
 	for s in all:
