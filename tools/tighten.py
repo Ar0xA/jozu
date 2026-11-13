@@ -6,7 +6,7 @@
     (then: python tools/build_levels.py)
 
 A stage is left alone if it is hand-made (it has a lesson or a story), if the solver cannot finish
-it, or if it already has at most WANT ways. A change is kept only if the mastery count stays what
+it, or if it has no more ways than its place on the road allows (ALLOW). A change is kept only if the mastery count stays what
 it was and every technique the stage grants is still needed for it. The new board takes the old
 one's place through tools/swaps.json; what a player earned on the old board stays at the station
 (tools/retired.json, for boards that had themselves replaced another).
@@ -16,7 +16,10 @@ import json, os, re, subprocess, sys, tempfile
 sys.stdout.reconfigure(encoding='utf-8')
 here = os.path.dirname(os.path.abspath(__file__))
 GEN = os.path.join(here, 'gen', 'bin', 'Release', 'net8.0', 'gen.exe')
-WANT = 4          # at most this many ways
+# How many ways a stage may have, by where it stands: the road forgives at first and asks more
+# later, and each chapter asks most of its last stage. [first chapter it applies to, ways allowed
+# at a chapter's first stage, ways allowed at its last]
+ALLOW = [[0, 12, 8], [2, 10, 5], [5, 8, 4], [10, 6, 3]]
 ROUNDS = 3        # changes tried one after another on a stubborn board
 FIXED = 'H'       # never moved
 
@@ -74,6 +77,15 @@ def changes(rows):
     return out
 
 lv = levels()
+_s = open(os.path.join(here, '..', 'scripts', 'data.gd'), encoding='utf-8').read()
+STARTS = [int(x) for x in re.findall(r'^	\{"kanji".*?"from": (\d+)', _s, re.M)]
+
+def want(i):
+    c = max(k for k in range(len(STARTS)) if STARTS[k] <= i)
+    end = STARTS[c + 1] if c + 1 < len(STARTS) else len(lv)
+    p = (i - STARTS[c]) / max(1, end - STARTS[c] - 1)
+    hi, lo = [(a[1], a[2]) for a in ALLOW if a[0] <= c][-1]
+    return int(round(hi + (lo - hi) * p))
 args = [a for a in sys.argv[1:] if a != 'count']
 first = int(args[0]) if args else 1
 last = int(args[1]) if len(args) > 1 else len(lv)
@@ -84,8 +96,8 @@ for i in todo:
     r = base[str(i)]
     if r['trace'] != 'CAPPED' and r['par'] == lv[i]['par']:
         ways[i] = r['ways']
-loose = [i for i in ways if ways[i] > WANT]
-print('%d stages looked at, %d decided by the solver, %d with more than %d ways' % (len(todo), len(ways), len(loose), WANT))
+loose = [i for i in ways if ways[i] > want(i)]
+print('%d stages looked at, %d decided by the solver, %d with more ways than their place allows' % (len(todo), len(ways), len(loose)))
 if 'count' in sys.argv:
     hist = {}
     for i in ways:
@@ -101,7 +113,7 @@ by_new = {''.join(b['rows']): b for b in swaps}
 taken = {''.join(l['rows']) for l in lv} | set(by_new)
 now = {i: {'rows': lv[i]['rows'], 'ways': ways[i], 'trace': None, 'what': []} for i in loose}
 for rnd in range(ROUNDS):
-    work = [i for i in now if now[i]['ways'] > WANT]
+    work = [i for i in now if now[i]['ways'] > want(i)]
     if not work:
         break
     jobs, cands = [], {}
@@ -129,8 +141,11 @@ for rnd in range(ROUNDS):
                 q = res['%d|%d|%s' % (i, k, w)]
                 if q['trace'] == 'CAPPED' or 0 < q['par'] <= lv[i]['par']:
                     ok = False
-            if ok and r['ways'] < now[i]['ways'] and (best is None or r['ways'] < best[0]):
-                best = (r['ways'], key, r['trace'], cands[i][key])
+            # the change that comes nearest the allowance from below; failing that, the tightest found
+            if ok and r['ways'] < now[i]['ways']:
+                fits = r['ways'] <= want(i)
+                if best is None or (fits and (not best[4] or r['ways'] > best[0])) or (not fits and not best[4] and r['ways'] < best[0]):
+                    best = (r['ways'], key, r['trace'], cands[i][key], fits)
         if best:
             now[i] = {'rows': [best[1][j * W:(j + 1) * W] for j in range(len(lv[i]['rows']))], 'ways': best[0], 'trace': best[2], 'what': now[i]['what'] + [best[3]]}
             better += 1
@@ -153,8 +168,8 @@ for i in sorted(now):
         swaps.append({'replaces': old, 'rows': n['rows'], 'waza': lv[i]['waza'], 'par': lv[i]['par'], 'trace': n['trace'],
                       'rules': lv[i]['rules'], 'ink': lv[i]['ink'], 'chapter': -1})
     changed += 1
-    print('stage %3d  %-18s %6d -> %-3d ways   %s' % (i + 1, lv[i]['name'][:18], ways[i], n['ways'], '; '.join(n['what'])))
+    print('stage %3d  %-18s %6d -> %-3d ways (allowed %d)   %s' % (i + 1, lv[i]['name'][:18], ways[i], n['ways'], want(i), '; '.join(n['what'])))
 json.dump(swaps, open(sp, 'w', encoding='utf-8', newline='\n'), ensure_ascii=False, indent=1)
 json.dump(retired, open(rp, 'w', encoding='utf-8', newline='\n'), ensure_ascii=False, indent=1)
-left = [i + 1 for i in now if now[i]['ways'] > WANT]
-print('%d stages changed; %d still have more than %d ways: %s' % (changed, len(left), WANT, left))
+left = [i + 1 for i in now if now[i]['ways'] > want(i)]
+print('%d stages changed; %d still have more ways than allowed: %s' % (changed, len(left), left))

@@ -812,6 +812,12 @@ head = re.sub(r'const WAZA_FROM = \{[^\n]*\}[^\n]*', 'const WAZA_FROM = %s  # fi
 # a board that took another's place keeps what was earned on the one it replaced (main.gd)
 new_at = {''.join(l['rows']): n for n, l in enumerate(levels)}
 swapped = {old: new_at[''.join(b['rows'])] for old, b in SWAPS.items() if ''.join(b['rows']) in new_at}
+# and a board that had itself replaced another, and was then changed again (tools/tighten.py)
+_rt = os.path.join(root, 'tools', 'retired.json')
+if os.path.exists(_rt):
+    for old, new in json.load(open(_rt, encoding='utf-8')).items():
+        if new in new_at:
+            swapped[old] = new_at[new]
 head = re.sub(r'const SWAPPED = \{[^\n]*\}[^\n]*\n', '', head)
 head = head.replace('const WAZA_FROM', 'const SWAPPED = %s  # boards taken off the road, and the stage index of what replaced each\nconst WAZA_FROM' % json.dumps(swapped), 1)
 i = head.index('const CHAPTERS = [')
