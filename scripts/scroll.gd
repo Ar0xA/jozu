@@ -66,6 +66,7 @@ func _draw():
 	var f = main.font
 	Ink.tategaki(self, f, Vector2(64, 6), "巻", 50, Ink.SUMI)
 	Ink.text(self, f, Vector2(110, 50), "Your Scroll", 32, Ink.SUMI)
+	Ink.seal(self, f, Vector2(330, 44), 17, main.my_seal())
 	var ch = Data.CHAPTERS[page]
 	if main.touch:
 		Ink.text(self, f, Vector2(110, 86), "%s  %s" % [ch.kanji, ch.name], 26, Ink.a(Ink.SHU, 0.9))

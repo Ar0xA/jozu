@@ -529,6 +529,18 @@ def features(b, trace):
     f.update('wind' if r.startswith('wind') else r for r in (b.get('rules') or []))
     return f
 
+# more sayings, each checked against a dictionary (tools/sayings_more.json keeps where)
+_more = os.path.join(root, 'tools', 'sayings_more.json')
+if os.path.exists(_more):
+    _have = {x[0] for x in SAY}
+    for x in json.load(open(_more, encoding='utf-8')):
+        if x['kanji'] not in _have:
+            SAY.append((x['kanji'], x['reading'], x['meaning'], [], x['tags']))
+
+# one old poem for each chapter, each checked against a printed text (tools/haiku.json keeps where)
+_hk = os.path.join(root, 'tools', 'haiku.json')
+HAIKU = {x['chapter']: [x['jp'], x['romaji'], x['en'], x['author']] for x in json.load(open(_hk, encoding='utf-8'))} if os.path.exists(_hk) else {}
+
 def pick_saying(b, trace, chapter):
     """The unused saying that fits this stage best: its board and answer first, its place second."""
     f = features(b, trace)
@@ -678,7 +690,7 @@ BEATS = {
 levels, chapters, bosses = [], [], []
 NCH = len(CHAPTERS)
 for c in ORDER:
-    chapters.append({'kanji': CHAPTERS[c][0], 'name': CHAPTERS[c][1], 'from': len(levels), 'note': NOTES[c]})
+    chapters.append({'kanji': CHAPTERS[c][0], 'name': CHAPTERS[c][1], 'from': len(levels), 'note': NOTES[c], 'haiku': HAIKU.get(c, [])})
     pools = {}
     for g in gen:
         if g['chapter'] == c:

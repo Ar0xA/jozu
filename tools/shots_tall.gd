@@ -69,6 +69,16 @@ func _initialize():
 		["settings", func(): main.show_settings()],
 		["scroll", func(): main.show_scroll()],
 		["dojo", func(): main.show_dojo()],
+		["print", func():
+			main.data.cleared.erase("9")
+			main.start_stage(9)],
+		["print2", func():
+			main.data.cleared.erase("99")
+			main.start_stage(99)],
+		["seal", func():
+			main.show_seal()
+			main.cur.name_now = "雪舟"
+			main.cur._sync()],
 		["editor", func(): main.show_editor()],
 	]
 	var want = OS.get_cmdline_user_args()

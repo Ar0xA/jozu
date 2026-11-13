@@ -315,3 +315,92 @@ def brush_sound():
     m.save('brush', 0.34, peak=0.45)
 
 brush_sound()
+
+
+# ------------------------------------------------------------------ the stroke's own notes, and the seasons
+def stroke_notes():
+    """One koto string and one hand-drum. The game plays the string a step higher in the In scale
+    with every step of a stroke (so a stroke is a phrase), and the drum when a yokai falls."""
+    m = Mix(1.8)
+    m.add(0, pluck(hz('D4'), 1.6, bright=0.55, decay=0.9955, amp=0.9))
+    m.save('koto', 1.7, peak=0.7)
+    # ko-tsuzumi, "pon": the skin is squeezed as it is struck, so the note rises as it dies
+    n = int(0.45 * SR)
+    t = np.arange(n) / SR
+    f = 310.0 + 120.0 * (1 - np.exp(-t * 22))
+    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 11)
+    tap = np.random.default_rng(3).uniform(-1, 1, n) * np.exp(-t * 160) * 0.5
+    m = Mix(0.6)
+    m.add(0, body + tap)
+    m.save('pon', 0.5, peak=0.75)
+
+stroke_notes()
+
+def air(seconds, lo, hi, seed, gust=0.0):
+    """Shaped noise that begins as it ends, so it can go round for ever: a breeze, or a winter wind."""
+    n = int(seconds * SR)
+    spec = np.fft.rfft(np.random.default_rng(seed).standard_normal(n))
+    fr = np.fft.rfftfreq(n, 1.0 / SR)
+    centre, width = np.sqrt(lo * hi), np.log(hi / lo)
+    shape = np.exp(-0.5 * (np.log(np.maximum(fr, 1.0) / centre) / (width * 0.5)) ** 2)
+    out = np.fft.irfft(spec * shape, n)
+    out /= np.abs(out).max()
+    t = np.arange(n) / SR
+    if gust > 0:
+        # two slow swells that fit the loop a whole number of times
+        out *= (1 - gust) + gust * (0.5 + 0.5 * np.sin(2 * np.pi * t * 2 / seconds + 1.0)) * (0.6 + 0.4 * np.sin(2 * np.pi * t * 5 / seconds))
+    return out
+
+def tone(f0, f1, dur, amp=1.0, attack=0.02, release=0.05, trem=0.0, trem_depth=1.0):
+    """A whistled note gliding from f0 to f1, with an optional tremolo: a bird, a cicada, a cricket."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    f = f0 + (f1 - f0) * (t / dur)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    out = np.sin(ph) + 0.12 * np.sin(2 * ph)
+    env = np.clip(t / attack, 0, 1) * np.clip((dur - t) / release, 0, 1)
+    if trem > 0:
+        env = env * ((1 - trem_depth) + trem_depth * (0.5 - 0.5 * np.cos(2 * np.pi * trem * t)) ** 2)
+    return out * env * amp
+
+def seasons():
+    """What the almanac's season sounds like, behind the title: about 24 seconds each, made to loop."""
+    L = 24.0
+    # spring: a bush warbler, "hoo... hokekyo", over a light breeze
+    m = Mix(L)
+    m.add(0, air(L, 500, 3000, 21) * 0.10)
+    for t0, far in ((2.5, 1.0), (11.0, 0.55), (18.5, 0.8)):
+        m.add(t0, tone(1500, 1720, 1.05, 0.5 * far, attack=0.5, release=0.08))
+        m.add(t0 + 1.12, tone(2050, 2100, 0.09, 0.6 * far))
+        m.add(t0 + 1.24, tone(3350, 3450, 0.08, 0.7 * far))
+        m.add(t0 + 1.35, tone(2750, 2050, 0.24, 0.6 * far, release=0.12))
+    m.save('amb_haru', L, peak=0.5)
+    # summer: an evening cicada, "kana kana kana", quickening and falling away
+    m = Mix(L)
+    m.add(0, air(L, 400, 2500, 22) * 0.08)
+    for t0, far, f in ((1.5, 1.0, 3700.0), (12.5, 0.5, 3450.0)):
+        t = t0
+        for k in range(16):
+            u = k / 15.0
+            gap = 0.42 - 0.24 * np.sin(np.pi * min(1.0, u * 1.3) * 0.5)
+            m.add(t, tone(f * (1 - 0.10 * u), f * (1 - 0.10 * u) * 0.985, gap * 0.8, 0.5 * far * np.sin(np.pi * (0.15 + 0.85 * u)) ** 0.7, attack=0.03, release=gap * 0.5, trem=55.0, trem_depth=0.6))
+            t += gap
+    m.save('amb_natsu', L, peak=0.5)
+    # autumn: a bell cricket, "riiin, riiin", and a pine cricket answering
+    m = Mix(L)
+    m.add(0, air(L, 300, 1800, 23) * 0.06)
+    for t0, far in ((1.0, 1.0), (9.0, 0.6), (16.5, 0.9)):
+        for k in range(4):
+            m.add(t0 + k * 1.35, tone(4150, 4120, 1.0, 0.45 * far, attack=0.25, release=0.3, trem=31.0, trem_depth=0.9))
+    for t0 in (6.2, 14.0, 21.2):
+        m.add(t0, tone(5000, 5000, 0.08, 0.25))
+        for k in range(5):
+            m.add(t0 + 0.22 + k * 0.075, tone(5200, 5150, 0.05, 0.22))
+    m.save('amb_aki', L, peak=0.45)
+    # winter: nothing sings; a cold wind in the pines, and long quiet between its gusts
+    m = Mix(L)
+    m.add(0, air(L, 150, 700, 24, gust=0.85) * 0.9)
+    m.add(0, air(L, 700, 1500, 25, gust=0.95) * 0.25)
+    m.save('amb_fuyu', L, peak=0.4)
+
+seasons()

@@ -1,0 +1,744 @@
+[
+ {
+  "kanji": "麻三斤",
+  "reading": "Masangin",
+  "meaning": "A monk asked Tōzan: what is Buddha? Tōzan said: three pounds of flax. — Mumonkan, case 18",
+  "tags": [
+   "koan"
+  ],
+  "source": "https://kotobank.jp/word/麻三斤-2083606"
+ },
+ {
+  "kanji": "日面仏、月面仏",
+  "reading": "Nichimen butsu, gachimen butsu",
+  "meaning": "Asked how he was, the dying Baso answered: Sun-faced Buddha, Moon-faced Buddha. — Hekiganroku, case 3",
+  "tags": [
+   "koan"
+  ],
+  "source": "https://rinnou.net/language/577/"
+ },
+ {
+  "kanji": "拈華微笑",
+  "reading": "Nenge mishō",
+  "meaning": "The Buddha held up a flower and said nothing; only Kashō smiled. — Mumonkan, case 6",
+  "tags": [
+   "koan"
+  ],
+  "source": "https://kotobank.jp/word/拈華微笑-111667"
+ },
+ {
+  "kanji": "主人公",
+  "reading": "Shujinkō",
+  "meaning": "Every day Zuigan called to himself, 'Master!' and answered himself, 'Yes!' — Mumonkan, case 12",
+  "tags": [
+   "koan"
+  ],
+  "source": "https://rinnou.net/language/613/"
+ },
+ {
+  "kanji": "啐啄同時",
+  "reading": "Sottaku dōji",
+  "meaning": "The chick pecks from inside the shell and the hen from outside, at the same moment. — Hekiganroku, case 16",
+  "tags": [
+   "koan"
+  ],
+  "source": "https://rinnou.net/language/450/"
+ },
+ {
+  "kanji": "百尺竿頭一歩を進む",
+  "reading": "Hyakushaku kantō ippo o susumu",
+  "meaning": "From the top of a hundred-foot pole, take one more step. — Mumonkan, case 46",
+  "tags": [
+   "koan",
+   "leap"
+  ],
+  "source": "https://kotowaza.jitenon.jp/kotowaza/4239.php"
+ },
+ {
+  "kanji": "至道無難",
+  "reading": "Shidō bunan",
+  "meaning": "The Great Way is not difficult; it only dislikes picking and choosing. — the Shinjinmei",
+  "tags": [
+   "koan"
+  ],
+  "source": "https://kotobank.jp/word/至道無難-74453"
+ },
+ {
+  "kanji": "独坐大雄峰",
+  "reading": "Dokuza Daiyūhō",
+  "meaning": "What is the most wonderful thing? Sitting alone on this great peak. — Hyakujō, Hekiganroku, case 26",
+  "tags": [
+   "garden"
+  ],
+  "source": "https://rinnou.net/language/510/"
+ },
+ {
+  "kanji": "掬水月在手",
+  "reading": "Mizu o kikusureba tsuki te ni ari",
+  "meaning": "Scoop up water, and the moon is in your hands.",
+  "tags": [
+   "garden"
+  ],
+  "source": "https://rinnou.net/language/542/"
+ },
+ {
+  "kanji": "竹影掃階塵不動",
+  "reading": "Chikuei kai o haratte chiri dōzezu",
+  "meaning": "The bamboo's shadow sweeps the steps, and not a grain of dust stirs.",
+  "tags": [
+   "garden"
+  ],
+  "source": "https://rinnou.net/language/497/"
+ },
+ {
+  "kanji": "春来草自生",
+  "reading": "Haru kitatte kusa onozukara shōzu",
+  "meaning": "Sit still, with nothing to do: spring comes, and the grass grows of itself. — Dentōroku",
+  "tags": [
+   "garden"
+  ],
+  "source": "https://rinnou.net/language/2769/"
+ },
+ {
+  "kanji": "大道無門",
+  "reading": "Daidō mumon",
+  "meaning": "The Great Way has no gate. — from the verse that opens the Mumonkan",
+  "tags": [
+   "gate"
+  ],
+  "source": "https://kotobank.jp/word/大道無門-317666"
+ },
+ {
+  "kanji": "帰家穏坐",
+  "reading": "Kika onza",
+  "meaning": "To come home and sit down in peace: where the long pilgrimage ends. — Hekiganroku, case 14",
+  "tags": [
+   "gate"
+  ],
+  "source": "https://rinnou.net/language/482/"
+ },
+ {
+  "kanji": "葷酒山門に入るを許さず",
+  "reading": "Kunshu sanmon ni iru o yurusazu",
+  "meaning": "No garlic and no wine may pass this gate: carved on the stone beside a Zen temple's entrance.",
+  "tags": [
+   "gate"
+  ],
+  "source": "https://kotobank.jp/word/葷酒山門に入るを許さず-487719"
+ },
+ {
+  "kanji": "無始無終",
+  "reading": "Mushi mushū",
+  "meaning": "Without beginning, and without end.",
+  "tags": [
+   "enso"
+  ],
+  "source": "https://kotobank.jp/word/無始無終-641515"
+ },
+ {
+  "kanji": "悟了同未悟",
+  "reading": "Satori owaraba imada satorazaru ni onaji",
+  "meaning": "When awakening is complete, it is the same as before awakening. — Dentōroku",
+  "tags": [
+   "enso"
+  ],
+  "source": "https://rinnou.net/language/464/"
+ },
+ {
+  "kanji": "無一物中無尽蔵",
+  "reading": "Muichimotsu chū mujinzō",
+  "meaning": "In owning not one thing, there is an inexhaustible store.",
+  "tags": [
+   "enso"
+  ],
+  "source": "https://rinnou.net/language/2882/"
+ },
+ {
+  "kanji": "池成月自来",
+  "reading": "Ike natte tsuki onozukara kitaru",
+  "meaning": "Finish the pond, and the moon comes to it of itself. — Kidōroku",
+  "tags": [
+   "stone"
+  ],
+  "source": "https://rinnou.net/language/2794/"
+ },
+ {
+  "kanji": "少欲知足",
+  "reading": "Shōyoku chisoku",
+  "meaning": "Want little, and know what is enough.",
+  "tags": [
+   "stone"
+  ],
+  "source": "https://yoji.jitenon.jp/yojie/2494"
+ },
+ {
+  "kanji": "電光影裏斬春風",
+  "reading": "Denkō yōri ni shunpū o kiru",
+  "meaning": "In a flash of lightning, your sword cuts only the spring wind. — Mugaku Sogen, as a soldier raised a blade over him",
+  "tags": [
+   "nocut"
+  ],
+  "source": "https://rinnou.net/language/393/"
+ },
+ {
+  "kanji": "怒りは敵と思え",
+  "reading": "Ikari wa teki to omoe",
+  "meaning": "Think of anger as your enemy. — from the precepts of Tokugawa Ieyasu",
+  "tags": [
+   "nocut"
+  ],
+  "source": "https://kotobank.jp/word/怒りは敵と思え-2236039"
+ },
+ {
+  "kanji": "韓信の股潜り",
+  "reading": "Kanshin no matakuguri",
+  "meaning": "Kanshin crawled between a bully's legs rather than fight him, and lived to be a great general.",
+  "tags": [
+   "nocut"
+  ],
+  "source": "https://kotobank.jp/word/韓信の股潜り-470285"
+ },
+ {
+  "kanji": "冷暖自知",
+  "reading": "Reidan jichi",
+  "meaning": "Whether the water is cold or warm, you know only by putting in your own hand.",
+  "tags": [
+   "wet"
+  ],
+  "source": "https://kotobank.jp/word/冷暖自知-661106"
+ },
+ {
+  "kanji": "一字不説",
+  "reading": "Ichiji fusetsu",
+  "meaning": "Not one word was preached: what the Buddha awoke to cannot be put into letters.",
+  "tags": [
+   "write"
+  ],
+  "source": "https://kotobank.jp/word/一字不説-433394"
+ },
+ {
+  "kanji": "銀椀裏盛雪",
+  "reading": "Ginwanri ni yuki o moru",
+  "meaning": "Snow heaped in a silver bowl. — Haryō's answer to a monk, in the Hekiganroku",
+  "tags": [
+   "snow"
+  ],
+  "source": "https://rinnou.net/language/467/"
+ },
+ {
+  "kanji": "鏡清雨滴声",
+  "reading": "Kyōsei utekisei",
+  "meaning": "Kyōsei asked: what is that sound outside the gate? The monk said: raindrops. — Hekiganroku, case 46",
+  "tags": [
+   "rain"
+  ],
+  "source": "https://rinnou.net/language/461/"
+ },
+ {
+  "kanji": "臨済の喝徳山の棒",
+  "reading": "Rinzai no katsu, Tokuzan no bō",
+  "meaning": "One master's shout, another's stick: how the old Zen teachers jolted their students awake.",
+  "tags": [
+   "katsu"
+  ],
+  "source": "https://kotobank.jp/word/臨済の喝徳山の棒-660012"
+ },
+ {
+  "kanji": "滴水滴凍",
+  "reading": "Tekisui tekitō",
+  "meaning": "Each drop of water freezes as it falls. — Dentōroku",
+  "tags": [
+   "ice"
+  ],
+  "source": "https://rinnou.net/language/503/"
+ },
+ {
+  "kanji": "入木道",
+  "reading": "Jubokudō",
+  "meaning": "The way of entering the wood: an old name for calligraphy, from ink of Wang Xizhi's that soaked deep into a board.",
+  "tags": [
+   "write"
+  ],
+  "source": "https://kotobank.jp/word/入木道-78221"
+ },
+ {
+  "kanji": "心正しければ則ち筆正し",
+  "reading": "Kokoro tadashikereba sunawachi fude tadashi",
+  "meaning": "If the heart is upright, the brush is upright. — the Tang calligrapher Liu Gongquan",
+  "tags": [
+   "write"
+  ],
+  "source": "https://kotobank.jp/word/心正しければ則ち筆正し-2037782"
+ },
+ {
+  "kanji": "金釘流",
+  "reading": "Kanakugi-ryū",
+  "meaning": "The Bent-Nail School: what bad handwriting is jokingly called.",
+  "tags": [
+   "write"
+  ],
+  "source": "https://kotobank.jp/word/金釘流-465055"
+ },
+ {
+  "kanji": "六十の手習い",
+  "reading": "Rokujū no tenarai",
+  "meaning": "Taking up the brush at sixty: it is never too late to begin.",
+  "tags": [
+   "write"
+  ],
+  "source": "https://kotobank.jp/word/六十の手習い-663358"
+ },
+ {
+  "kanji": "手習いは坂に車を押す如し",
+  "reading": "Tenarai wa saka ni kuruma o osu gotoshi",
+  "meaning": "Learning to write is like pushing a cart uphill: ease off, and it rolls back.",
+  "tags": [
+   "write"
+  ],
+  "source": "https://kotobank.jp/word/手習いは坂に車を押す如し-3228420"
+ },
+ {
+  "kanji": "魯魚",
+  "reading": "Rogyo",
+  "meaning": "魯 and 魚: characters so alike that the copyist's brush takes one for the other.",
+  "tags": [
+   "write"
+  ],
+  "source": "https://kotobank.jp/word/魯魚-663257"
+ },
+ {
+  "kanji": "推敲",
+  "reading": "Suikō",
+  "meaning": "'Push' or 'knock'? The poet Jia Dao agonised over one word of a line, and gave revision its name.",
+  "tags": [
+   "write"
+  ],
+  "source": "https://ja.wiktionary.org/wiki/推敲"
+ },
+ {
+  "kanji": "墨痕淋漓",
+  "reading": "Bokkon rinri",
+  "meaning": "The ink looks as if it were still wet: brushwork full of life.",
+  "tags": [
+   "wet"
+  ],
+  "source": "https://kotobank.jp/word/墨痕淋漓-384261"
+ },
+ {
+  "kanji": "気韻生動",
+  "reading": "Kiin seidō",
+  "meaning": "Spirit resonance, living movement: the first of Xie He's six laws of painting.",
+  "tags": [
+   "wet"
+  ],
+  "source": "https://kotobank.jp/word/気韻生動-472210"
+ },
+ {
+  "kanji": "一気呵成",
+  "reading": "Ikki kasei",
+  "meaning": "Finished in a single breath.",
+  "tags": [
+   "wet"
+  ],
+  "source": "https://ja.wiktionary.org/wiki/一気呵成"
+ },
+ {
+  "kanji": "蛇足",
+  "reading": "Dasoku",
+  "meaning": "Legs on a snake: he finished his drawing first, added feet to it, and lost the wine.",
+  "tags": [
+   "wet"
+  ],
+  "source": "https://ja.wiktionary.org/wiki/蛇足"
+ },
+ {
+  "kanji": "磨穿鉄硯",
+  "reading": "Masen tekken",
+  "meaning": "To grind through an iron inkstone: study that never lets up.",
+  "tags": [
+   "stone"
+  ],
+  "source": "https://yoji.jitenon.jp/yoji/115"
+ },
+ {
+  "kanji": "胸中成竹",
+  "reading": "Kyōchū no seichiku",
+  "meaning": "Have the finished bamboo in your heart before the brush touches the paper. — Su Shi",
+  "tags": [
+   "stone"
+  ],
+  "source": "https://yoji.jitenon.jp/yojii/4292"
+ },
+ {
+  "kanji": "臨池学書",
+  "reading": "Rinchi gakusho",
+  "meaning": "Zhang Zhi practised his writing beside a pond until the water turned black with ink.",
+  "tags": [
+   "stone"
+  ],
+  "source": "https://ja.wiktionary.org/wiki/臨池学書"
+ },
+ {
+  "kanji": "一将功成りて万骨枯る",
+  "reading": "Isshō kō narite bankotsu karu",
+  "meaning": "One general wins his fame, and ten thousand bones lie bleaching. — the Tang poet Cao Song",
+  "tags": [
+   "gasha"
+  ],
+  "source": "https://kotobank.jp/word/一将功成りて万骨枯る-434228"
+ },
+ {
+  "kanji": "粉骨砕身",
+  "reading": "Funkotsu saishin",
+  "meaning": "Bones to powder, body broken: to give a task everything you have.",
+  "tags": [
+   "gasha"
+  ],
+  "source": "https://kotobank.jp/word/粉骨砕身-623170"
+ },
+ {
+  "kanji": "肉を切らせて骨を断つ",
+  "reading": "Niku o kirasete hone o tatsu",
+  "meaning": "Let him cut your flesh, and you cut through his bone.",
+  "tags": [
+   "gasha"
+  ],
+  "source": "https://ja.wiktionary.org/wiki/肉を切らせて骨を断つ"
+ },
+ {
+  "kanji": "清水の舞台から飛び降りる",
+  "reading": "Kiyomizu no butai kara tobioriru",
+  "meaning": "To leap from the stage of Kiyomizu temple: to take the plunge.",
+  "tags": [
+   "leap"
+  ],
+  "source": "https://kotobank.jp/word/清水の舞台から飛び降りる-3227697"
+ },
+ {
+  "kanji": "案ずるより産むが易し",
+  "reading": "Anzuru yori umu ga yasushi",
+  "meaning": "Giving birth is easier than worrying about it: the doing is lighter than the dread.",
+  "tags": [
+   "leap"
+  ],
+  "source": "https://kotobank.jp/word/案ずるより産むが易し-429345"
+ },
+ {
+  "kanji": "当たって砕けろ",
+  "reading": "Atatte kudakero",
+  "meaning": "Go at it, and break if you must.",
+  "tags": [
+   "leap"
+  ],
+  "source": "https://kotowaza.jitenon.jp/kotowaza/1488.php"
+ },
+ {
+  "kanji": "念には念を入れよ",
+  "reading": "Nen ni wa nen o ireyo",
+  "meaning": "On top of care, take more care.",
+  "tags": [
+   "ward"
+  ],
+  "source": "https://kotobank.jp/word/念には念を入れよ-2236342"
+ },
+ {
+  "kanji": "浅い川も深く渡れ",
+  "reading": "Asai kawa mo fukaku watare",
+  "meaning": "Cross even a shallow river as though it were deep.",
+  "tags": [
+   "ward"
+  ],
+  "source": "https://kotowaza.jitenon.jp/kotowaza/932.php"
+ },
+ {
+  "kanji": "濡れぬ先の傘",
+  "reading": "Nurenu saki no kasa",
+  "meaning": "An umbrella before you are wet.",
+  "tags": [
+   "kasa",
+   "ward"
+  ],
+  "source": "https://kotowaza.jitenon.jp/kotowaza/4026.php"
+ },
+ {
+  "kanji": "大喝一声",
+  "reading": "Daikatsu issei",
+  "meaning": "A single great shout.",
+  "tags": [
+   "katsu"
+  ],
+  "source": "https://kotobank.jp/word/大喝一声-2058178"
+ },
+ {
+  "kanji": "獅子吼",
+  "reading": "Shishiku",
+  "meaning": "The lion's roar: the Buddha's preaching, before which every other voice falls silent.",
+  "tags": [
+   "katsu"
+  ],
+  "source": "https://kotobank.jp/word/獅子吼-73212"
+ },
+ {
+  "kanji": "氷山の一角",
+  "reading": "Hyōzan no ikkaku",
+  "meaning": "One corner of the iceberg.",
+  "tags": [
+   "ice"
+  ],
+  "source": "https://kotobank.jp/word/氷山の一角-613245"
+ },
+ {
+  "kanji": "夏の虫、氷を笑う",
+  "reading": "Natsu no mushi, kōri o warau",
+  "meaning": "The summer insect laughs at ice, never having seen any.",
+  "tags": [
+   "ice"
+  ],
+  "source": "https://kotowaza.jitenon.jp/kotowaza/3951.php"
+ },
+ {
+  "kanji": "暖簾に腕押し",
+  "reading": "Noren ni udeoshi",
+  "meaning": "Pushing against a shop curtain: nothing pushes back.",
+  "tags": [
+   "nurikabe"
+  ],
+  "source": "https://kotobank.jp/word/暖簾に腕押し-597667"
+ },
+ {
+  "kanji": "八方塞がり",
+  "reading": "Happō fusagari",
+  "meaning": "Blocked in all eight directions.",
+  "tags": [
+   "nurikabe"
+  ],
+  "source": "https://kotobank.jp/word/八方塞がり-603023"
+ },
+ {
+  "kanji": "瓜二つ",
+  "reading": "Uri futatsu",
+  "meaning": "Two halves of one melon: as alike as can be.",
+  "tags": [
+   "twins"
+  ],
+  "source": "https://kotobank.jp/word/瓜二つ-442008"
+ },
+ {
+  "kanji": "笠に着る",
+  "reading": "Kasa ni kiru",
+  "meaning": "To wear another's power like a hat, and lord it over people.",
+  "tags": [
+   "kasa"
+  ],
+  "source": "https://kotobank.jp/word/笠に着る-461533"
+ },
+ {
+  "kanji": "傘と提灯は戻らぬつもりで貸せ",
+  "reading": "Kasa to chōchin wa modoranu tsumori de kase",
+  "meaning": "Lend an umbrella or a lantern as though it will never come back.",
+  "tags": [
+   "kasa",
+   "chochin"
+  ],
+  "source": "https://kotowaza.jitenon.jp/kotowaza/2692.php"
+ },
+ {
+  "kanji": "雪に白鷺",
+  "reading": "Yuki ni shirasagi",
+  "meaning": "A white egret on snow: there, and impossible to pick out.",
+  "tags": [
+   "yukionna"
+  ],
+  "source": "https://kotobank.jp/word/雪に白鷺-651468"
+ },
+ {
+  "kanji": "単刀直入",
+  "reading": "Tantō chokunyū",
+  "meaning": "One sword, straight in: to go directly to the point.",
+  "tags": [
+   "short"
+  ],
+  "source": "https://kotobank.jp/word/単刀直入-564511"
+ },
+ {
+  "kanji": "快刀乱麻を断つ",
+  "reading": "Kaitō ranma o tatsu",
+  "meaning": "A sharp blade through tangled hemp: a knotted problem settled at a stroke.",
+  "tags": [
+   "short"
+  ],
+  "source": "https://kotobank.jp/word/快刀乱麻を断つ-458124"
+ },
+ {
+  "kanji": "百鬼夜行",
+  "reading": "Hyakki yagyō",
+  "meaning": "The night parade of a hundred demons.",
+  "tags": [
+   "crowd"
+  ],
+  "source": "https://kotobank.jp/word/百鬼夜行-612861"
+ },
+ {
+  "kanji": "多勢に無勢",
+  "reading": "Tazei ni buzei",
+  "meaning": "The few against the many.",
+  "tags": [
+   "crowd"
+  ],
+  "source": "https://kotobank.jp/word/多勢に無勢-560600"
+ },
+ {
+  "kanji": "石に立つ矢",
+  "reading": "Ishi ni tatsu ya",
+  "meaning": "The arrow that stood in a stone: the archer took it for a tiger, and his whole will went into the shot.",
+  "tags": [
+   "rock"
+  ],
+  "source": "https://kotobank.jp/word/石に立つ矢-431897"
+ },
+ {
+  "kanji": "一念岩をも通す",
+  "reading": "Ichinen iwa o mo tōsu",
+  "meaning": "A single-minded will passes even through rock.",
+  "tags": [
+   "rock"
+  ],
+  "source": "https://kotobank.jp/word/一念岩をも通す-433525"
+ },
+ {
+  "kanji": "陸に上がった河童",
+  "reading": "Oka ni agatta kappa",
+  "meaning": "A kappa up on dry land: helpless out of its element.",
+  "tags": [
+   "kappa"
+  ],
+  "source": "https://kotowaza.jitenon.jp/kotowaza/446.php"
+ },
+ {
+  "kanji": "河童に水練",
+  "reading": "Kappa ni suiren",
+  "meaning": "Teaching a kappa to swim.",
+  "tags": [
+   "kappa"
+  ],
+  "source": "https://kotobank.jp/word/河童に水練-1720490"
+ },
+ {
+  "kanji": "鬼が出るか蛇が出るか",
+  "reading": "Oni ga deru ka ja ga deru ka",
+  "meaning": "Will an oni come out, or a snake? No one can say what is next.",
+  "tags": [
+   "oni"
+  ],
+  "source": "https://kotobank.jp/word/鬼が出るか蛇が出るか-453647"
+ },
+ {
+  "kanji": "来年の事を言えば鬼が笑う",
+  "reading": "Rainen no koto o ieba oni ga warau",
+  "meaning": "Talk about next year, and the oni laugh.",
+  "tags": [
+   "oni"
+  ],
+  "source": "https://kotobank.jp/word/来年の事を言えば鬼が笑う-655643"
+ },
+ {
+  "kanji": "独活の大木",
+  "reading": "Udo no taiboku",
+  "meaning": "A great tree of udo: big, soft, and good for nothing.",
+  "tags": [
+   "bigoni"
+  ],
+  "source": "https://kotobank.jp/word/独活の大木-441017"
+ },
+ {
+  "kanji": "窮鼠猫を噛む",
+  "reading": "Kyūso neko o kamu",
+  "meaning": "A cornered rat will bite the cat.",
+  "tags": [
+   "bigoni"
+  ],
+  "source": "https://kotobank.jp/word/窮鼠猫を噛む-477115"
+ },
+ {
+  "kanji": "幽霊の正体見たり枯れ尾花",
+  "reading": "Yūrei no shōtai mitari kareobana",
+  "meaning": "The ghost, seen for what it was: withered pampas grass.",
+  "tags": [
+   "yurei"
+  ],
+  "source": "https://kotobank.jp/word/幽霊の正体見たり枯れ尾花-403124"
+ },
+ {
+  "kanji": "人を呪わば穴二つ",
+  "reading": "Hito o norowaba ana futatsu",
+  "meaning": "Curse someone, and dig two graves.",
+  "tags": [
+   "yurei",
+   "twins"
+  ],
+  "source": "https://kotobank.jp/word/人を呪わば穴二つ-611210"
+ },
+ {
+  "kanji": "貧者の一灯",
+  "reading": "Hinja no ittō",
+  "meaning": "The poor man's single lamp is worth more than the rich man's ten thousand.",
+  "tags": [
+   "chochin"
+  ],
+  "source": "https://kotobank.jp/word/貧者の一灯-614630"
+ },
+ {
+  "kanji": "天狗の飛び損ない",
+  "reading": "Tengu no tobisokonai",
+  "meaning": "Even a tengu misjudges a flight: the boastful slip when they grow careless.",
+  "tags": [
+   "tengu"
+  ],
+  "source": "https://kotowaza.jitenon.jp/kotowaza/3820.php"
+ },
+ {
+  "kanji": "合縁奇縁",
+  "reading": "Aien kien",
+  "meaning": "Whether two people suit each other or not is a strange work of fate.",
+  "tags": [
+   "hitodama"
+  ],
+  "source": "https://kotobank.jp/word/合縁奇縁-421102"
+ },
+ {
+  "kanji": "雨晴れて笠を忘る",
+  "reading": "Ame harete kasa o wasuru",
+  "meaning": "When the rain clears, the hat is forgotten: so is the help we had in hard times.",
+  "tags": [
+   "rain"
+  ],
+  "source": "https://kotobank.jp/word/雨晴れて笠を忘る-427400"
+ },
+ {
+  "kanji": "雪と墨",
+  "reading": "Yuki to sumi",
+  "meaning": "Snow and ink: as unlike as two things can be.",
+  "tags": [
+   "snow"
+  ],
+  "source": "https://kotobank.jp/word/雪と墨-651467"
+ },
+ {
+  "kanji": "草木も眠る丑三つ時",
+  "reading": "Kusaki mo nemuru ushimitsu-doki",
+  "meaning": "The hour of the ox, when even the grass and the trees are asleep.",
+  "tags": [
+   "night"
+  ],
+  "source": "https://kotobank.jp/word/草木も眠る-483043"
+ },
+ {
+  "kanji": "釣り鐘を蜂が刺す",
+  "reading": "Tsurigane o hachi ga sasu",
+  "meaning": "A bee stinging a temple bell: the bell feels nothing at all.",
+  "tags": [
+   "bell"
+  ],
+  "source": "https://kotowaza.jitenon.jp/kotowaza/10098.php"
+ }
+]

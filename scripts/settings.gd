@@ -10,6 +10,7 @@ const ROWS = [
 	["filter", "紙", "Painted look", "Ink-bleed and paper grain. Off: sharper, and easier on an old phone."],
 	["undo", "戻", "Taking strokes back", "Within the stroke in hand, until the brush is lifted; or never, as on the pilgrimage."],
 	["style", "書", "Style", "Shodō: bare paper, one seal, a stroke that runs dry. Ornate: clouds, seasons, seals, frames."],
+	["seal", "印", "Your seal", "The art name pressed on every piece you finish. Until you choose one, your master's."],
 ]
 const STYLE = ["Shodō", "Ornate"]
 const UNDO = ["", "This stroke", "Never"]
@@ -22,7 +23,7 @@ var b_take
 func setup():
 	still = true
 	for i in range(ROWS.size()):
-		rows[ROWS[i][0]] = btn(Rect2(910, _y(i) - 8, 260, 56) if main.touch else Rect2(900, _y(i), 260, 50), "", _flip.bind(ROWS[i][0]), ROWS[i][1])
+		rows[ROWS[i][0]] = btn(Rect2(910, _y(i) - 8, 260, 54) if main.touch else Rect2(900, _y(i), 260, 46), "", _flip.bind(ROWS[i][0]), ROWS[i][1])
 	btn(Rect2(40, 646, 260, 64) if main.touch else Rect2(40, 648, 220, 50), "Back", back, "戻")
 	# the save as a line of text: out to keep it or carry it, in to take one up
 	btn(Rect2(560, 646, 290, 64) if main.touch else Rect2(560, 648, 250, 50), "Copy my save", _copy, "写")
@@ -68,7 +69,7 @@ func tall_parts(_h):
 		return super.tall_parts(_h)
 	var parts = [{"src": [Rect2(30, 0, 400, 66)], "s": 1.2}]
 	for i in range(ROWS.size()):
-		parts.append({"src": [Rect2(120, _y(i) - 14, 420, 72), Rect2(905, _y(i) - 14, 275, 72)], "s": 1.0})
+		parts.append({"src": [Rect2(120, _y(i) - 14, 420, 68), Rect2(905, _y(i) - 14, 275, 68)], "s": 1.0})
 	if note != "":
 		parts.append({"src": [Rect2(552, 2, 696, 58)], "s": 1.0})
 	parts.append({"src": [Rect2(552, 640, 304, 76), Rect2(872, 640, 316, 76)], "s": 1.1})
@@ -76,7 +77,7 @@ func tall_parts(_h):
 	return parts
 
 func _y(i):
-	return (76 + i * 80) if main.touch else (104 + i * 76)
+	return (74 + i * 70) if main.touch else (100 + i * 67)
 
 func _on(k):
 	return main.data.sound if k == "sound" else main.data.opts[k]
@@ -91,10 +92,17 @@ func _labels():
 			rows[k].label = STYLE[int(main.data.opts.style)]
 			rows[k].sel = int(main.data.opts.style) > 0
 			continue
+		if k == "seal":
+			rows[k].label = main.my_seal()
+			rows[k].sel = main.data.gago != ""
+			continue
 		rows[k].label = "On" if _on(k) else "Off"
 		rows[k].sel = _on(k)
 
 func _flip(k):
+	if k == "seal":
+		main.show_seal(main.show_settings.bind(back))
+		return
 	if k == "sound":
 		main.toggle_sound()
 	elif k == "undo":
@@ -121,7 +129,7 @@ func _draw():
 	var big = main.touch
 	for i in range(ROWS.size()):
 		var y = _y(i)
-		var r = Rect2(100, y - 14, 1080, 72 if big else 68)
+		var r = Rect2(100, y - 14, 1080, 66 if big else 62)
 		if main.spare():
 			draw_line(Vector2(r.position.x, r.end.y), Vector2(r.end.x, r.end.y), Ink.a(Ink.SUMI, 0.3), 1.5, true)
 		else:

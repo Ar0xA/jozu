@@ -7,6 +7,21 @@ Wikimedia Commons; where the uploader attached a licence to the photograph or sc
 - `sesshu_*.jpg` - Sesshu Toyo, *Landscapes of the Four Seasons* (Sansui Chokan, the Long Scroll), 1486. Mori Museum.
 - `hyakki_*.jpg` - *Hyakki Yagyo Emaki* (Night Parade of One Hundred Demons), Muromachi period, Shinju-an, Daitoku-ji.
 
+## Prints shown before the great yokai (`prints/`)
+
+Nineteenth-century woodblock prints, all in the public domain; each scan comes from the institution named,
+which marks it public domain or free of known restrictions. They are shown whole, reduced in size.
+
+- `ibaraki.jpg` - Tsukioka Yoshitoshi, *Rashōmon Watanabe no Tsuna oni ude kiru no zu* (Watanabe no Tsuna cutting off the demon's arm at Rashōmon), vertical diptych, 1888. National Diet Library, Japan, https://dl.ndl.go.jp/pid/1307849 (Public Domain Mark). The two sheets joined.
+- `sojobo.jpg` - Kawanabe Kyōsai, *Yoshitsune Training with the Tengu Sōjōbō*, triptych, 1863. Los Angeles County Museum of Art, M.84.31.530a-c (public domain image, via Wikimedia Commons).
+- `kuzunoha.jpg` - Tsukioka Yoshitoshi, *The Fox-Woman Kuzunoha Leaving Her Child*, from *New Forms of Thirty-six Ghosts*, c. 1890. Library of Congress, Prints and Photographs Division (no known restrictions on publication).
+- `shuten.jpg` - Tsukioka Yoshitoshi, *Raikō and his Four Companions Conquering the Demon of Mount Ōe*, triptych, 1864. Minneapolis Institute of Art, 2017.106.51a-c (public domain).
+- `tamamo.jpg` - Utagawa Kunisada (Toyokuni III), *Abe no Yasunari chōbuku yōkai no zu* (Abe no Yasunari exorcising Tamamo-no-Mae), triptych, mid-19th century. National Diet Library, Japan, https://dl.ndl.go.jp/pid/1307759 (Public Domain Mark).
+- `yukionna.jpg` - Tsukioka Yoshitoshi, *Heron Maiden*, from *New Forms of Thirty-six Ghosts*, 1889. Minneapolis Institute of Art, 2017.106.226 (public domain). A heron spirit as a woman in white in falling snow: it stands in for the snow woman, of whom no good print of the period is free to use.
+- `kappa.jpg` - Tsukioka Yoshitoshi, *Shirafuji Genta* watching kappa wrestle, from *One Hundred Ghost Tales from China and Japan*, 1865. National Diet Library, Japan, https://dl.ndl.go.jp/pid/1311785 (Public Domain Mark).
+- `gashadokuro.jpg` - Utagawa Kuniyoshi, *Takiyasha the Witch and the Skeleton Spectre* (Sōma no furudairi), triptych, c. 1844. National Diet Library, Japan, https://dl.ndl.go.jp/pid/1305636 (Public Domain Mark). The three sheets joined, the scanner's margins trimmed.
+- `hyakki.jpg` - Kawanabe Kyōsai, *Kyōsai's Pictures of One Hundred Demons* (Kyōsai hyakki gadan), one spread, 1890. The Metropolitan Museum of Art, 2013.767 (public domain). The page margins trimmed.
+
 ## Board pieces (`pieces/`)
 
 Each figure was cropped from the painting and its paper made transparent.

@@ -34,12 +34,18 @@ fi
 # the stage music is left out of the pck (see the Web preset's exclude filter) and fetched once the
 # title is up: scripts/main.gd, _fetch_music
 mkdir -p build/web/music build/web/art
-for n in battle boss boss2 road2 road3 zen; do cp "audio/$n.ogg" build/web/music/; done
+for n in battle boss boss2 road2 road3 zen amb_haru amb_natsu amb_aki amb_fuyu; do cp "audio/$n.ogg" build/web/music/; done
 # so are the two long scrolls, as WebP (the trimmed engine reads WebP, not JPEG)
 "${PYTHON:-python}" - <<'EOF'
 from PIL import Image
 for n in ('sesshu_0', 'sesshu_1', 'hyakki_0', 'hyakki_1'):
     Image.open('art/%s.jpg' % n).save('build/web/art/%s.webp' % n, quality=82, method=6)
+import glob, os
+for p in glob.glob('art/prints/*.jpg'):
+    # the boss prints, smaller for a phone
+    im = Image.open(p)
+    im.thumbnail((1280, 1440))
+    im.save('build/web/art/print_%s.webp' % os.path.splitext(os.path.basename(p))[0], quality=80, method=6)
 EOF
 
 # offline: the service worker keeps what it is told to (see tools/web_sw.py)

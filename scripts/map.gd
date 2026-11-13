@@ -104,7 +104,11 @@ func tall_parts(_h):
 		return [{"src": [Rect2(30, 0, 400, 62)], "s": 1.2}, {"src": [Rect2(10, 66, 630, 7 * 78 + 4)], "s": 1.12}, {"src": [Rect2(646, 66, 630, rows2 * 78 + 4)], "s": 1.12}]
 	var parts = [{"src": [Rect2(30, 4, 660, 122)], "s": 1.06}, {"src": [Rect2(34, 136, 652, 264)], "s": 1.08}]
 	if _note_h() > 0.0:
-		parts.append({"src": [Rect2(696, 140, 560, _note_h() + 24.0)], "s": 1.25})
+		var hk = Data.CHAPTERS[page].get("haiku", [])
+		var more = 0.0
+		if hk.size() == 4:
+			more = 46.0 + main.font.get_multiline_string_size(hk[2] + "  — " + hk[3], HORIZONTAL_ALIGNMENT_LEFT, 540, 19).y
+		parts.append({"src": [Rect2(696, 140, 560, _note_h() + 24.0 + more)], "s": 1.25})
 	parts.append({"src": [Rect2(700, 8, 560, 120)], "s": 1.2})
 	var rg = _range(page)
 	var rows = int(ceil((rg[1] - rg[0]) / float(_per())))
@@ -297,15 +301,39 @@ func _draw():
 	if main.data.opts.motion and not spare:
 		Ink.season(self, _season(), time, 22)
 
+	# the chapter's poem, set down the way it is written, with what it says beside it
+	var hk = ch.get("haiku", [])
+	if hk.size() == 4 and not (phone and main.tall):
+		var pw = 392.0 if phone else 330.0
+		var pr = Rect2(band.end.x - pw - 14, band.position.y + 12, pw, band.size.y - 24)
+		draw_rect(pr, Ink.a(Ink.PAPER, 0.9))
+		if not spare:
+			Ink.frame(self, pr, 2.0, Ink.a(Ink.SUMI, 0.6))
+		var fs = 22.0 if phone else 21.0
+		var per = max(6, int((pr.size.y - 24.0) / (fs * 1.08)))
+		for k in range(hk[0].length()):
+			draw_string(f, Vector2(pr.end.x - 34.0 - (k / per) * (fs + 8.0) - fs * 0.5, pr.position.y + 14.0 + fs * 0.9 + (k % per) * fs * 1.08), hk[0][k], HORIZONTAL_ALIGNMENT_CENTER, fs, int(fs), Ink.SUMI)
+		var cols = int(ceil(hk[0].length() / float(per)))
+		var tw = pr.size.x - 34.0 - cols * (fs + 8.0) - 26.0
+		Ink.para(self, f, pr.position + Vector2(14, 34), hk[2], 19 if phone else 15, Ink.a(Ink.AI, 0.95), tw)
+		var eh = f.get_multiline_string_size(hk[2], HORIZONTAL_ALIGNMENT_LEFT, tw, 19 if phone else 15).y
+		Ink.text(self, f, pr.position + Vector2(14, 34 + eh + (8 if phone else 6)), "— " + hk[3], 17 if phone else 14, Ink.a(Ink.SHU, 0.9))
+		if not phone:
+			Ink.para(self, f, pr.position + Vector2(14, 34 + eh + 34), hk[1], 12, Ink.a(Ink.SUMI, 0.6), tw)
+
 	# a line of history about this place
 	var note = ch.get("note", "")
 	if note != "":
 		if phone and main.tall:
 			Ink.para(self, f, Vector2(706, 166), note, 21, Ink.a(Ink.SUMI, 0.9), 540)
+			if hk.size() == 4:
+				var hy = 166.0 + _note_h() + 26.0
+				Ink.text(self, f, Vector2(706, hy), hk[0], 25 if hk[0].length() <= 19 else 21, Ink.SUMI)
+				Ink.para(self, f, Vector2(706, hy + 32), hk[2] + "  — " + hk[3], 19, Ink.a(Ink.AI, 0.95), 540)
 		elif phone:
 			Ink.para(self, f, Vector2(48, 426), note, 21, Ink.a(Ink.SUMI, 0.9), 1184)
 		else:
-			var nr = Rect2(band.position.x + 14, band.end.y - 96, 860, 82)
+			var nr = Rect2(band.position.x + 14, band.end.y - 96, 830, 82)
 			draw_rect(nr, Ink.a(Ink.PAPER, 0.86))
 			if not spare:
 				Ink.frame(self, nr, 2.0, Ink.a(Ink.SUMI, 0.6))

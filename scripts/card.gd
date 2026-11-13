@@ -14,6 +14,7 @@ var cols = 7
 var rows = 7
 var tries = 1
 var streak = 0
+var seal = "筆剣"     # the painter's seal
 
 func _draw():
 	draw_rect(Rect2(0, 0, SIDE, SIDE), Ink.PAPER)
@@ -22,7 +23,7 @@ func _draw():
 	Ink.calligraphy(self, Rect2(90, 150, 700, 700), paths, cols, rows)
 	# the name of the game down the right edge, and its seal
 	Ink.tategaki(self, font, Vector2(930, 90), "上手", 150, Ink.SUMI)
-	Ink.seal(self, font, Vector2(930, 520), 54, "日課")
+	Ink.seal(self, font, Vector2(930, 520), 54, seal)
 	# the day
 	var tint = Koyomi.TINT[koyomi[4]]
 	Ink.text(self, font, Vector2(90, 118), "%s  %s" % [koyomi[0], koyomi[2]], 52, tint)

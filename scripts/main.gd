@@ -33,6 +33,7 @@ var pinching = false   # two fingers are down: the screens ignore them
 var pinch = {}
 var zoom_btn
 var music
+var ambient          # the season's own sound, behind the title
 var music_name = ""
 var sfx_pool = []
 var sfx_i = 0
@@ -108,6 +109,12 @@ Turn your phone sideways"
 			art[nm] = []
 			late.append("art:%s_0" % nm)
 			late.append("art:%s_1" % nm)
+	for k in PRINTS:
+		var pn = PRINTS[k][0]
+		if ResourceLoader.exists("res://art/prints/%s.jpg" % pn):
+			art["print_" + pn] = load("res://art/prints/%s.jpg" % pn)
+		else:
+			late.append("art:print_" + pn)   # the web build fetches the prints after everything else
 	for nm in ["hero", "oni", "oni3", "tengu", "kitsune", "yurei", "tamamo", "chochin", "kasa", "kappa", "nurikabe", "yukionna", "gasha", "daruma", "tanuki", "shinigami", "kamaitachi"]:
 		var t = load("res://art/pieces/%s.png" % nm)
 		if t:
@@ -180,16 +187,20 @@ func _setup_audio():
 	music = AudioStreamPlayer.new()
 	add_child(music)
 	music.finished.connect(func(): if data.opts.music: music.play())
+	ambient = AudioStreamPlayer.new()
+	add_child(ambient)
 	for i in range(6):
 		var p = AudioStreamPlayer.new()
 		add_child(p)
 		sfx_pool.append(p)
-	for nm in ["title", "story", "battle", "road2", "road3", "zen", "boss", "boss2"]:
+	for nm in ["title", "story", "battle", "road2", "road3", "zen", "boss", "boss2"] + AMBIENCE:
 		var path = "res://audio/%s.ogg" % nm
 		if ResourceLoader.exists(path):
 			streams[nm] = load(path)
-		else:
+		elif not AMBIENCE.has(nm):
 			late.append(nm)   # the web build leaves the stage music out of its first download
+		elif nm == AMBIENCE[Koyomi.today()[4]]:
+			late.push_front(nm)   # of the four seasons only today's is fetched, and first
 	_fetch_music()
 	if OS.has_feature("web"):
 		JavaScriptBridge.pwa_update_available.connect(_newer_build)
@@ -197,7 +208,7 @@ func _setup_audio():
 			_newer_build()
 		# ask now whether there is a newer build, rather than whenever the browser next thinks to
 		JavaScriptBridge.eval("if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update()}).catch(function(){})", true)
-	for nm in ["step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2", "brush"]:
+	for nm in ["step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2", "brush", "koto", "pon"]:
 		streams[nm] = load("res://audio/%s.wav" % nm)
 	AudioServer.set_bus_mute(0, not data.sound)
 	apply_opts()
@@ -237,7 +248,9 @@ func _music_fetched(result, code, _headers, body, rq):
 	fetching = ""
 	if result == HTTPRequest.RESULT_SUCCESS and code == 200 and nm.begins_with("art:"):
 		var img = Image.new()
-		if img.load_webp_from_buffer(body) == OK:
+		if img.load_webp_from_buffer(body) == OK and nm.begins_with("art:print_"):
+			art[nm.substr(4)] = ImageTexture.create_from_image(img)
+		elif img.load_webp_from_buffer(body) == OK:
 			art_parts[nm.substr(4)] = ImageTexture.create_from_image(img)
 			var scroll = nm.substr(4, nm.length() - 6)
 			if art_parts.has(scroll + "_0") and art_parts.has(scroll + "_1"):
@@ -283,20 +296,31 @@ func apply_opts():
 	elif music.stream and not music.playing:
 		music.play()
 
+# 落款: the seal pressed on a finished piece. Suzu's own art name once she has chosen one
+# (scripts/seal.gd); until then her master's, 筆剣.
+func my_seal():
+	return data.gago if data.gago != "" else "筆剣"
+
+func show_seal(back = Callable()):
+	play_music("title")
+	var scr = load("res://scripts/seal.gd").new()
+	scr.back = back if back.is_valid() else show_map
+	go(scr)
+
 func show_settings(back = Callable()):
 	play_music("title")
 	var scr = load("res://scripts/settings.gd").new()
 	scr.back = back if back.is_valid() else show_title
 	go(scr)
 
-func sfx(nm, pitch = 1.0):
+func sfx(nm, pitch = 1.0, db = -7.0):
 	var st = streams.get(nm)
 	if st == null:
 		return
 	var p = sfx_pool[sfx_i % sfx_pool.size()]
 	sfx_i += 1
 	p.stream = st
-	p.volume_db = -7.0
+	p.volume_db = db
 	p.pitch_scale = pitch
 	p.play()
 
@@ -322,6 +346,28 @@ func install_tip():
 				data.told = true
 				write_save()
 	return tip == 1
+
+# A stroke is a phrase: each step sounds the next note of the In scale (miyako-bushi: D, E flat,
+# G, A, B flat), the scale the stage music is written in, on one koto string. `n` is how many
+# notes up from the low D; -5 is the D an octave below, where a lifted brush comes to rest.
+const IN_SCALE = [0, 1, 5, 7, 8]
+
+func koto(n, db = -15.0):
+	var semis = IN_SCALE[posmod(n, 5)] + 12 * int(floor(n / 5.0))
+	sfx("koto", pow(2.0, semis / 12.0), db)
+
+# The season, heard behind the title: a bush warbler in spring, an evening cicada in summer, bell
+# crickets in autumn, and in winter only the wind (audio/amb_*.ogg, made by tools/make_audio.py).
+const AMBIENCE = ["amb_haru", "amb_natsu", "amb_aki", "amb_fuyu"]
+
+func play_ambience(season):
+	var st = streams.get(AMBIENCE[season])
+	if st == null or ambient.playing:
+		return   # in a browser it may not have arrived yet: the title asks again
+	st.loop = true
+	ambient.stream = st
+	ambient.volume_db = -16.0
+	ambient.play()
 
 func toggle_sound():
 	data.sound = not data.sound
@@ -525,7 +571,7 @@ func _draw():
 
 func fresh():
 	return {"cleared": {}, "scroll": {}, "seals": {}, "daily": {"day": -1, "last": -1, "streak": 0, "best": 0},
-		"henro": {"at": 0, "staffs": 3, "best": 0, "done": 0}, "mine": "", "told": false, "sound": true, "opts": OPTS.duplicate(), "days": {}, "tries": {}, "rand": {}, "met": {}, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
+		"henro": {"at": 0, "staffs": 3, "best": 0, "done": 0}, "mine": "", "gago": "", "told": false, "sound": true, "opts": OPTS.duplicate(), "days": {}, "tries": {}, "rand": {}, "met": {}, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
 
 func load_save():
 	_front = -1
@@ -540,6 +586,7 @@ func load_save():
 			if j.has("sound"):
 				data.sound = bool(j.sound)
 			data.told = bool(j.get("told", false))
+			data.gago = str(j.get("gago", "")).substr(0, 2)
 			if j.has("scroll") and typeof(j.scroll) == TYPE_DICTIONARY:
 				data.scroll = j.scroll
 			for grp in ["daily", "henro"]:
@@ -820,6 +867,7 @@ func go(scr):
 	var stage = scr.get_script().resource_path.ends_with("battle.gd") or (cur != null and cur.get_script().resource_path.ends_with("battle.gd"))
 	if cur:
 		cur.queue_free()
+	ambient.stop()   # only the title has it, and starts it again
 	cur = scr
 	scr.main = self
 	_hold(scr)
@@ -976,6 +1024,7 @@ func daily_card(day, paths, cols, rows):
 	c.rows = rows
 	c.tries = int(data.days.get(str(day), 1))
 	c.streak = int(data.daily.streak) if day == today() else 0
+	c.seal = my_seal()
 	vp.add_child(c)
 	add_child(vp)
 	await RenderingServer.frame_post_draw
@@ -1263,8 +1312,35 @@ func show_story(lines, after, where = 0.0):
 	scr.after = after
 	go(scr)
 
+# The old prints shown before the great yokai (scripts/print.gd; sources in art/CREDITS.md):
+# stage index -> [file, artist, title in Japanese, title in English, year, where it is kept]
+const PRINTS = {
+	9: ["ibaraki", "Tsukioka Yoshitoshi", "羅城門渡辺綱鬼腕斬之図", "Watanabe no Tsuna cuts off the demon's arm at Rashōmon", "1888", "National Diet Library, Japan"],
+	19: ["sojobo", "Kawanabe Kyōsai", "", "Yoshitsune training with the tengu Sōjōbō", "1863", "Los Angeles County Museum of Art"],
+	29: ["kuzunoha", "Tsukioka Yoshitoshi", "葛の葉きつね童子にわかるるの図", "The fox-woman Kuzunoha leaving her child", "about 1890", "Library of Congress"],
+	39: ["shuten", "Tsukioka Yoshitoshi", "頼光四天王大江山鬼神退治之図", "Raikō and his four companions conquer the demon of Mount Ōe", "1864", "Minneapolis Institute of Art"],
+	49: ["tamamo", "Utagawa Kunisada", "安倍泰成調伏妖怪図", "Abe no Yasunari exorcises Tamamo-no-Mae, the nine-tailed fox", "mid-19th century", "National Diet Library, Japan"],
+	59: ["yukionna", "Tsukioka Yoshitoshi", "さぎむすめ", "The Heron Maiden, from New Forms of Thirty-six Ghosts", "1889", "Minneapolis Institute of Art"],
+	69: ["kappa", "Tsukioka Yoshitoshi", "和漢百物語 白藤源太", "Shirafuji Genta watches kappa wrestle", "1865", "National Diet Library, Japan"],
+	90: ["hyakki", "Kawanabe Kyōsai", "暁斎百鬼画談", "Kyōsai's Pictures of One Hundred Demons", "1890", "The Metropolitan Museum of Art"],
+	99: ["gashadokuro", "Utagawa Kuniyoshi", "相馬の古内裏", "Takiyasha the Witch and the Skeleton Spectre", "about 1844", "National Diet Library, Japan"],
+}
+
 func start_stage(i):
-	show_story(Data.LEVELS[i].story, show_battle.bind(i), i / float(Data.LEVELS.size()))
+	var story = show_story.bind(Data.LEVELS[i].story, show_battle.bind(i), i / float(Data.LEVELS.size()))
+	if PRINTS.has(i) and grade_of(i) == "":
+		var nm = "print_" + PRINTS[i][0]
+		if art.has(nm):
+			play_music("story")
+			var scr = load("res://scripts/print.gd").new()
+			scr.info = PRINTS[i]
+			scr.after = story
+			go(scr)
+			return
+		if late.has("art:" + nm):
+			late.erase("art:" + nm)
+			late.push_front("art:" + nm)   # not here yet (a browser): fetched next, for the next time
+	story.call()
 
 func show_battle(i):
 	play_music(stage_music(i))

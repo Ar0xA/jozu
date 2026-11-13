@@ -9,6 +9,7 @@ var armed_at = 0.0
 
 func setup():
 	koyomi = Koyomi.today()
+	main.play_ambience(koyomi[4])
 	var has = not main.data.cleared.is_empty()
 	btn(Rect2(940, 444, 290, 58), "Continue the road" if has else "Take up the brush", main.show_map, "旅")
 	b_new = btn(Rect2(940, 516, 290, 50), "Begin anew", _anew, "新")
@@ -47,6 +48,8 @@ func _anew():
 	main.show_title()
 
 func tick(_dt):
+	if not main.ambient.playing:
+		main.play_ambience(koyomi[4])   # in a browser the season's sound arrives a little after the title
 	if main.newer and time > 1.5:
 		main._take_newer()   # a newer build is waiting: the page reloads into it
 

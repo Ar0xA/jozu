@@ -36,7 +36,7 @@ func key(scr, code):
 
 func skip_story():
 	var guard = 0
-	while kind() == "story" and guard < 60:
+	while (kind() == "story" or kind() == "print") and guard < 60:   # a great yokai's print comes before its story
 		main.cur.on_click(Vector2(640, 500), MOUSE_BUTTON_LEFT)
 		await frames()
 		guard += 1
@@ -248,6 +248,17 @@ func _run():
 			if kind() != "story":
 				bad("stage %d: closing story did not show" % (i + 1))
 		await skip_story()
+		if first and i == Data.BOSSES[0]:
+			# the first chapter closes with Suzu choosing a seal of her own
+			if kind() != "seal":
+				bad("the seal was not offered after the first chapter")
+			else:
+				main.cur.on_click(main.cur._cell(0).get_center(), MOUSE_BUTTON_LEFT)
+				main.cur._take()
+				if main.my_seal() != main.cur.KANJI[0][0]:
+					bad("the chosen seal was not kept")
+				main.cur._leave()
+				await frames()
 		if kind() != "map":
 			bad("stage %d: 'Onward' did not return to the map" % (i + 1))
 		if i % 10 == 9:

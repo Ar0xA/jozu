@@ -345,6 +345,8 @@ func _after(ok, quiet = "step"):
 		if ["kill", "cut", "hit", "katsu", "ward", "leap", "bell"].has(e.t) and not (ending and e.t == "kill" and e.dmg == 0):
 			main.sfx(e.t)
 			heard = true
+			if e.t == "kill" and e.dmg > 0:
+				main.sfx("pon", 1.0, -9.0)   # the hand-drum answers a yokai's fall
 			if e.t == "kill" or e.t == "hit":
 				main.buzz(40 if e.t == "hit" else 14)
 	if not heard and quiet == "step" and main.spare():
@@ -352,6 +354,11 @@ func _after(ok, quiet = "step"):
 		main.sfx("brush", clamp(1.30 - 0.09 * s.visited.size(), 0.72, 1.3))
 	elif not heard:
 		main.sfx(quiet)
+	# the stroke plays a phrase: a note higher with each step, and home to the low string when the brush is lifted
+	if quiet == "step":
+		main.koto(s.visited.size() - 2 + (s.turn % 2) * 2)
+	elif quiet == "sheathe" and s.status == "play":
+		main.koto(-5, -13.0)
 	if quiet == "step":
 		if Sim.ter(s, s.hero) == "w" and s.ink == 0:
 			main.sfx("web")
@@ -598,6 +605,11 @@ func _finish():
 		var nxt = main.show_map
 		if first:
 			nxt = main.show_story.bind(lv.after, main.show_map)
+			if idx == Data.BOSSES[0] and main.data.gago == "":
+				nxt = main.show_story.bind(lv.after + [
+					["Tessai", "落款. A finished piece is signed, and sealed in red. Until today you have pressed my seal on your work: 筆剣, brush and sword."],
+					["Tessai", "A chapter of the scroll is yours now. Cut a seal of your own. One character or two; choose what you would be known by."],
+				], main.show_seal.bind(main.show_map))
 		extra.append(btn(Rect2(250, 470, 200, 50), "Onward", nxt, "進"))
 		extra.append(btn(Rect2(250, 526, 200, 44), "Try again", _restart))
 	else:
@@ -1310,6 +1322,7 @@ func _seals(f):
 
 # what you painted to clear this stage, as it will hang in the scroll
 func _my_scroll():
+	var f = main.font
 	var wrote = 0.28 * max(1, my_paths.size())
 	if main.spare():
 		# your strokes alone on the paper, and round them the circle a teacher gives: two for
@@ -1320,11 +1333,14 @@ func _my_scroll():
 		Ink.maru(self, c, 92.0, 7.0, Ink.a(Ink.SHU, 0.9), _since(0.7 + wrote, 0.45))
 		if grade == "jouzu":
 			Ink.maru(self, c, 78.0, 5.0, Ink.a(Ink.SHU, 0.9), _since(1.0 + wrote, 0.4))
+		# and the painter's own seal, pressed last, low at the left as a piece is signed
+		Ink.stamp(self, f, Vector2(196, 344), 15, main.my_seal(), _since(1.3 + wrote, 0.3))
 		return
 	var r = Rect2(318, 222, 196, 160)
 	draw_rect(r, Ink.a(Ink.GOFUN, 0.9))
 	Ink.frame(self, r, 2.5, Ink.a(Ink.SUMI, 0.7))
 	Ink.calligraphy(self, r.grow(-10), my_paths, s.w, s.h, _since(0.85, wrote))
+	Ink.stamp(self, f, Vector2(r.position.x + 20, r.end.y - 28), 12, main.my_seal(), _since(1.1 + wrote, 0.3))
 
 # how far along something is that began `after` seconds past the end of the stage and takes `length`
 func _since(after, length):

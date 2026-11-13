@@ -1176,5 +1176,25 @@
   "rules": [],
   "ink": 4,
   "chapter": 28
+ },
+ {
+  "replaces": "T.~~.....~~...#.~~t.t..T#.T..................H...",
+  "rows": [
+   "T.~~...",
+   "..~~...",
+   "#.~~t.t",
+   "..T~.T.",
+   ".......",
+   ".......",
+   "...H..."
+  ],
+  "waza": [
+   "leap"
+  ],
+  "par": 6,
+  "trace": "R U L U / R U U U / D R D R / L D L D / L L U U / L L leapU U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 1
  }
 ]
