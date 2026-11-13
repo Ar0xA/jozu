@@ -9,6 +9,8 @@ var btns = []
 var hover_btn = -1
 var still = false      # set by a page on which nothing moves unless the player does something
 var wake = 1.0
+var rest = 0.0         # set by a page that only breathes when left alone: seconds between its redraws then
+var slept = 0.0
 var painting = false   # a press that began on the page itself is held: dragging paints
 var time = 0.0
 var mouse = Vector2.ZERO
@@ -38,14 +40,24 @@ func on_motion(_pos, _held):
 func on_key(_code):
 	pass
 
+# Is something on the page moving that should be seen at full speed? (Only asked where `rest` is set.)
+func busy():
+	return false
+
 func _process(dt):
 	time += dt
 	tick(dt)
+	wake -= dt
 	if still:
 		# nothing here moves by itself: draw for a moment after it opens or is touched, then rest
-		wake -= dt
 		if wake < 0.0:
 			return
+	elif rest > 0.0 and wake < 0.0 and not busy():
+		# only water, weather and a slow pulse are moving: a few frames a second show them, and spare the battery
+		slept += dt
+		if slept < rest:
+			return
+	slept = 0.0
 	queue_redraw()
 
 func btn(rect, label, cb, kanji = ""):

@@ -77,6 +77,8 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   fireflies, maple leaves, snow); painted sliding doors open onto each stage; yokai gather out of ink
   and come apart into it; a cleared stage hangs as a scroll; sayings are set top to bottom; wooden
   clappers open and close a scene. All of the motion stops with Motion off.
+- **The almanac 暦:** the title names the day by the old calendar of seventy-two seasons (七十二候), such as 立冬 地始凍, the earth begins to freeze.
+- **Offline:** in a browser the game is kept by a service worker, so after the first visit it opens at once and without a network. A newer build is taken at the title, never mid-play. The stage music and the two long scrolls are fetched after the title.
 - **On a phone:** pinch with two fingers to zoom and drag with two to move about, or tap 拡 on the left
   edge. Each stage opens with a large card giving the goal and anything met there for the first time;
   it goes by itself or at a tap, and 問 brings it back.

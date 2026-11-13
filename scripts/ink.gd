@@ -209,11 +209,12 @@ static func brush(ci, pts, w, col):
 # rounder (nijimi). As it runs the brush empties: each step is paler than the one before, and
 # toward the end the hairs part and bare paper shows through in streaks (kasure).
 # full = how far through its ink the brush is at the end of this stroke, 0 to 1.
-static func fude(ci, pts, w, full):
+# strength = how much of the ink is still on the paper: 1 for the stroke in hand, less as it dries.
+static func fude(ci, pts, w, full, strength = 1.0, ink = Color(0.11, 0.09, 0.09)):
 	var n = pts.size()
 	if n == 0:
 		return
-	var black = Color(0.11, 0.09, 0.09)
+	var black = a(ink, strength)
 	if n == 1:
 		ci.draw_circle(pts[0], w * 0.42, black)
 		return
@@ -229,10 +230,11 @@ static func fude(ci, pts, w, full):
 		# the ribbon thins as the ink gives out
 		var w0 = w * 0.5 * (1.0 - 0.34 * u0)
 		var w1 = w * 0.5 * (1.0 - 0.34 * u1)
-		var c0 = a(black, 0.96 - 0.42 * u0)
-		var c1 = a(black, 0.96 - 0.42 * u1)
+		var c0 = a(black, strength * (0.96 - 0.42 * u0))
+		var c1 = a(black, strength * (0.96 - 0.42 * u1))
 		ci.draw_polygon(PackedVector2Array([a0 + nrm * w0, b0 + nrm * w1, b0 - nrm * w1, a0 - nrm * w0]), PackedColorArray([c0, c1, c1, c0]))
-		ci.draw_circle(b0, w1, c1)      # the turn of the brush at each corner
+		if i == n - 2 or (pts[i + 2] - b0).normalized().dot(d.normalized()) < 0.99:
+			ci.draw_circle(b0, w1, c1)      # the turn of the brush at a corner, and where it stops
 		# dry brush: streaks of paper along the stroke, more of them the emptier the brush
 		var dry = clamp((u1 - 0.30) / 0.55, 0.0, 1.0)
 		if dry > 0.0:
@@ -243,14 +245,14 @@ static func fude(ci, pts, w, full):
 				var to = a0.lerp(b0, 0.70 + 0.09 * ((k + i * 2) % 4))
 				ci.draw_line(from + nrm * off, to + nrm * off, a(PAPER, min(1.0, 1.05 * dry)), 1.3 + 2.4 * dry, true)
 	# where the brush came down
-	blot(ci, pts[0], w * 0.95, w * 0.95, black, 0.30)
-	ci.draw_circle(pts[0], w * 0.56, a(black, 0.97))
+	blot(ci, pts[0], w * 0.95, w * 0.95, black, 0.30 * strength)
+	ci.draw_circle(pts[0], w * 0.56, a(black, 0.97 * strength))
 	# and where it lifted: a tail drawn out thin
 	var last = pts[n - 1] - pts[n - 2]
 	if last.length() > 0.01:
 		var tip = pts[n - 1] + last.normalized() * w * 0.55 * (1.0 - 0.3 * full)
 		var side = last.normalized().orthogonal() * w * 0.5 * (1.0 - 0.34 * full)
-		ci.draw_colored_polygon(PackedVector2Array([pts[n - 1] + side, tip, pts[n - 1] - side]), a(black, 0.96 - 0.42 * full))
+		ci.draw_colored_polygon(PackedVector2Array([pts[n - 1] + side, tip, pts[n - 1] - side]), a(black, strength * (0.96 - 0.42 * full)))
 
 # An inkstone seen from above: the dark stone, and in its well as much ink as is left.
 static func suzuri(ci, r, n, mx):

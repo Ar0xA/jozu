@@ -3,6 +3,7 @@ extends "res://scripts/screen_base.gd"
 
 const Sim = preload("res://scripts/sim.gd")
 const TS = 84.0
+const MA = 0.3         # 間: the stillness after the brush lifts, before anything answers
 const ORG = Vector2(56, 104)
 const PX = 690.0
 
@@ -62,6 +63,7 @@ var last_drag = Vector2i(-9, -9)
 var done = false
 var grade = ""
 var kinds = []
+var new_kinds = []     # the yokai not met before this stage: the only ones the spare panel explains
 var b_leap
 var b_ward
 var b_katsu
@@ -94,6 +96,7 @@ var hint_marks = []
 var ending = false
 
 func setup():
+	rest = 1.0 / 15.0
 	lv = custom if custom != null else Data.LEVELS[idx]
 	rules = lv.get("rules", [])
 	if not back.is_valid():
@@ -163,6 +166,8 @@ func _brief(first):
 		if RULE_NOTE.has(w):
 			here.append(["w:" + w, RULE_NOTE[w]])
 	var fresh = []
+	if first and starts <= 1:
+		new_kinds = kinds.filter(func(k): return not main.data.met.has("y:" + k))
 	for e in here:
 		if not main.data.met.has(e[0]):
 			fresh.append(e[1])
@@ -175,7 +180,8 @@ func _brief(first):
 		notes = [main.touch_words(lv.hint)]   # the stage's own lesson says it better than the stock lines
 	elif first:
 		notes = fresh
-	else:
+	if not first and (lv.hint == "" or not big):
+		# asked for: everything that is here, since the spare panel no longer lists it
 		for e in here:
 			notes.append(e[1])
 	if not notes.is_empty():
@@ -342,6 +348,8 @@ func _after(ok, quiet = "step"):
 	var cursor = 0.0
 	if ending and main.data.opts.motion:
 		var moves = s.events.filter(func(e): return e.t == "move")
+		if not moves.is_empty():
+			cursor = MA
 		var gap = min(0.16, 1.1 / max(1, moves.size()))
 		var sung = {}
 		for e in s.events:
@@ -691,6 +699,11 @@ func tick(dt):
 				e.life -= dt
 		fx = fx.filter(func(e): return e.life > 0.0)
 
+func busy():
+	return not fx.is_empty() or not walk.is_empty() or not later.is_empty() or shake > 0.0 or flash > 0.0 \
+		or (not card.is_empty() and card_len < 100.0) or time - born_t < 2.5 or (done and time - done_t < 8.0) \
+		or hdisp.distance_squared_to(Vector2(s.hero)) > 0.0004
+
 func ctr(p):
 	return ORG + (Vector2(p) + Vector2(0.5, 0.5)) * TS
 
@@ -825,7 +838,9 @@ func _draw():
 			for v in s.paths[k]:
 				old.append(ctr(v))
 			if old.size() > 1:
-				Ink.brush(self, old, 18.0, Ink.a(Ink.AI if (rules.has("wet") and age == 0) else Ink.SUMI, max(0.045, 0.24 * pow(0.6, age))))
+				# drying, but still the stroke it was: where the brush came down, how dry it ran, where it lifted
+				Ink.fude(self, old, 19.0, clamp(float(old.size() - 1) / max(1.0, float(s.ink_max)), 0.0, 1.0), max(0.07, 0.34 * pow(0.6, age)),
+					Ink.AI if (rules.has("wet") and age == 0) else Color(0.11, 0.09, 0.09))
 	elif not s.paths.is_empty() and not done:
 		var old = []
 		for v in s.paths.back():
@@ -1117,6 +1132,8 @@ func _panel_phone(f):
 	var rows = [["気", max(0, s.ki), ki_max, Ink.SHU], ["墨", s.ink, Sim.INK_CAP if s.r_stone else max(s.ink_max, s.ink), Ink.SUMI], ["勢", min(2, s.mom), 2, Ink.AI]]
 	for k in range(rows.size()):
 		var y = 130.0 + k * 66.0
+		if k == 2 and s.mom == 0 and main.spare():
+			continue   # no momentum, nothing to say about it
 		Ink.text(self, f, Vector2(PX, y + 16), rows[k][0], 46, Ink.SUMI)
 		var mx = rows[k][2]
 		if k == 1 and main.spare():
@@ -1137,7 +1154,8 @@ func _panel_phone(f):
 				if i < rows[k][1]:
 					draw_circle(c, rad, rows[k][3])
 				draw_arc(c, rad, 0, TAU, 24, Ink.SUMI, 2.6, true)
-	Ink.text(self, f, Vector2(PX + 220, 272), "next cut deals %d" % min(3, 1 + s.mom), 26, Ink.a(Ink.SUMI, 0.75))
+	if s.mom > 0 or not main.spare():
+		Ink.text(self, f, Vector2(PX + 220, 272), "next cut deals %d" % min(3, 1 + s.mom), 26, Ink.a(Ink.SUMI, 0.75))
 	var wz = ""
 	for w in [["leap", "縮地", s.leap], ["ward", "結界", s.ward], ["katsu", "喝", s.katsu], ["bell", "鐘", s.bell]]:
 		if lv.waza.has(w[0]):
@@ -1163,8 +1181,9 @@ func _panel(f):
 	Ink.text(self, f, Vector2(PX + 150, 52), "上手 mastery: within %d, unharmed" % lv.par, 17, Ink.SHU if _on_par() else Ink.a(Ink.SUMI, 0.5))
 	_pips(f, 96, "気", "Ki", max(0, s.ki), ki_max, Ink.SHU)
 	_pips(f, 134, "墨", "Ink", s.ink, Sim.INK_CAP if s.r_stone else max(s.ink_max, s.ink), Ink.SUMI)
-	_pips(f, 172, "勢", "Momentum", min(2, s.mom), 2, Ink.AI)
-	Ink.text(self, f, Vector2(PX + 230, 170), "a straight cut now deals %d" % min(3, 1 + s.mom), 16, Ink.a(Ink.SUMI, 0.7))
+	if s.mom > 0 or not main.spare():
+		_pips(f, 172, "勢", "Momentum", min(2, s.mom), 2, Ink.AI)
+		Ink.text(self, f, Vector2(PX + 230, 170), "a straight cut now deals %d" % min(3, 1 + s.mom), 16, Ink.a(Ink.SUMI, 0.7))
 	var wz = ""
 	if lv.waza.has("leap"):
 		wz += "縮地 %d   " % s.leap
@@ -1177,7 +1196,7 @@ func _panel(f):
 	if wz != "":
 		Ink.text(self, f, Vector2(PX, 206), "Waza left:  " + wz, 18, Ink.SUMI)
 	var y = 226.0
-	for k in kinds:
+	for k in (new_kinds if main.spare() else kinds):
 		var L = Data.LEGEND[k]
 		main.piece(self, k, Vector2(PX + 18, y + 16), 40, 0.0, false, true)
 		var nm = L[0] + " " + L[1]

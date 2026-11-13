@@ -12,7 +12,9 @@ var cur = null
 var fibers = []
 var art = {}
 var _touch_words = {}
-var late = []        # music not in the first download, still to be fetched (web only)
+var late = []        # music and paintings not in the first download, still to be fetched (web only)
+var art_parts = {}   # the halves of a long scroll that have arrived so far
+var newer = false    # a newer build of the game is waiting to be taken (web only)
 var fetching = ""
 var touch = false   # a phone or tablet: no hover, no right-click, fingers not pointers
 var turn_note
@@ -92,7 +94,13 @@ Turn your phone sideways"
 		fibers.append([p, p + Vector2(cos(ang), sin(ang)) * rng.randf_range(6, 34), rng.randf_range(0.04, 0.13)])
 	art["tohaku"] = load("res://art/tohaku.jpg")
 	for nm in ["sesshu", "hyakki"]:
-		art[nm] = [load("res://art/%s_0.jpg" % nm), load("res://art/%s_1.jpg" % nm)]
+		if ResourceLoader.exists("res://art/%s_0.jpg" % nm):
+			art[nm] = [load("res://art/%s_0.jpg" % nm), load("res://art/%s_1.jpg" % nm)]
+		else:
+			# the web build leaves the two long scrolls out of its first download too
+			art[nm] = []
+			late.append("art:%s_0" % nm)
+			late.append("art:%s_1" % nm)
 	for nm in ["hero", "oni", "oni3", "tengu", "kitsune", "yurei", "tamamo", "chochin", "kasa", "kappa", "nurikabe", "yukionna", "gasha", "daruma", "tanuki", "shinigami", "kamaitachi"]:
 		var t = load("res://art/pieces/%s.png" % nm)
 		if t:
@@ -125,6 +133,12 @@ func _setup_audio():
 		else:
 			late.append(nm)   # the web build leaves the stage music out of its first download
 	_fetch_music()
+	if OS.has_feature("web"):
+		JavaScriptBridge.pwa_update_available.connect(_newer_build)
+		if JavaScriptBridge.pwa_needs_update():
+			_newer_build()
+		# ask now whether there is a newer build, rather than whenever the browser next thinks to
+		JavaScriptBridge.eval("if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update()}).catch(function(){})", true)
 	for nm in ["step", "cut", "kill", "hit", "ward", "leap", "katsu", "sheathe", "click", "win", "lose", "bell", "eat", "splash", "web", "kama", "ink", "ki", "ki2", "brush"]:
 		streams[nm] = load("res://audio/%s.wav" % nm)
 	AudioServer.set_bus_mute(0, not data.sound)
@@ -143,8 +157,9 @@ func play_music(nm):
 		late.erase(nm)
 		late.push_front(nm)   # wanted now: it is fetched next, and starts when it arrives
 
-# On the web the stage music sits beside the game (music/*.ogg) and is fetched one piece at a time
-# once the title is up, so the first download is smaller. Until a piece arrives its stage is quiet.
+# On the web the stage music (music/*.ogg) and the two long scrolls (art/*.webp) sit beside the
+# game and are fetched one at a time once the title is up, so the first download is smaller. Until
+# a piece of music arrives its stage is quiet; until a scroll arrives its place is bare paper.
 func _fetch_music():
 	if late.is_empty() or fetching != "":
 		return
@@ -153,7 +168,8 @@ func _fetch_music():
 	add_child(rq)
 	rq.request_completed.connect(_music_fetched.bind(rq))
 	var page = str(JavaScriptBridge.eval("window.location.href.split('?')[0].split('#')[0]", true))
-	if rq.request(page.substr(0, page.rfind("/") + 1) + "music/" + fetching + ".ogg") != OK:
+	var file = ("art/" + fetching.substr(4) + ".webp") if fetching.begins_with("art:") else ("music/" + fetching + ".ogg")
+	if rq.request(page.substr(0, page.rfind("/") + 1) + file) != OK:
 		rq.queue_free()
 		fetching = ""
 
@@ -161,7 +177,14 @@ func _music_fetched(result, code, _headers, body, rq):
 	rq.queue_free()
 	var nm = fetching
 	fetching = ""
-	if result == HTTPRequest.RESULT_SUCCESS and code == 200:
+	if result == HTTPRequest.RESULT_SUCCESS and code == 200 and nm.begins_with("art:"):
+		var img = Image.new()
+		if img.load_webp_from_buffer(body) == OK:
+			art_parts[nm.substr(4)] = ImageTexture.create_from_image(img)
+			var scroll = nm.substr(4, nm.length() - 6)
+			if art_parts.has(scroll + "_0") and art_parts.has(scroll + "_1"):
+				art[scroll] = [art_parts[scroll + "_0"], art_parts[scroll + "_1"]]
+	elif result == HTTPRequest.RESULT_SUCCESS and code == 200:
 		var got = AudioStreamOggVorbis.load_from_buffer(body)
 		if got != null:
 			streams[nm] = got
@@ -345,6 +368,8 @@ func piece(ci, kind, c, s, t = 0.0, big = false, flat = false, grow = 1.0, mod =
 # Draws a window onto one of the long handscrolls, x pixels along it.
 func band(ci, nm, dest, x):
 	var texs = art[nm]
+	if texs.is_empty():
+		return   # not yet arrived (web)
 	var h = float(texs[0].get_height())
 	var k = dest.size.y / h
 	var ww = dest.size.x / k
@@ -414,6 +439,8 @@ func load_save():
 					data.seals[k] = int(j.seals[k])
 			for k in j.cleared:
 				data.cleared[k] = str(j.cleared[k])
+			if typeof(j.get("ids")) == TYPE_DICTIONARY:
+				_follow_boards(j.ids)
 			if typeof(j.get("up")) == TYPE_DICTIONARY:
 				for k in data.up:
 					if j.up.has(k):
@@ -421,7 +448,42 @@ func load_save():
 			data.henro.at = clamp(data.henro.at, 0, Extra.HENRO.size())
 			data.henro.staffs = clamp(data.henro.staffs, 0, 3)
 
+# What a stage's board is called in the save: the board itself, not its place on the road.
+func board_id(i):
+	return str("".join(Data.LEVELS[i].rows).hash())
+
+# Progress is kept by station number, and beside it which board each number was. If the road has
+# since been rebuilt and a board now stands elsewhere, what was earned on it goes with it; a board
+# that is no longer on the road takes its record with it.
+func _follow_boards(ids):
+	var moved = {}
+	for k in ids:
+		if not k.is_valid_int() or int(k) < 0 or int(k) >= Data.LEVELS.size() or board_id(int(k)) != str(ids[k]):
+			moved[k] = ""
+	if moved.is_empty():
+		return
+	var at = {}
+	for i in range(Data.LEVELS.size()):
+		at[board_id(i)] = str(i)
+	for k in moved:
+		moved[k] = at.get(str(ids[k]), "")
+	for grp in ["cleared", "scroll", "seals"]:
+		var kept = {}
+		for k in data[grp]:
+			if not moved.has(k):
+				kept[k] = data[grp][k]
+		for k in data[grp]:
+			if moved.has(k) and moved[k] != "" and not kept.has(moved[k]):
+				kept[moved[k]] = data[grp][k]
+		data[grp] = kept
+
 func write_save():
+	var ids = {}
+	for grp in ["cleared", "scroll", "seals"]:
+		for k in data[grp]:
+			if k.is_valid_int() and int(k) >= 0 and int(k) < Data.LEVELS.size():
+				ids[k] = board_id(int(k))
+	data["ids"] = ids
 	# written beside the save and then moved over it, so a write cut short cannot leave half a file
 	var tmp = save_path + ".tmp"
 	var f = FileAccess.open(tmp, FileAccess.WRITE)
@@ -591,6 +653,18 @@ func go(scr):
 	move_child(wipe, -1)
 	if data.opts.motion:
 		wipe.start("fusuma" if stage else "fade" if spare() else "wash")
+
+# The web build is kept by a service worker, so it opens at once and without a network. A newer
+# build waits behind the one in use; it is taken (the page reloads) only at the title, never mid-play.
+func _newer_build():
+	newer = true   # the title takes it (scripts/title.gd, tick)
+
+func _take_newer():
+	newer = false
+	# once a minute at most, so that a build that will not take cannot reload the page for ever
+	var again = JavaScriptBridge.eval("(function(){var t=Number(sessionStorage.getItem('jozu_update')||0),n=Date.now();if(n-t<60000)return 1;sessionStorage.setItem('jozu_update',String(n));return 0})()", true)
+	if int(again) == 0:
+		JavaScriptBridge.pwa_update()
 
 func show_title():
 	play_music("title")

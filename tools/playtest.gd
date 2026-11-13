@@ -311,6 +311,20 @@ func _run():
 	await other_roads()
 
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://playtest_save.json"))
+	# progress follows its board when the road is rebuilt
+	main.erase_save()
+	main.record(5, "jouzu", null, 1)
+	main.record(7, "ka", null, 0)
+	var kept_save = JSON.parse_string(FileAccess.get_file_as_string(main.save_path))
+	kept_save.ids["5"] = main.board_id(9)      # as if the board cleared at 6 now stood at 10
+	kept_save.ids["7"] = "nowhere"             # and the one at 8 had left the road
+	var fh2 = FileAccess.open(main.save_path, FileAccess.WRITE)
+	fh2.store_string(JSON.stringify(kept_save))
+	fh2.close()
+	main.load_save()
+	if main.grade_of(9) != "jouzu" or main.grade_of(5) != "" or main.grade_of(7) != "" or main.seals_of(9) != 1:
+		bad("progress did not follow its board: %s" % str(main.data.cleared))
+	main.erase_save()
 	print("playtest finished: %d problem(s)" % fails.size())
 	for f in fails:
 		print("  - ", f)

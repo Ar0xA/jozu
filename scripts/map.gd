@@ -18,7 +18,10 @@ var nav = []          # the buttons of the road page itself (hidden while chapte
 var picking = false   # phone: the page of chapters is open
 var b_close
 
+var moving = false   # the scroll above the road is still travelling
+
 func setup():
+	rest = 1.0 / 15.0
 	# nothing is cleared while the map is open, so the road's totals are counted once
 	var done = 0
 	for i in range(Data.LEVELS.size()):
@@ -129,6 +132,10 @@ func tick(dt):
 	if pan < 0.0:
 		pan = want
 	pan = lerp(pan, want, 1.0 - exp(-dt * 2.2))
+	moving = abs(pan - want) > 0.5
+
+func busy():
+	return moving
 
 func on_motion(pos, _held):
 	hover_st = -1
