@@ -329,6 +329,8 @@ func _after(ok, quiet = "step"):
 		if ["kill", "cut", "hit", "katsu", "ward", "leap", "bell"].has(e.t) and not (ending and e.t == "kill" and e.dmg == 0):
 			main.sfx(e.t)
 			heard = true
+			if e.t == "kill" or e.t == "hit":
+				main.buzz(40 if e.t == "hit" else 14)
 	if not heard and quiet == "step" and main.spare():
 		# the brush on the paper: lower and longer the further the stroke has run
 		main.sfx("brush", clamp(1.30 - 0.09 * s.visited.size(), 0.72, 1.3))

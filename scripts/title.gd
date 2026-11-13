@@ -63,6 +63,8 @@ func _draw():
 		Ink.tategaki(self, f, Vector2(1140, 30), "上手", 180, Ink.a(Ink.SUMI, settle))
 	Ink.stamp(self, f, Vector2(1012, 360), 34, "筆剣", 1.0 if not main.data.opts.motion else (t - 4.0) / 0.3)
 	Ink.blot(self, Vector2(420, 630), 560, 140, Color(0.93, 0.89, 0.79), 0.95)
+	if main.install_tip():
+		Ink.text(self, f, Vector2(64, 496), "Add this page to your home screen and it opens without a network.", 16, Ink.a(Ink.SUMI, 0.6))
 	# the day, as the old almanac names it
 	Ink.text(self, f, Vector2(64, 534), "%s  %s" % [koyomi[0], koyomi[2]], 24, Koyomi.TINT[koyomi[4]])
 	Ink.text(self, f, Vector2(64 + f.get_string_size("%s  %s" % [koyomi[0], koyomi[2]], HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x + 16.0, 532), "%s · %s" % [koyomi[1], koyomi[3]], 17, Ink.a(Ink.SUMI, 0.7))

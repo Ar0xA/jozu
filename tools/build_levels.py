@@ -77,11 +77,11 @@ NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '�
 
 # solutions the in-engine beam solver found for boards too large for the exact solver
 BEAM = {
-    '信太': (4, 'U L U U / R U L L / L U U R / R R leapR R'),
+    '信太': (4, 'R U U / R U L L / R U L L / U U L L'),
     '喝': (5, 'KATSU U leapR U / R D D D / L L L L / L L U U / R U'),
     '怨霊': (4, 'U U U U / R D L KATSU / R U U U / L U'),
     '玉藻前': (5, 'U U U U / U U U leapR / R U L L / L L L KATSU / wardR L L'),
-    '酒呑童子': (6, 'U U U U / U U U R / D D L L / R U U R / R R U L / L L leapL L'),
+    '酒呑童子': (6, 'R R / R U U U / U U U L / D D D L / D L D D / U L leapL U'),
 }
 
 CHAPTERS = [
@@ -797,6 +797,11 @@ p = os.path.join(root, 'scripts', 'data.gd')
 s = open(p, encoding='utf-8').read()
 head = s[:s.index('const LEVELS = [')]
 head = re.sub(r'const WAZA_FROM = \{[^\n]*\}[^\n]*', 'const WAZA_FROM = %s  # first stage index that grants each waza' % json.dumps(waza_from), head)
+# a board that took another's place keeps what was earned on the one it replaced (main.gd)
+new_at = {''.join(l['rows']): n for n, l in enumerate(levels)}
+swapped = {old: new_at[''.join(b['rows'])] for old, b in SWAPS.items() if ''.join(b['rows']) in new_at}
+head = re.sub(r'const SWAPPED = \{[^\n]*\}[^\n]*\n', '', head)
+head = head.replace('const WAZA_FROM', 'const SWAPPED = %s  # boards taken off the road, and the stage index of what replaced each\nconst WAZA_FROM' % json.dumps(swapped), 1)
 i = head.index('const CHAPTERS = [')
 j = head.rindex('\n\n', 0, head.index('const LEGEND')) + 2   # keeps the comment above LEGEND
 ch = 'const CHAPTERS = [\n' + ''.join('\t%s,\n' % json.dumps(c, ensure_ascii=False) for c in chapters) + ']\nconst BOSSES = %s\n\n' % json.dumps(bosses)

@@ -2,11 +2,11 @@ extends RefCounted
 # 暦 The old almanac: the year in twenty-four solar terms (sekki), each in three spans of about
 # five days (kō), seventy-two in all, each named for what the land is doing. The names are those
 # of the Japanese almanac of 1874 (略本暦). The dates are the usual ones and can be a day out in a
-# given year. Three names are given in English only: the game's typeface lacks a character of theirs.
+# given year. A few characters the game's typeface lacks come from a second one (tools/subset_font.py).
 
 # [month, day the sekki begins, sekki, its reading, then three kō: kanji, English]
 const SEKKI = [
-	[2, 4, "立春", "Risshun", "東風解凍", "The east wind melts the ice", "", "Bush warblers sing in the hills", "魚上氷", "Fish rise through the ice"],
+	[2, 4, "立春", "Risshun", "東風解凍", "The east wind melts the ice", "黄鶯睍睆", "Bush warblers sing in the hills", "魚上氷", "Fish rise through the ice"],
 	[2, 19, "雨水", "Usui", "土脉潤起", "Rain wets the soil", "霞始靆", "Mist begins to trail", "草木萌動", "Grass and trees put out buds"],
 	[3, 6, "啓蟄", "Keichitsu", "蟄虫啓戸", "Wintering insects open their doors", "桃始笑", "The peach begins to bloom", "菜虫化蝶", "Caterpillars become butterflies"],
 	[3, 21, "春分", "Shunbun", "雀始巣", "Sparrows begin to nest", "桜始開", "The cherry begins to open", "雷乃発声", "Thunder finds its voice"],
@@ -26,9 +26,9 @@ const SEKKI = [
 	[10, 23, "霜降", "Sōkō", "霜始降", "The first frost falls", "霎時施", "Light rains fall now and then", "楓蔦黄", "Maple and ivy turn"],
 	[11, 7, "立冬", "Rittō", "山茶始開", "Camellias begin to bloom", "地始凍", "The earth begins to freeze", "金盞香", "Daffodils bloom"],
 	[11, 22, "小雪", "Shōsetsu", "虹蔵不見", "The rainbow hides", "朔風払葉", "The north wind strips the leaves", "橘始黄", "Tachibana leaves turn yellow"],
-	[12, 7, "大雪", "Taisetsu", "閉塞成冬", "The sky closes; winter comes", "熊蟄穴", "Bears go to their dens", "", "Salmon gather and run"],
+	[12, 7, "大雪", "Taisetsu", "閉塞成冬", "The sky closes; winter comes", "熊蟄穴", "Bears go to their dens", "鱖魚群", "Salmon gather and run"],
 	[12, 22, "冬至", "Tōji", "乃東生", "Self-heal sprouts", "麋角解", "Deer shed their antlers", "雪下出麦", "Barley sprouts under snow"],
-	[1, 6, "小寒", "Shōkan", "芹乃栄", "Parsley thrives", "水泉動", "Springs thaw", "", "Pheasants begin to call"],
+	[1, 6, "小寒", "Shōkan", "芹乃栄", "Parsley thrives", "水泉動", "Springs thaw", "雉始雊", "Pheasants begin to call"],
 	[1, 20, "大寒", "Daikan", "款冬華", "Butterburs bud", "水沢腹堅", "Ice lies thick on the streams", "鶏始乳", "Hens begin to lay"],
 ]
 const DAYS = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]

@@ -5,7 +5,7 @@ extends "res://scripts/screen_base.gd"
 const ROWS = [
 	["sound", "音", "Sound", "Everything you hear."],
 	["music", "曲", "Music", "The koto, shamisen and flute. Brush and bell sounds stay on."],
-	["motion", "動", "Motion", "Yokai move one after another; the board shakes when you are struck."],
+	["motion", "動", "Motion", "Yokai move one after another; the board shakes, and a phone taps, when you are struck."],
 	["pattern", "印", "Mark danger with a cross", "A black cross on the red tiles, if red is hard to tell from the paper."],
 	["filter", "紙", "Painted look", "Ink-bleed and paper grain. Off: sharper, and easier on an old phone."],
 	["undo", "戻", "Taking strokes back", "Within the stroke in hand, until the brush is lifted; or never, as on the pilgrimage."],

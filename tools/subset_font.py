@@ -36,5 +36,20 @@ sub.populate(unicodes=[ord(c) for c in chars])
 sub.subset(font)
 font.save(dst)
 print('%d characters kept; %.1f MB -> %.2f MB' % (len(chars), os.path.getsize(src) / 1e6, os.path.getsize(dst) / 1e6))
+# What Yuji Syuku lacks is taken from Shippori Mincho, an old-style Mincho (SIL OFL, see
+# fonts/OFL-ShipporiMincho.txt), into a second small font the game falls back on.
+sys.stdout.reconfigure(encoding='utf-8')
+fill_src = os.path.join(root, 'fonts', 'src', 'ShipporiMincho-Regular.ttf')
+fill_dst = os.path.join(root, 'fonts', 'ShipporiMincho-Fill.ttf')
+if missing and os.path.exists(fill_src):
+    fill = TTFont(fill_src, recalcTimestamp=False)
+    got = set(fill.getBestCmap().keys())
+    take = [c for c in missing if ord(c) in got]
+    missing = [c for c in missing if ord(c) not in got]
+    sub2 = subset.Subsetter(opts)
+    sub2.populate(unicodes=[ord(c) for c in take])
+    sub2.subset(fill)
+    fill.save(fill_dst)
+    print('%d taken from Shippori Mincho: %s (%.0f KB)' % (len(take), ''.join(take), os.path.getsize(fill_dst) / 1e3))
 if missing:
-    print('not in this typeface (the system font, if any, will draw them): ' + ''.join(missing))
+    print('in neither typeface (the system font, if any, will draw them): ' + ''.join(missing))

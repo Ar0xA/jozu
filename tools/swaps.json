@@ -138,5 +138,445 @@
   "rules": [],
   "ink": 4,
   "chapter": 5
+ },
+ {
+  "replaces": "~p...~~~o....pp#....~~p...~~.......#.........H...",
+  "rows": [
+   "..~.o..",
+   "..~t...",
+   "..p..O.",
+   ".#p.T#.",
+   "..#.#..",
+   "...#y..",
+   "......H"
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 5,
+  "trace": "L U R wardL / U U U L / L L L U / R R D D / L L D R",
+  "rules": [],
+  "ink": 4,
+  "chapter": 6
+ },
+ {
+  "replaces": "t...t.........~.....~~pO..~~~p...~~#.....#...H...",
+  "rows": [
+   "iTOpt.i",
+   "...pi.i",
+   "..#~...",
+   "...~...",
+   "#.H....",
+   "..ii...",
+   "......."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 6,
+  "trace": "R R R U / L U U R / L L D / L L D D / L L L wardU / U U U U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 6
+ },
+ {
+  "replaces": "f...n.fT#~~~#y..~~~n.n.........#....f...f....H...",
+  "rows": [
+   "OTn...c",
+   "T......",
+   "~~...~~",
+   "~f.n..~",
+   "~..#..~",
+   ".f.....",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 7,
+  "trace": "R U U U / L L L U / L U U wardL / L U U R / R R R R / L L L L / L L D D",
+  "rules": [],
+  "ink": 4,
+  "chapter": 7
+ },
+ {
+  "replaces": ".T~y..t..p....t#~.t....p..............#......H...",
+  "rows": [
+   ".f.ttf.",
+   ".#...#.",
+   "...u.To",
+   ".f~~.f.",
+   "##~~.##",
+   "..~~...",
+   "c..H..u"
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 6,
+  "trace": "L L L / R R / R R U wardU / U U R R / U L L / L U U L",
+  "rules": [],
+  "ink": 4,
+  "chapter": 8
+ },
+ {
+  "replaces": "...~.T...c~c..#..~..##.n~.y#n..~.............H...",
+  "rows": [
+   "Ti~i.it",
+   ".o~i.n.",
+   ".#~i.#T",
+   ".t~....",
+   "....c..",
+   ".......",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 7,
+  "trace": "R U U / U U U R / U R D D / U L L L / L D D L / L U L wardU / U U U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 8
+ },
+ {
+  "replaces": "Tf.O.f.y.T..O..ff.ff.#O~~~.#..~~~.O..~~~..y..H...",
+  "rows": [
+   "....tto",
+   "Ot.T.tt",
+   ".......",
+   "..f.f..",
+   "#.###.#",
+   ".......",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 6,
+  "trace": "R R R U / L U U wardU / U U R D / L L L L / L U R R / R R U R",
+  "rules": [],
+  "ink": 4,
+  "chapter": 9
+ },
+ {
+  "replaces": "~~iti~~p.ntOk~~~#f#~~fT...if.......i.....OH......",
+  "rows": [
+   "T...o..",
+   ".O.O...",
+   "....tT.",
+   ".~#~~p~",
+   "c......",
+   ".......",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 6,
+  "trace": "L L L / U U U wardU / U R U U / D R R R / D D R / D D R R",
+  "rules": [],
+  "ink": 4,
+  "chapter": 9
+ },
+ {
+  "replaces": ".......o......#..a..#......c#.....#............H.",
+  "rows": [
+   ".......",
+   ".......",
+   "...o..a",
+   "..#a#..",
+   ".......",
+   ".....o.",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 3,
+  "trace": "U wardR U / U U R R / R D L L",
+  "rules": [],
+  "ink": 4,
+  "chapter": 18
+ },
+ {
+  "replaces": ".....c.........#........o.a........H#.........a..",
+  "rows": [
+   ".c.....",
+   ".......",
+   ".a.o..c",
+   ".......",
+   ".#.#.#.",
+   "..#.#..",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 4,
+  "trace": "R R R U / U U U wardL / L L L L / L U U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 18
+ },
+ {
+  "replaces": "..........#.a.O.......#.....#.....a..........H..a",
+  "rows": [
+   ".c.....",
+   ".....a.",
+   "..~~...",
+   "..~~...",
+   "..~~...",
+   "#a....#",
+   "...H..o"
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 5,
+  "trace": "wardR L L / R U L U / U U U U / R R R R / D D D",
+  "rules": [],
+  "ink": 4,
+  "chapter": 18
+ },
+ {
+  "replaces": ".........#...e#...................c..H.........e.",
+  "rows": [
+   ".oo....",
+   ".e.e...",
+   ".......",
+   ".......",
+   ".......",
+   "...#...",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 3,
+  "trace": "L U U U / U U wardU R / L L U U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 19
+ },
+ {
+  "replaces": ".............e...iOiie#.iiii..#iiii...iiic...H...",
+  "rows": [
+   ".iiie..",
+   ".iiii..",
+   "o~~ii..",
+   ".~~ii..",
+   "......H",
+   "...O...",
+   "....e.."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 3,
+  "trace": "L L wardL U / R D L U / R D D D",
+  "rules": [],
+  "ink": 4,
+  "chapter": 19
+ },
+ {
+  "replaces": "~~...~~~#....~~e#...~~.#...~.....o.e.........H..c",
+  "rows": [
+   ".t...e.",
+   ".....t.",
+   "..e.t..",
+   "...#...",
+   "...#...",
+   ".......",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 4,
+  "trace": "R U U wardU / U U L L / L U U R / R R R D",
+  "rules": [],
+  "ink": 4,
+  "chapter": 19
+ },
+ {
+  "replaces": "...eOe..iiiii...#..i.....ti.............o.o..H...",
+  "rows": [
+   "..e....",
+   "..###..",
+   ".......",
+   "..e..c.",
+   "...#...",
+   ".o.....",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 4,
+  "trace": "L U U U / wardD R R R / L L L L / U U U R",
+  "rules": [],
+  "ink": 4,
+  "chapter": 19
+ },
+ {
+  "replaces": ".......#.....#.XX..............#......#......H...",
+  "rows": [
+   ".....X.",
+   "..#.X..",
+   "......c",
+   ".##....",
+   ".......",
+   ".......",
+   ".H..c.."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 3,
+  "trace": "R R R U / U U U wardU / R R R R",
+  "rules": [],
+  "ink": 4,
+  "chapter": 25
+ },
+ {
+  "replaces": "....X.X.....................#...c.#.H............",
+  "rows": [
+   "~....X~",
+   "~~...~~",
+   "~~.#.~~",
+   "~#....~",
+   "......X",
+   "......c",
+   "..H...."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 3,
+  "trace": "R R R / U U R wardU / L U U U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 25
+ },
+ {
+  "replaces": "..u.X.....u......c...##.t....X..........H........",
+  "rows": [
+   ".......",
+   "...X...",
+   "~.c..c~",
+   "~..#..~",
+   "~#...#~",
+   "~~...~~",
+   "...H..c"
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 4,
+  "trace": "R R R / L L U U / U R wardL U / L L L L",
+  "rules": [],
+  "ink": 4,
+  "chapter": 25
+ },
+ {
+  "replaces": ".co.......#X....t....X.......................H...",
+  "rows": [
+   ".......",
+   "...t..X",
+   ".#.o.#.",
+   ".......",
+   "H......",
+   "..#.#..",
+   ".....c."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 4,
+  "trace": "R R R wardR / R R D D / U U U U / L L U U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 25
+ },
+ {
+  "replaces": "...~~~.#c.~~~#.#...#............K........KH......",
+  "rows": [
+   "......K",
+   ".K.#...",
+   "c......",
+   "..#.#..",
+   ".......",
+   "......K",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 3,
+  "trace": "U U wardL U / U L L L / R R R",
+  "rules": [],
+  "ink": 4,
+  "chapter": 30
+ },
+ {
+  "replaces": ".....K........~~.~~~~....Kc.H.#K#................",
+  "rows": [
+   ".......",
+   "....c..",
+   "##~~.##",
+   ".K~~...",
+   "..~~o..",
+   ".....c.",
+   "...H..."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 3,
+  "trace": "R R R / L U U wardD / L U U U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 30
+ },
+ {
+  "replaces": ".............o.......K.#.#o.K......#.....#...H...",
+  "rows": [
+   ".K.....",
+   ".......",
+   ".......",
+   "~.~~~~.",
+   "....c..",
+   "K.#.#..",
+   "...H..o"
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 3,
+  "trace": " / R R wardL U / U L L D",
+  "rules": [],
+  "ink": 4,
+  "chapter": 30
+ },
+ {
+  "replaces": "..t....t........t.K...#..K#..................H..K",
+  "rows": [
+   "..K....",
+   ".c.t...",
+   "K...t..",
+   "t......",
+   ".#...#.",
+   "......H",
+   "......."
+  ],
+  "waza": [
+   "ward"
+  ],
+  "par": 4,
+  "trace": "L L L L / U U L L / R U U wardR / R R R D",
+  "rules": [],
+  "ink": 4,
+  "chapter": 30
  }
 ]

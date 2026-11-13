@@ -15,6 +15,7 @@ var _touch_words = {}
 var late = []        # music and paintings not in the first download, still to be fetched (web only)
 var art_parts = {}   # the halves of a long scroll that have arrived so far
 var newer = false    # a newer build of the game is waiting to be taken (web only)
+var tip = -1         # whether the title names the home screen this visit: -1 not yet decided, 0 no, 1 yes
 var fetching = ""
 var touch = false   # a phone or tablet: no hover, no right-click, fingers not pointers
 var turn_note
@@ -41,7 +42,9 @@ func _ready():
 	# Yuji Syuku: a typeface cut from brush-written kana and kanji (SIL OFL, see fonts/OFL.txt)
 	var ff = load("res://fonts/YujiSyuku-Regular.ttf")
 	if ff:
-		ff.fallbacks = [sysf]
+		# the few characters it lacks come from Shippori Mincho (SIL OFL, fonts/OFL-ShipporiMincho.txt)
+		var fill = load("res://fonts/ShipporiMincho-Fill.ttf")
+		ff.fallbacks = [fill, sysf] if fill else [sysf]
 		font = ff
 	touch = DisplayServer.is_touchscreen_available()
 	# everything on screen passes through the paint shader
@@ -242,6 +245,29 @@ func sfx(nm, pitch = 1.0):
 	p.pitch_scale = pitch
 	p.play()
 
+# A phone taps when a cut lands or you are struck, where the browser or the device can (Android;
+# an iPhone's browser cannot). It goes with the Motion setting.
+func buzz(ms):
+	if not touch or not data.opts.motion:
+		return
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("if (navigator.vibrate) navigator.vibrate(%d)" % ms)
+	else:
+		Input.vibrate_handheld(ms)
+
+# Once, on a phone's browser, the title says the game can be kept on the home screen. It is said
+# for one visit and not again, and never to someone who already opened it from there.
+func install_tip():
+	if tip < 0:
+		tip = 0
+		if touch and OS.has_feature("web") and not data.told and not data.cleared.is_empty():
+			var kept = JavaScriptBridge.eval("(window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true) ? 1 : 0")
+			if int(kept) == 0:
+				tip = 1
+				data.told = true
+				write_save()
+	return tip == 1
+
 func toggle_sound():
 	data.sound = not data.sound
 	AudioServer.set_bus_mute(0, not data.sound)
@@ -403,7 +429,7 @@ func _draw():
 
 func fresh():
 	return {"cleared": {}, "scroll": {}, "seals": {}, "daily": {"day": -1, "last": -1, "streak": 0, "best": 0},
-		"henro": {"at": 0, "staffs": 3, "best": 0, "done": 0}, "mine": "", "sound": true, "opts": OPTS.duplicate(), "days": {}, "tries": {}, "rand": {}, "met": {}, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
+		"henro": {"at": 0, "staffs": 3, "best": 0, "done": 0}, "mine": "", "told": false, "sound": true, "opts": OPTS.duplicate(), "days": {}, "tries": {}, "rand": {}, "met": {}, "up": {"ink": 0, "ki": 0, "leap": 0, "ward": 0, "katsu": 0}}
 
 func load_save():
 	_front = -1
@@ -417,6 +443,7 @@ func load_save():
 		else:
 			if j.has("sound"):
 				data.sound = bool(j.sound)
+			data.told = bool(j.get("told", false))
 			if j.has("scroll") and typeof(j.scroll) == TYPE_DICTIONARY:
 				data.scroll = j.scroll
 			for grp in ["daily", "henro"]:
@@ -454,7 +481,8 @@ func board_id(i):
 
 # Progress is kept by station number, and beside it which board each number was. If the road has
 # since been rebuilt and a board now stands elsewhere, what was earned on it goes with it; a board
-# that is no longer on the road takes its record with it.
+# that is no longer on the road takes its record with it, unless another was put in its place
+# (Data.SWAPPED): then the clear and the seals stay at that station, and only the drawn scroll goes.
 func _follow_boards(ids):
 	var moved = {}
 	for k in ids:
@@ -465,15 +493,22 @@ func _follow_boards(ids):
 	var at = {}
 	for i in range(Data.LEVELS.size()):
 		at[board_id(i)] = str(i)
+	var swapped = {}
+	for rows in Data.SWAPPED:
+		swapped[str(rows.hash())] = str(int(Data.SWAPPED[rows]))
+	var redrawn = {}   # stations whose board was replaced: the old strokes do not fit the new one
 	for k in moved:
 		moved[k] = at.get(str(ids[k]), "")
+		if moved[k] == "" and swapped.has(str(ids[k])):
+			moved[k] = swapped[str(ids[k])]
+			redrawn[k] = true
 	for grp in ["cleared", "scroll", "seals"]:
 		var kept = {}
 		for k in data[grp]:
 			if not moved.has(k):
 				kept[k] = data[grp][k]
 		for k in data[grp]:
-			if moved.has(k) and moved[k] != "" and not kept.has(moved[k]):
+			if moved.has(k) and moved[k] != "" and not kept.has(moved[k]) and not (grp == "scroll" and redrawn.has(k)):
 				kept[moved[k]] = data[grp][k]
 		data[grp] = kept
 
@@ -497,11 +532,13 @@ func write_save():
 func erase_save():
 	var snd = data.get("sound", true)
 	var opts = data.get("opts", OPTS.duplicate())
+	var told = data.get("told", false)
 	_front = -1
 	gate_told = -1
 	data = fresh()
 	data.sound = snd
 	data.opts = opts
+	data.told = told
 	write_save()
 
 func grade_of(i):

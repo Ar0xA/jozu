@@ -467,9 +467,7 @@
   "kanji": "信太",
   "name": "The Shinoda Mirror",
   "par": 4,
-  "waza": [
-   "leap"
-  ],
+  "waza": [],
   "rows": [
    "t......",
    ".#.k.#.",
@@ -479,7 +477,7 @@
    ".#...#.",
    "...H..k"
   ],
-  "hint": "A ward also breaks the tengu's wind. One leaf, three uses — choose.",
+  "hint": "Two foxes and a tengu. A fox steps as you step, so it can be cut only where it has no step left: against stone, or the edge.",
   "story": [
    [
     "Kuzunoha",
@@ -619,8 +617,7 @@
   "name": "Shuten-dōji",
   "par": 6,
   "waza": [
-   "leap",
-   "ward"
+   "leap"
   ],
   "rows": [
    "c..S..c",
@@ -1700,7 +1697,7 @@
  {
   "kanji": "狸",
   "name": "Tanuki",
-  "hint": "Tanuki 狸: it sits as a stone with a leaf on it, and stone cannot be cut. End a stroke on a tile beside it, or startle it with a shout, and it shows itself. After that it is a yokai like any other.",
+  "hint": "Tanuki 狸: it sits as a stone with a leaf on it, and stone cannot be cut. End a stroke on a tile beside it and it shows itself. After that it is a yokai like any other. On a stage that grants the shout, a shout startles it out as well.",
   "story": [
    [
     "",
@@ -2040,7 +2037,7 @@
  {
   "kanji": "蜘蛛",
   "name": "The Spider",
-  "hint": "Web 巣: step into a web and your stroke ends there; whatever ink you had left is lost. Yokai walk over webs freely. A leap clears one.",
+  "hint": "Web 巣: step into a web and your stroke ends there; whatever ink you had left is lost. Yokai walk over webs freely. On a stage that grants the leap, a leap clears one.",
   "story": [
    [
     "",
@@ -2192,7 +2189,7 @@
  {
   "kanji": "嵐",
   "name": "The Storm",
-  "hint": "Wind, a bell and the sickle weasel together. The wind carries lanterns, umbrellas and ghosts a tile each turn. The bell, once, holds every yokai still, but it does not hold the wind.",
+  "hint": "Wind and the sickle weasel together. The wind carries lanterns, umbrellas and ghosts a tile each turn. On a stage that grants the bell, it holds every yokai still once, but it does not hold the wind.",
   "story": [
    [
     "",
@@ -2204,11 +2201,11 @@
    ],
    [
     "Suzu",
-    "And the bell?"
+    "And if I had a bell to ring?"
    ],
    [
     "Tessai",
-    "The bell stops what has legs. It does not stop weather."
+    "You have none today. A bell stops what has legs. It does not stop weather."
    ]
   ],
   "after": [

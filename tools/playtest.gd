@@ -325,6 +325,20 @@ func _run():
 	if main.grade_of(9) != "jouzu" or main.grade_of(5) != "" or main.grade_of(7) != "" or main.seals_of(9) != 1:
 		bad("progress did not follow its board: %s" % str(main.data.cleared))
 	main.erase_save()
+	# and a board that was replaced leaves its clear with the one that took its place
+	if Data.SWAPPED.size() > 0:
+		var old9 = Data.SWAPPED.keys()[0]
+		var stn = int(Data.SWAPPED[old9])
+		main.record(stn, "jouzu", null, 1)
+		var sv9 = JSON.parse_string(FileAccess.get_file_as_string(main.save_path))
+		sv9.ids[str(stn)] = str(old9.hash())
+		var fh9 = FileAccess.open(main.save_path, FileAccess.WRITE)
+		fh9.store_string(JSON.stringify(sv9))
+		fh9.close()
+		main.load_save()
+		if main.grade_of(stn) != "jouzu" or main.seals_of(stn) != 1:
+			bad("a replaced board did not leave its clear behind: %s" % str(main.data.cleared))
+		main.erase_save()
 	print("playtest finished: %d problem(s)" % fails.size())
 	for f in fails:
 		print("  - ", f)

@@ -659,10 +659,14 @@ static class Gen
     public static void SolveFile(string inPath, string outPath)
     {
         var levels = JsonSerializer.Deserialize<List<LevelOut>>(File.ReadAllText(inPath));
-        Parallel.ForEach(levels, lv =>
+        // JOZU_CAP: how many positions a board may take before it is given up (the long search);
+        // JOZU_PAR: how many boards at once, since a long search needs the memory
+        int cap = int.TryParse(Environment.GetEnvironmentVariable("JOZU_CAP"), out var c0) ? c0 : 250_000;
+        int par = int.TryParse(Environment.GetEnvironmentVariable("JOZU_PAR"), out var p0) ? p0 : -1;
+        Parallel.ForEach(levels, new ParallelOptions { MaxDegreeOfParallelism = par }, lv =>
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            var r = SolveRows(lv.rows, lv.waza, 250_000, lv.rules, lv.ink);
+            var r = SolveRows(lv.rows, lv.waza, cap, lv.rules, lv.ink);
             lv.par = r.par; lv.ways = r.ways; lv.states = r.states; lv.trace = r.capped ? "CAPPED" : r.trace;
             if (r.par > 0) lv.score = Score(r, lv.rows);
             lock (levels) Console.WriteLine($"{lv.name,-10} par={lv.par,2} ways={lv.ways,8:0} states={lv.states,8} score={lv.score,5:0.0} {sw.Elapsed.TotalSeconds,5:0.0}s  {lv.trace}");
@@ -1026,10 +1030,16 @@ static class Gen
             var rows = Make(r, g);
             if (rows == null) return null;
             string kanjiName = lastName;
-            var waza = g.wazaSets[r.Next(g.wazaSets.Length)].Split(',', StringSplitOptions.RemoveEmptyEntries);
-            // JOZU_WAZA=ward: only boards that grant that technique are tried
+            // JOZU_WAZA=ward: only boards that grant that technique are made; a segment that never
+            // grants it grants it alone
             var must = Environment.GetEnvironmentVariable("JOZU_WAZA");
-            if (!string.IsNullOrEmpty(must) && !waza.Contains(must)) return null;
+            var sets = g.wazaSets;
+            if (!string.IsNullOrEmpty(must))
+            {
+                sets = sets.Where(x => x.Split(',').Contains(must)).ToArray();
+                if (sets.Length == 0) sets = new[] { must };
+            }
+            var waza = sets[r.Next(sets.Length)].Split(',', StringSplitOptions.RemoveEmptyEntries);
             var feats = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith("+") && x != "+brush").ToArray();
             if (feats.Contains("+bell")) waza = waza.Append("bell").ToArray();
             var rules = g.rules.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(x => !x.StartsWith("+"))
@@ -1109,6 +1119,12 @@ static class Gen
                     if (plain.capped || plain.par > 0) return null;
                 }
                 score = Score(res, rows);
+            }
+            if (!string.IsNullOrEmpty(must) && res.par > 0)
+            {
+                // and mastery must need it: without it the same count must be out of reach
+                var bare = new Sim(rows, ink, 3, L && must != "leap", Wd && must != "ward", K && must != "katsu", rules, B).Solve(250_000, res.par, secs * 4);
+                if (bare.capped || bare.par > 0) return null;
             }
             var lv = new LevelOut { chapter = g.chapter, seg = g.seg, name = kanjiName ?? "", rows = rows, waza = waza, rules = rules, ink = ink, par = res.par, ways = res.ways, states = res.states, trace = res.trace, score = score };
             return lv;
