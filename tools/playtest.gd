@@ -194,6 +194,13 @@ func _run():
 		main.cur._page(main.cur._chapter_of(i))
 		main.cur.on_click(main.cur.st_pos(i), MOUSE_BUTTON_LEFT)
 		await frames()
+		if main.PRINTS.has(i):
+			# a great yokai's print comes first, and a tap goes on from it
+			if kind() != "print":
+				bad("stage %d: its print did not show" % (i + 1))
+			else:
+				main.cur.on_click(Vector2(640, 300), MOUSE_BUTTON_LEFT)
+				await frames()
 		if lv.story.is_empty():
 			if kind() != "battle":
 				bad("stage %d: clicking the station did not start the battle" % (i + 1))
