@@ -1003,7 +1003,10 @@ func _draw():
 
 	_panel(f)
 	if guide_msg != "":
-		if main.touch:
+		if main.touch and main.tall:
+			# upright the line would run off the board's part: it goes in the open middle of the panel
+			Ink.para(self, f, Vector2(692, 318), "手本  " + main.touch_words(guide_msg), 22, Ink.SHU, 570)
+		elif main.touch:
 			draw_rect(Rect2(40, 690, 1200, 30), Ink.a(Ink.PAPER, 0.92))
 			Ink.text(self, f, Vector2(52, 714), "手本  " + main.touch_words(guide_msg), 24, Ink.SHU)
 		else:

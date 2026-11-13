@@ -52,6 +52,9 @@ func _initialize():
 			main.cur.notice = ""
 			main.cur._page(17)],
 		["card", func(): main.show_battle(34)],
+		["first", func():
+			main.show_battle(0)
+			main.cur.card = []],
 		["board", func():
 			main.show_battle(34)
 			main.cur.card = []
