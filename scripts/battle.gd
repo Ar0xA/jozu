@@ -587,7 +587,7 @@ func _finish():
 			extra.append(btn(Rect2(250, 470, 200, 50), "Onward" if kind_of != "random" else "Another", nxt2 if nxt2 is Callable else back, "進"))
 			if lv.has("code"):
 				extra.append(btn(Rect2(160, 526, 170, 44), "Try again", _restart))
-				extra.append(btn(Rect2(346, 526, 196, 44), "Copy its code", func(): DisplayServer.clipboard_set(lv.code), "写"))
+				extra.append(btn(Rect2(346, 526, 196, 44), "Copy its link", func(): DisplayServer.clipboard_set(main.board_link(lv.code)), "写"))
 			elif kind_of != "henro":
 				extra.append(btn(Rect2(250, 526, 200, 44), "Try again", _restart))
 			if kind_of == "daily":

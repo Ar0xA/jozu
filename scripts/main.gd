@@ -129,7 +129,8 @@ Turn your phone sideways"
 	add_child(tall_view)
 	get_window().size_changed.connect(_fit)
 	_fit()
-	show_title()
+	if not _linked_board():
+		show_title()
 
 # Wide or upright? Upright, the sheet is 720 across and as tall as the screen makes it, and the
 # page moves off screen to be cut up (scripts/tall.gd); wide, everything is as it always was.
@@ -1135,9 +1136,38 @@ func board_code(b):
 	var raw = "".join(b.rows) + "|" + initials + "|" + ",".join(b.rules) + "|" + str(int(b.ink)) + "|" + str(int(b.par))
 	return "JZ1." + Marshalls.utf8_to_base64(raw).replace("+", "-").replace("/", "_").replace("=", "")
 
+# A board's code as a link: opened in a browser, it goes straight to that board.
+const HOME = "https://ar0xa.github.io/jozu/"
+
+func board_link(code):
+	return HOME + "#" + code
+
+# The page was opened by such a link: play the board it carries, once, and forget the link.
+func _linked_board():
+	if not OS.has_feature("web"):
+		return false
+	var hash = str(JavaScriptBridge.eval("window.location.hash || ''", true))
+	if not hash.contains("JZ1."):
+		return false
+	JavaScriptBridge.eval("history.replaceState(null, '', window.location.pathname + window.location.search)", true)
+	var b = board_from_code(hash)
+	if b.is_empty():
+		return false
+	var lv = board_level(b)
+	lv["code"] = board_code(b)
+	lv["kanji"] = "伝"
+	lv["name"] = "A board passed on"
+	lv["hint"] = "Someone made this board and passed it on to you." + (" They mastered it in %d stroke%s." % [int(b.par), "" if int(b.par) == 1 else "s"] if int(b.par) > 0 else "")
+	play_music("battle")
+	show_custom(lv, "custom", "A board passed on", func(_g, _m, _t): return show_title, Callable(), show_title)
+	return true
+
+# The code may come with a link or other words around it: it is read from where it begins.
 func board_from_code(code):
-	if not code.begins_with("JZ1."):
+	var from = code.find("JZ1.")
+	if from < 0:
 		return {}
+	code = code.substr(from).strip_edges()
 	var b64 = code.substr(4).replace("-", "+").replace("_", "/")
 	for ch in b64:
 		if not "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".contains(ch):

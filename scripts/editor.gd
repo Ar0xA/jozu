@@ -188,10 +188,15 @@ func _copy():
 	if line.text == "":
 		msg = "Nothing to copy yet: clear your board first."
 		return
-	DisplayServer.clipboard_set(line.text)
-	msg = "Copied. Anyone can paste it here to play your board."
+	DisplayServer.clipboard_set(main.board_link(line.text))
+	msg = "Copied as a link: it opens straight onto your board. It can also be pasted here."
 
 func _load():
+	if main.touch and OS.has_feature("web"):
+		# a phone's keyboard does not reach the line above: the browser asks instead
+		var typed = JavaScriptBridge.eval("prompt('Paste a board code or link (JZ1.\u2026)') || ''", true)
+		if typed != null and str(typed).strip_edges() != "":
+			line.text = str(typed).strip_edges()
 	var got = main.board_from_code(line.text.strip_edges())
 	if got.is_empty():
 		msg = "That is not a board code."

@@ -350,6 +350,12 @@ func _run():
 	if not main.take_code("  " + code9 + "\n") or main.grade_of(3) != "jouzu" or main.grade_of(4) != "ka" or main.seals_of(3) != 3:
 		bad("a save did not come back from its code: %s" % str(main.data.cleared))
 	main.erase_save()
+	# a board's code is read out of a link
+	var bd = main.blank_board()
+	bd.rows[0] = "o......"
+	var link9 = main.board_link(main.board_code(bd))
+	if main.board_from_code(link9).is_empty() or main.board_from_code(link9).rows != bd.rows or not main.board_from_code("hello").is_empty():
+		bad("a board did not come back out of its link")
 	print("playtest finished: %d problem(s)" % fails.size())
 	for f in fails:
 		print("  - ", f)
