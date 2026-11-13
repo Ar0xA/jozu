@@ -824,5 +824,357 @@
   ],
   "ink": 4,
   "chapter": 31
+ },
+ {
+  "replaces": "......................#.#.ee..............c.....H",
+  "rows": [
+   ".t.t...",
+   "..t..i.",
+   ".ieeii.",
+   "~~~~.~~",
+   ".....i.",
+   "..#....",
+   "...H..."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 3,
+  "trace": "R U U U / U L KATSU D / L U L U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 19
+ },
+ {
+  "replaces": ".........#.#.e.c...e........#..#c.#..........H...",
+  "rows": [
+   "..~....",
+   "..~.cee",
+   ".#~t...",
+   ".......",
+   ".......",
+   "o#.....",
+   ".c..H.."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 4,
+  "trace": "L L L / L KATSU R U / R U U U / R U R R",
+  "rules": [],
+  "ink": 4,
+  "chapter": 19
+ },
+ {
+  "replaces": "........#.e.........e.........H...o.......c......",
+  "rows": [
+   "...~~~t",
+   "..#~~~e",
+   ".ki~~~.",
+   ".iic...",
+   "#ik...#",
+   ".....H.",
+   ".e....."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 5,
+  "trace": "L L U KATSU / D L L D / R R R U / U U R L / R U U U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 19
+ },
+ {
+  "replaces": ".c........#...~.c...~~p...~~p.f#f.~.#...#....H...",
+  "rows": [
+   "...f...",
+   ".....c.",
+   "~#.#..p",
+   "~.....~",
+   "~~c.c~~",
+   "~....c~",
+   "...H..."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 3,
+  "trace": "R R U L / L U KATSU U / R R U U",
+  "rules": [
+   "rain"
+  ],
+  "ink": 4,
+  "chapter": 21
+ },
+ {
+  "replaces": "...f..c.f.t..c.......#.p~...#cp~......#......H...",
+  "rows": [
+   "..c....",
+   "..o....",
+   "..t....",
+   "~.#p~p~",
+   "..#....",
+   "f......",
+   "..o...H"
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 4,
+  "trace": "L L L L / L U U U / U U R KATSU / R D D D",
+  "rules": [
+   "rain"
+  ],
+  "ink": 4,
+  "chapter": 21
+ },
+ {
+  "replaces": ".......~~.t.p~p.#.#.~~..c..~..#f#.c#...H.#..O....",
+  "rows": [
+   "c......",
+   ".......",
+   ".......",
+   "..#.#c.",
+   "pfp.~p~",
+   ".f.#.f.",
+   "...H..."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 5,
+  "trace": "L U U L / U U U L / U U KATSU R / R R D D / U R R D",
+  "rules": [
+   "rain"
+  ],
+  "ink": 4,
+  "chapter": 21
+ },
+ {
+  "replaces": "...c...#c..c...o............#........#.......H...",
+  "rows": [
+   ".......",
+   "..#....",
+   ".......",
+   ".co..c.",
+   ".....c.",
+   "......c",
+   "...H..."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 3,
+  "trace": "R R U KATSU / U U L L / L L",
+  "rules": [
+   "night"
+  ],
+  "ink": 4,
+  "chapter": 23
+ },
+ {
+  "replaces": "c.........c...........c..c.c...#...##...##...H...",
+  "rows": [
+   "......c",
+   "..t...c",
+   ".......",
+   ".~~.~~~",
+   "#H....#",
+   "...u..c",
+   "....c.."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 5,
+  "trace": "R R R R / D KATSU L D / L U U U / U L U R / R R R U",
+  "rules": [
+   "night"
+  ],
+  "ink": 4,
+  "chapter": 23
+ },
+ {
+  "replaces": "....c...#............c.o....c......#.........H..o",
+  "rows": [
+   ".O.~...",
+   "..#~#i.",
+   ".ii~iO.",
+   "t..~.it",
+   "...~.i.",
+   "#c....#",
+   "...H..c"
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 5,
+  "trace": "R R R / L U U / R D L D / D L L L / U U R KATSU",
+  "rules": [
+   "night"
+  ],
+  "ink": 4,
+  "chapter": 23
+ },
+ {
+  "replaces": "X............X#.c..u#................#.#.....H...",
+  "rows": [
+   "..X~...",
+   "...~.ou",
+   "#..~..#",
+   ".....t.",
+   ".......",
+   ".H.#c..",
+   "....o.."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 4,
+  "trace": "R D R KATSU / R R U U / U U R D / U L L L",
+  "rules": [],
+  "ink": 4,
+  "chapter": 24
+ },
+ {
+  "replaces": "..~....#u~X..#.i~.....i~.uuX.i~ii.X..#.#.....H...",
+  "rows": [
+   "....t..",
+   "...#...",
+   "..c..u.",
+   "....o..",
+   "##..o##",
+   "H......",
+   "....X.."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 4,
+  "trace": "R R R / D D U KATSU / U U L U / R R U U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 24
+ },
+ {
+  "replaces": ".c..~......~X.....~..#..c..X.................H...",
+  "rows": [
+   "uXu.u..",
+   ".......",
+   ".......",
+   "X##.##.",
+   "#.c..H#",
+   ".......",
+   "......."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 4,
+  "trace": "L L L / R U U KATSU / L U U U / D D D R",
+  "rules": [],
+  "ink": 4,
+  "chapter": 24
+ },
+ {
+  "replaces": "..c...m.........o#......#.........o............H.",
+  "rows": [
+   ".......",
+   ".o.....",
+   "..#.#..",
+   "...o..c",
+   "......c",
+   "m......",
+   "...H..."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 3,
+  "trace": "U U KATSU R / R R U L / L L L L",
+  "rules": [],
+  "ink": 4,
+  "chapter": 26
+ },
+ {
+  "replaces": "...o..o#.o...##.....#.....m........H#...#...c....",
+  "rows": [
+   "...om..",
+   "...o...",
+   "....c..",
+   "......c",
+   ".......",
+   "..#.#..",
+   "...H..."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 3,
+  "trace": "R R U U / U KATSU L D / U U U U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 26
+ },
+ {
+  "replaces": "o..~.....#~#.....~o.....~...m.....c......o...H...",
+  "rows": [
+   "....cm.",
+   "c......",
+   ".......",
+   ".......",
+   "..o#.c.",
+   "...#...",
+   "...H..."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 4,
+  "trace": "R R U U / L U L L / L U U KATSU / R R R U",
+  "rules": [],
+  "ink": 4,
+  "chapter": 26
+ },
+ {
+  "replaces": "........#c..#.........#...#.b~~b~~~..o.o....o...H",
+  "rows": [
+   "...cc..",
+   ".#...#.",
+   ".#o..#.",
+   "~~~b~~~",
+   ".o.....",
+   "#.....#",
+   "...H..."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 3,
+  "trace": "U U U / U KATSU / U U U R",
+  "rules": [],
+  "ink": 4,
+  "chapter": 28
+ },
+ {
+  "replaces": ".....c........b~~b~~~........o.#.o..o........H...",
+  "rows": [
+   ".o.....",
+   "..O...o",
+   "..o....",
+   "~~~b~b~",
+   "S...o..",
+   "...#...",
+   "...H..."
+  ],
+  "waza": [
+   "katsu"
+  ],
+  "par": 4,
+  "trace": "R U U R / U U R R / L L L D / U U R KATSU",
+  "rules": [],
+  "ink": 4,
+  "chapter": 28
  }
 ]
