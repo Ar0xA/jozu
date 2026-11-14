@@ -25,6 +25,13 @@ PYTHONIOENCODING=utf-8 "${PYTHON:-python}" tools/subset_font.py
 "$GODOT" --headless --path . --import >/dev/null 2>&1 || true   # exits non-zero on warnings alone
 rm -rf build/web
 mkdir -p build/web
+# which commit this build is, for the settings page (main.gd version()); "+" if it has changes on top
+dirty=""; [ -z "$(git status --porcelain)" ] || dirty="+"
+printf 'extends RefCounted
+# Written by tools/build_web.sh.
+const NUMBER = "%s"
+const COMMIT = "%s"
+' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)$dirty" > scripts/build.gd
 "$GODOT" --headless --path . --export-release "Web" build/web/index.html 2>&1 | { grep -E "^ERROR" || true; }
 if [ ! -s build/web/index.pck ] || [ ! -s build/web/index.wasm ]; then
 	echo "The web export failed: is the Web export template installed?" >&2

@@ -929,6 +929,33 @@ func _in_season(rows, season):
 		2: return rows.contains("k") and not rows.contains("~")
 	return rows.contains("i")
 
+# Which game this is: the version (project.godot) and the commit it was built from, with how many
+# commits came before it. A build is told by tools/build_web.sh (scripts/build.gd); run from the
+# project, git is asked.
+var _version = ""
+
+func version():
+	if _version != "":
+		return _version
+	var n = ""
+	var hash = ""
+	if OS.has_feature("editor"):
+		var dir = ProjectSettings.globalize_path("res://")
+		var out = []
+		if OS.execute("git", ["-C", dir, "rev-list", "--count", "HEAD"], out) == 0 and not out.is_empty():
+			n = out[0].strip_edges()
+		out = []
+		if OS.execute("git", ["-C", dir, "rev-parse", "--short", "HEAD"], out) == 0 and not out.is_empty():
+			hash = out[0].strip_edges()
+	elif ResourceLoader.exists("res://scripts/build.gd"):
+		var b = load("res://scripts/build.gd")
+		n = b.NUMBER
+		hash = b.COMMIT
+	_version = "v" + str(ProjectSettings.get_setting("application/config/version", "1.0.0"))
+	if n != "" and hash != "":
+		_version += "  ·  build %s (%s)" % [n, hash]
+	return _version
+
 # The four grades of the koan and of the temples, and how many ways to mastery each leaves open
 # (tools/tighten_extra.py holds the boards to it). A koan is graded by its weekday, a temple by
 # its province.

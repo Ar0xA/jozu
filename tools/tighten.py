@@ -4,6 +4,8 @@
     python tools/tighten.py count            how many ways each stage on the road can be mastered
     python tools/tighten.py [first last]     tighten the stages in that range (1-based; default all)
     (then: python tools/build_levels.py)
+    JOZU_ONLY=98,206 names the stages instead; JOZU_ROUNDS=8 tries more changes in a row;
+    JOZU_PAIRS=1 tries two changes at once (slow: thousands of boards a stage).
 
 A stage is left alone if it is hand-made (it has a lesson or a story), if the solver cannot finish
 it, or if it has no more ways than its place on the road allows (ALLOW). A change is kept only if the mastery count stays what
@@ -20,7 +22,7 @@ GEN = os.path.join(here, 'gen', 'bin', 'Release', 'net8.0', 'gen.exe')
 # later, and each chapter asks most of its last stage. [first chapter it applies to, ways allowed
 # at a chapter's first stage, ways allowed at its last]
 ALLOW = [[0, 12, 8], [2, 10, 5], [5, 8, 4], [10, 6, 3]]
-ROUNDS = 3        # changes tried one after another on a stubborn board
+ROUNDS = int(os.environ.get('JOZU_ROUNDS', '3'))   # changes tried one after another on a stubborn board
 FIXED = 'H'       # never moved
 
 def levels():
@@ -90,6 +92,8 @@ args = [a for a in sys.argv[1:] if a != 'count']
 first = int(args[0]) if args else 1
 last = int(args[1]) if len(args) > 1 else len(lv)
 todo = [i for i in range(first - 1, last) if lv[i]['plain']]
+if os.environ.get('JOZU_ONLY'):   # just these stages (1-based, comma separated)
+    todo = [int(x) - 1 for x in os.environ['JOZU_ONLY'].split(',') if lv[int(x) - 1]['plain']]
 base = solve([job(str(i), lv[i]) for i in todo])
 ways = {}
 for i in todo:
@@ -120,6 +124,10 @@ for rnd in range(ROUNDS):
     for i in work:
         cands[i] = changes(now[i]['rows'])
         W = len(lv[i]['rows'][0])
+        if os.environ.get('JOZU_PAIRS'):   # two changes at once, where no single one helps
+            for k1, w1 in list(cands[i].items()):
+                for k2, w2 in changes([k1[j * W:(j + 1) * W] for j in range(len(lv[i]['rows']))]).items():
+                    cands[i].setdefault(k2, w1 + ' and ' + w2)
         for k, key in enumerate(cands[i]):
             if key in taken:
                 continue

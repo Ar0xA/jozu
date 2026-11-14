@@ -4,6 +4,7 @@ config_version=5
 [application]
 
 config/name="Jōzu 上手"
+config/version="1.0.0"
 run/main_scene="res://main.tscn"
 config/icon="res://art/icon.png"
 boot_splash/bg_color=Color(0.925, 0.878, 0.76, 1)

@@ -3,6 +3,8 @@
 
 # Build output
 build/
+scripts/build.gd
+scripts/build.gd.uid
 
 # C# generator build output
 tools/gen/bin/

@@ -67,7 +67,7 @@ func _paste():
 func tall_parts(_h):
 	if not main.touch:
 		return super.tall_parts(_h)
-	var parts = [{"src": [Rect2(30, 0, 400, 66)], "s": 1.2}]
+	var parts = [{"src": [Rect2(30, 0, 520, 66)], "s": 1.2}]
 	for i in range(ROWS.size()):
 		parts.append({"src": [Rect2(120, _y(i) - 14, 420, 68), Rect2(905, _y(i) - 14, 275, 68)], "s": 1.0})
 	if note != "":
@@ -126,6 +126,7 @@ func _draw():
 	backdrop(0.4)
 	Ink.tategaki(self, f, Vector2(64, 8), "設", 50, Ink.SUMI)
 	Ink.text(self, f, Vector2(110, 52), "Settings", 34, Ink.SUMI)
+	Ink.text(self, f, Vector2(276, 52), main.version(), 16 if main.touch else 14, Ink.a(Ink.SUMI, 0.6))
 	var big = main.touch
 	for i in range(ROWS.size()):
 		var y = _y(i)

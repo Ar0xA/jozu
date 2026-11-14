@@ -1648,17 +1648,17 @@
   "rows": [
    "O.t#cO.",
    "~..O..~",
-   "~~t.T~~",
-   "~~T#.~~",
-   ".....#.",
-   "..#.#..",
-   "...H..."
+   "~~t..~~",
+   "~~T#T~~",
+   "....##.",
+   "..#.~#.",
+   "..#H..#"
   ],
   "waza": [
    "katsu"
   ],
   "par": 9,
-  "trace": " / R R / L L U U / L U U KATSU / U U D / R R U U / L L U U / D D D L / D L U U",
+  "trace": " / R R / L L U U / L U U KATSU / U U D / U U U R / U R D D / U L U U / D L L U",
   "rules": [],
   "ink": 4,
   "chapter": -1
@@ -2221,17 +2221,17 @@
  {
   "replaces": "..c.......#Sc..#...#.......................H.....",
   "rows": [
-   "..c....",
-   "...#Sc.",
-   ".#...#.",
+   "...c...",
+   ".#.#.#.",
+   "...SOO.",
+   "~~~~~.~",
    ".......",
-   "..#.#..",
    ".......",
-   ".H....."
+   "...H..."
   ],
   "waza": [],
   "par": 4,
-  "trace": " / U U U R U U U R /  / R R R R R R D",
+  "trace": " / R R U U U / U U U / L L L L L U U L",
   "rules": [
    "wet",
    "enso",
@@ -2292,19 +2292,19 @@
  {
   "replaces": "...o.....#.#..~~...~~~..#..~~~...~~~~o..~~......H",
   "rows": [
-   "...o...",
-   "..#.#..",
-   "~~...~~",
-   "~.##..~",
-   "~~o..~~",
-   "~~...~~",
-   ".#....H"
+   "......c",
+   "......S",
+   ".......",
+   "O.~~...",
+   "..~~...",
+   ".#.....",
+   "...H..."
   ],
   "waza": [
    "katsu"
   ],
   "par": 4,
-  "trace": " / L L L L / R R U U L L D / R R U U U L KATSU",
+  "trace": "R R U U U U / R U KATSU L U L L / R D D L L U U / L L D D R R U",
   "rules": [
    "wet",
    "enso",
@@ -2387,16 +2387,16 @@
   "replaces": ".........#........o..~.~o~~~.................H...",
   "rows": [
    ".......",
-   "..#....",
-   "....o..",
-   "~.~o~.~",
-   ".....#.",
+   "..#.#..",
+   "...#...",
+   "......o",
    ".......",
-   "...H..."
+   ".o.....",
+   "....H.."
   ],
   "waza": [],
-  "par": 5,
-  "trace": "R /  / L L U U R R D / L L U R U U U / D R R U U L L",
+  "par": 3,
+  "trace": "R R U L L U R / R U U L L D D / L L D D R R U",
   "rules": [
    "wet",
    "enso",
@@ -2815,7 +2815,7 @@
    "...cyc.",
    ".#..##.",
    "#.....#",
-   "c.#....",
+   ".c#....",
    "#.#H..#",
    ".......",
    "......."
@@ -3568,17 +3568,17 @@
  {
   "replaces": ".......~#~~~~~..............c....c......o....H...",
   "rows": [
+   "..c....",
+   "..c.c..",
+   ".#.o...",
    ".......",
-   "~#~~~~~",
-   "###....",
    ".......",
-   "c....c.",
-   ".....o.",
+   ".......",
    "...H..."
   ],
   "waza": [],
   "par": 5,
-  "trace": " / L L L U R R / D R R U U L L / shikiL R R D / R R U U L L D",
+  "trace": "R R U L L L U / R R U U L L D / shikiU R R R U L L / R R U U L L D / shikiL",
   "rules": [
    "wet",
    "enso",
@@ -3660,17 +3660,17 @@
  {
   "replaces": "...o......c........c.#..~~~....~~~....~~~....H...",
   "rows": [
-   "...o...",
-   "#..c.#.",
+   ".......",
+   ".#ct...",
    ".....c.",
-   "#.#~~~.",
-   "...~~~.",
-   "...~~~.",
-   "...H..."
+   ".......",
+   ".......",
+   "...#...",
+   "O..H..."
   ],
   "waza": [],
-  "par": 6,
-  "trace": "L / L U U U U L / R R U U R R / L L D D R R U / shikiD L / D L L U U R R",
+  "par": 5,
+  "trace": "R R U L U U / R R U U L L D / shikiL R D L L L L / L D D R R U U / shikiU",
   "rules": [
    "wet",
    "enso",
@@ -4663,7 +4663,7 @@
    "..w.O.w",
    ".#..c#.",
    "~~~~.~~",
-   "...#.H.",
+   "...#.H#",
    "c#...#.",
    "...o..."
   ],
@@ -4763,7 +4763,7 @@
   "rows": [
    "...#H#.",
    ".xxxxx.",
-   ".x...x.",
+   ".x.#.x.",
    ".x...x.",
    ".x...x.",
    ".xxxxx.",
@@ -4771,7 +4771,7 @@
   ],
   "waza": [],
   "par": 3,
-  "trace": "D R D D D / D L L L L U / U U U R R",
+  "trace": "D R R D L D / D D L L L L / U U U U R R",
   "rules": [
    "write"
   ],
@@ -4862,16 +4862,16 @@
   "replaces": ".#....#.xxxxx.c.........H..........xxxxxxx.c.....",
   "rows": [
    ".#....#",
-   "#xxxxx.",
+   "#xxxxx#",
    "c#.....",
    "...H...",
-   "#......",
+   "#.....#",
    "xxxxxxx",
    ".c....."
   ],
   "waza": [],
   "par": 4,
-  "trace": "U U R R R D / D D D L L L / L L L D R R / U U U U U L",
+  "trace": "L L D D L / R R R R R R / L U U U U L / L L L",
   "rules": [
    "write"
   ],
@@ -4902,16 +4902,16 @@
   "replaces": "xxxxxxx...x.t...#xxx....x#.....x.....Hx..u.......",
   "rows": [
    "xxxxxxx",
-   "..#xt.#",
+   "..#x#t#",
    "..#xxx.",
    "...x#..",
    "...x...",
-   "..Hx..u",
+   "..Hx.u.",
    "......."
   ],
   "waza": [],
   "par": 4,
-  "trace": "R U U U / R R U U R / L L L D R / L U L L L",
+  "trace": "R U U U / R R U U R / L L L D / U L L L",
   "rules": [
    "write"
   ],
@@ -4982,16 +4982,16 @@
   "replaces": ".#Hx...Oxxxxx..x.x.x..xxxxx..x.x.xu.xxxxx#...x...",
   "rows": [
    ".#Hx...",
-   "Oxxxxx.",
-   ".x#x.x.",
    ".xxxxx.",
+   ".x#x#x.",
+   "Oxxxxx.",
    ".x#x#xu",
    ".xxxxx#",
-   "...x..."
+   "..#x#.."
   ],
   "waza": [],
   "par": 5,
-  "trace": "R D R R D D / D D L L L L / U U U U R / R D R D L L / R D D R D L",
+  "trace": "R D D D R / L L L D D R / R R R U U U / U L L L L D / D R R D D D",
   "rules": [
    "write"
   ],
@@ -5024,14 +5024,176 @@
    ".xxxxx.",
    ".x#x#x.",
    ".xxxxx.",
-   ".x#x.x.",
-   ".xxxxx.",
-   ".H.x..O",
+   ".x#x#x.",
+   ".xxxxxO",
+   ".H.x...",
    "...xO.o"
   ],
   "waza": [],
   "par": 5,
-  "trace": "U R R R R U / L L U L L D / U U U R R R / R D D L L U / D D D D D D",
+  "trace": "U R R R R U / U L L L L D / U U U R R R / R D D L L U / D D D D D D",
+  "rules": [
+   "write"
+  ],
+  "ink": 6,
+  "chapter": -1
+ },
+ {
+  "replaces": "...x......xc..xxxxxxx.c.x......x......x.H..xxxxx.",
+  "rows": [
+   "...x...",
+   "...xc..",
+   "xxxxxxx",
+   "..cx...",
+   "...x...",
+   "...x.H.",
+   ".xxxxx."
+  ],
+  "waza": [],
+  "par": 5,
+  "trace": "D L L L / L U R R U / U U R R R / L L L U U / L D D L L",
+  "rules": [
+   "write"
+  ],
+  "ink": 5,
+  "chapter": -1
+ },
+ {
+  "replaces": ".o.x......x..u.x.x.x.#x.xHx.x..x..x...x...O.xx...",
+  "rows": [
+   ".o.x...",
+   "...x..u",
+   ".x.x.x.",
+   "#x.xHx.",
+   "x..x..x",
+   "..#x...",
+   "O.xx..."
+  ],
+  "waza": [],
+  "par": 5,
+  "trace": "L L L U R / R U U R R / D D D R D / L L L D D / L L L U U",
+  "rules": [
+   "write"
+  ],
+  "ink": 5,
+  "chapter": -1
+ },
+ {
+  "replaces": ".o.x.#o.xxxxx..x.x.x..xxxxx..x.x.x.Hxxxxx........",
+  "rows": [
+   ".o.x.#o",
+   ".xxxxx.",
+   ".x#x#x.",
+   ".xxxxx.",
+   ".x#x.x.",
+   "Hxxxxx.",
+   "......."
+  ],
+  "waza": [
+   "leap"
+  ],
+  "par": 5,
+  "trace": "R R R R R / U U U U L / L L L D leapD / U R R R D / L U U U U",
+  "rules": [
+   "write"
+  ],
+  "ink": 5,
+  "chapter": -1
+ },
+ {
+  "replaces": "xxxxxx....x.x....x.x.H..x.x...x..x..xc..x.x..xxx.",
+  "rows": [
+   "xxxxxx.",
+   ".#.x.x.",
+   "...x.x.",
+   "H..x.x.",
+   "..x..x.",
+   ".xc..x.",
+   "x#.xxx."
+  ],
+  "waza": [],
+  "par": 6,
+  "trace": "U U U R R / R R R D D / L U L D D / R R D D D / L L L U U / L D L D",
+  "rules": [
+   "write"
+  ],
+  "ink": 5,
+  "chapter": -1
+ },
+ {
+  "replaces": "...x...xxxxxxx...x....xxxxx..x...x#.x..Hx.#xxxxxo",
+  "rows": [
+   "...x...",
+   "xxxxxxx",
+   "...x..#",
+   ".xxxxx.",
+   ".x..#x#",
+   ".x..Hx.",
+   "#xxxxxo"
+  ],
+  "waza": [],
+  "par": 6,
+  "trace": "R D L L L / L U U U R / R U U L L / L U R R R / R R R D L / L D D R D",
+  "rules": [
+   "write"
+  ],
+  "ink": 5,
+  "chapter": -1
+ },
+ {
+  "replaces": "...x...xxxxxxx.K.x..H.xxxxx...cx......x..Kxxxxxxx",
+  "rows": [
+   "..#x#..",
+   "xxxxxxx",
+   "#K.x..H",
+   ".xxxxx.",
+   "..cx#..",
+   "...x..K",
+   "xxxxxxx"
+  ],
+  "waza": [],
+  "par": 6,
+  "trace": "U L L L D D / D D D L L L / R R R R R R / L U U U L / L L L U U L / R R R U",
+  "rules": [
+   "write"
+  ],
+  "ink": 6,
+  "chapter": -1
+ },
+ {
+  "replaces": "..#x......x...xxxxxxx..uxc...#x.x...x...x.x...H.x",
+  "rows": [
+   "..#x...",
+   "...x...",
+   "xxxxxxx",
+   "..uxc..",
+   ".#x.x..",
+   ".x#..x.",
+   "x...H.x"
+  ],
+  "waza": [],
+  "par": 6,
+  "trace": "R R U L L / U U U R R / L L L U U / D D D L D / U U L L D / D D R D L",
+  "rules": [
+   "write"
+  ],
+  "ink": 5,
+  "chapter": -1
+ },
+ {
+  "replaces": "H..x..o...x......xxx....x....c.x......x...xxxxxxx",
+  "rows": [
+   "H#.x..o",
+   "...x...",
+   "...xxx.",
+   "...x...",
+   ".c.x...",
+   ".#.x#..",
+   "xxxxxxx"
+  ],
+  "waza": [],
+  "par": 4,
+  "trace": "D R R R U R / D R D L L D / D D D R R R / L L L L L L",
   "rules": [
    "write"
   ],
