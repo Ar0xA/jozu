@@ -336,11 +336,12 @@ func buzz(ms):
 
 # Once, on a phone's browser, the title says the game can be kept on the home screen. It is said
 # for one visit and not again, and never to someone who already opened it from there.
+# (Not when the game sits in someone else's page, as on itch.io: there is nothing to install there.)
 func install_tip():
 	if tip < 0:
 		tip = 0
 		if touch and OS.has_feature("web") and not data.told and not data.cleared.is_empty():
-			var kept = JavaScriptBridge.eval("(window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true) ? 1 : 0")
+			var kept = JavaScriptBridge.eval("(window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true || window.self !== window.top) ? 1 : 0")
 			if int(kept) == 0:
 				tip = 1
 				data.told = true
