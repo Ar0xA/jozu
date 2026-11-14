@@ -45,6 +45,8 @@ func _initialize():
 			main.cur.card = []
 			play(1, 2)],
 		["map", func(): main.show_map()],
+		["hub", func(): main.show_hub()],
+		["temple", func(): main.show_henro()],
 		["title", func():
 			main.show_title()
 			main.cur.time = 9.0],

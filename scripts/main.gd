@@ -916,7 +916,7 @@ func show_custom(lv, kind, label, on_win, on_fail, back):
 	go(scr)
 
 # ---------------------------------------------------------------- the daily koan
-# One single-stroke board a day, the same for everyone: gentle on Monday, hardest on Sunday.
+# One single-stroke board a day, the same for everyone: easy on Monday, expert on Sunday.
 
 const SEASONED_FROM = 20770   # 13 November 2026: from this day the board is chosen by the season
 
@@ -928,6 +928,28 @@ func _in_season(rows, season):
 		1: return rows.contains("~")
 		2: return rows.contains("k") and not rows.contains("~")
 	return rows.contains("i")
+
+# The four grades of the koan and of the temples, and how many ways to mastery each leaves open
+# (tools/tighten_extra.py holds the boards to it). A koan is graded by its weekday, a temple by
+# its province.
+const GRADES = [["易", "Easy", 10], ["中", "Normal", 5], ["難", "Hard", 3], ["極", "Expert", 1]]
+const DAY_GRADE = [0, 0, 1, 1, 2, 2, 3]   # Monday first
+
+func daily_grade(day = -1):
+	return DAY_GRADE[((today() if day < 0 else day) + 3) % 7]
+
+func henro_grade(at):
+	var g = 0
+	for k in range(PROVINCES.size()):
+		if at >= PROVINCES[k][0]:
+			g = k
+	return g
+
+# what a grade promises, in a few words
+func grade_words(g, koan = false):
+	if g == 3:
+		return "Expert: it has one answer." if koan else "Expert: one way to mastery."
+	return "%s: at most %d %s." % [GRADES[g][1], GRADES[g][2], "answers" if koan else "ways to mastery"]
 
 # the day by the player's own clock, counted from 1970
 func today():
@@ -955,6 +977,7 @@ func daily_level(day = -1):
 	lv["name"] = day_name(day)
 	var season = "%s %s, %s" % [koyomi[0], koyomi[2], koyomi[3].to_lower()] if koyomi[2] != "" else "%s, %s" % [koyomi[0], koyomi[3].to_lower()]
 	lv["hint"] = ("Today's kōan, for %s. One stroke, and only one. It is the same board for everyone today." if day == today() else "The kōan of a day gone by: %s. One stroke, and only one.") % season
+	lv["hint"] += " " + grade_words(daily_grade(day), true)
 	lv["koyomi"] = koyomi
 	lv["story"] = []
 	lv["after"] = []
@@ -1160,7 +1183,7 @@ func show_henro():
 	var lv = Extra.HENRO[at].duplicate(true)
 	lv["kanji"] = "第%d番" % (at + 1)
 	lv["name"] = province(at)[2]
-	lv["hint"] = "Temple %d of 88. No stroke can be taken back here. Staffs left: %d." % [at + 1, int(h.staffs)]
+	lv["hint"] = "Temple %d of 88. No stroke can be taken back here. Staffs left: %d. %s" % [at + 1, int(h.staffs), grade_words(henro_grade(at))]
 	lv["story"] = []
 	lv["after"] = []
 	lv["say"] = []

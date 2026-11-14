@@ -63,8 +63,8 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
   board is a character and you paint every tile of it (fifty-odd characters over two chapters, ending
   on 上 and 手). Three chapters mix them: the lure (offerings and bridges), the storm (wind, bell and
   weasel) and the knot (seals among webs).
-- **Other roads** 別 (from the map): a **daily kōan**, the same board for everyone, gentle on Monday and
-  hardest on Sunday, with a calendar of past days and a result line to copy; the **88 temples**, a pilgrimage with no undo, no hints and three staffs; and the
+- **Other roads** 別 (from the map): a **daily kōan**, the same board for everyone, easy on Monday and
+  expert on Sunday (four grades by how many answers a board has: at most 10, 5, 3, and exactly 1), with a calendar of past days and a result line to copy; the **88 temples**, a pilgrimage with no undo, no hints and three staffs; and the
   **workshop**, where you lay out a board, clear it, and get a short code anyone can paste to play it.
   The **unmapped road** makes a new board while you wait, in one of four brackets of difficulty: in the
   browser the generator and solver themselves run beside the game (`tools/genweb`, the C# of `tools/gen`

@@ -72,11 +72,11 @@ func _draw():
 	var wd = (main.today() + 3) % 7
 	if main.touch:
 		# the same four roads, said shortly and set large
-		_card(f, 0, "日課", "The Daily Kōan", ["One single-stroke board a day. %s: %s." % [names[wd], ["gentlest", "gentle", "plain", "testing", "hard", "harder", "hardest"][wd]],
+		_card(f, 0, "日課", "The Daily Kōan", ["One single-stroke board a day. %s: %s." % [names[wd], main.GRADES[main.daily_grade()][1].to_lower()],
 			("Answered today.  " if main.daily_done() else "Not yet answered.  ") + "Run: %d.  Best: %d." % [int(d.streak) if int(d.last) >= main.today() - 1 else 0, int(d.best)]])
 		var hh = main.data.henro
 		_card(f, 1, "遍路", "The 88 Temples", ["88 boards: no undo, no hints, three staffs.",
-			"Temple %d  ·  staffs %d of 3  ·  furthest %d" % [min(int(hh.at) + 1, 88), int(hh.staffs), int(hh.best)]])
+			"Temple %d (%s)  ·  staffs %d of 3  ·  furthest %d" % [min(int(hh.at) + 1, 88), main.GRADES[main.henro_grade(min(int(hh.at), 87))][1].to_lower(), int(hh.staffs), int(hh.best)]])
 		var w2 = []
 		for k in range(4):
 			w2.append(str(int(main.data.rand.get(str(k), 0))))
@@ -85,14 +85,14 @@ func _draw():
 		draw_btns()
 		return
 	_card(f, 0, "日課", "The Daily Kōan", [
-		"One single-stroke board a day, the same for everyone. %s: %s." % [names[wd], ["the gentlest", "gentle", "plain", "testing", "hard", "harder", "the hardest of the week"][wd]],
+		"One single-stroke board a day, the same for everyone. %s: %s." % [names[wd], main.grade_words(main.daily_grade(), true).trim_suffix(".").to_lower().replace(": ", ", ")],
 		("Answered today.  " if main.daily_done() else "Not yet answered today.  ") + "Days running: %d.   Longest: %d." % [int(d.streak) if int(d.last) >= main.today() - 1 else 0, int(d.best)]])
 
 	var h = main.data.henro
 	var at = int(h.at)
 	var pr = main.province(min(at, 87))
 	_card(f, 1, "遍路", "The 88 Temples", [
-		"A pilgrimage of 88 boards: no stroke taken back, three staffs.",
+		"A pilgrimage of 88 boards: no stroke taken back, three staffs. Easy in Awa, expert in Sanuki.",
 		"Next: temple %d, in %s.   Staffs: %d of 3.   Furthest: %d.%s" % [min(at + 1, 88), pr[2], int(h.staffs), int(h.best), ("   Completed: %d." % int(h.done)) if int(h.done) > 0 else ""]])
 
 	var won = []

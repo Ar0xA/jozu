@@ -830,6 +830,16 @@ body = 'const LEVELS = [\n' + ''.join('\t' + gd(l) + ',\n' for l in levels) + ']
 def slim(g):
     return {'rows': g['rows'], 'waza': g['waza'], 'rules': g.get('rules') or [], 'ink': g.get('ink') or 4, 'par': g['par'], 'sol': g['trace']}
 
+# a koan or a temple with more ways to mastery than its grade allows was changed a little
+# (tools/tighten_extra.py); it keeps the place the board it came from had
+_xs = os.path.join(root, 'tools', 'extra_swaps.json')
+XSWAP = json.load(open(_xs, encoding='utf-8')) if os.path.exists(_xs) else {}
+def graded(b):
+    x = XSWAP.get(''.join(b['rows']))
+    if x:
+        b = dict(b, **x)
+    return b
+
 daily = list(SPARE.get(10, []))
 dp = os.path.join(root, 'tools', 'daily_pool.json')
 if os.path.exists(dp):
@@ -841,13 +851,16 @@ for g in sorted(daily, key=difficulty):
         seen.add(k)
         bank.append(slim(g))
 bank = bank[:len(bank) // 7 * 7]   # seven equal slices, Monday's the gentlest
+bank = [graded(b) for b in bank]
 
 rest = [g for c in sorted(SPARE) if c >= 12 for g in SPARE[c]]
 rest.sort(key=difficulty)
 assert len(rest) >= 88, 'too few spare boards for the 88 temples'
 henro = [slim(rest[round(i * (len(rest) - 1) / 87)]) for i in range(88)]
+taken0 = set(''.join(b['rows']) for b in henro) | set(''.join(b['rows']) for b in bank)   # as they were: still off the shelf
+henro = [graded(b) for b in henro]
 
-taken = set(''.join(l['rows']) for l in levels) | set(''.join(b['rows']) for b in henro) | set(''.join(b['rows']) for b in bank)
+taken = taken0 | set(''.join(l['rows']) for l in levels) | set(''.join(b['rows']) for b in henro) | set(''.join(b['rows']) for b in bank)
 rand, rand_d = [], []
 for g in sorted([g for c in sorted(SPARE) if c != 10 for g in SPARE[c]], key=difficulty):
     k = ''.join(g['rows'])
