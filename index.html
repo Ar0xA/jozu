@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<meta name="theme-color" content="#ece0c2">
+		<title>Jōzu 上手</title>
+		<!-- Jozu's own page for the web build, in place of Godot's default: paper, the name written
+		     in the game's typeface (art/splash.png), and a brush stroke that is drawn as the game loads.
+		     Used by the "Web" export preset (html/custom_html_shell). -->
+		<style>
+html, body, #canvas {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+body {
+	color: #211c1a;
+	background-color: #ded0ab;   /* the paper's shadow, around the page on a wide or tall screen */
+	overflow: hidden;
+	touch-action: none;
+}
+
+#canvas {
+	display: block;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+#status {
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(ellipse at 50% 42%, #f0e6cb 0%, #ece0c2 55%, #dccda6 100%);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	visibility: hidden;
+	transition: opacity 0.5s ease;
+}
+
+#status.leaving {
+	opacity: 0;
+}
+
+#status-splash {
+	max-height: 62vh;
+	max-width: 70vw;
+	object-fit: contain;
+	animation: settle 0.9s ease-out both;
+}
+
+@keyframes settle {
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: none; }
+}
+
+#status-progress {
+	display: none;
+	width: min(420px, 70vw);
+	margin-top: 3.5vh;
+}
+
+#status-progress svg {
+	display: block;
+	width: 100%;
+	height: 26px;
+}
+
+#ink {
+	transition: stroke-dashoffset 0.25s ease-out;
+}
+
+/* before the size of the download is known, the brush is drawn and lifted, over and over */
+#status-progress.waiting #ink {
+	animation: wait 1.6s ease-in-out infinite;
+}
+
+@keyframes wait {
+	0% { stroke-dashoffset: 100; }
+	60% { stroke-dashoffset: 0; opacity: 1; }
+	100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+#status-text {
+	font-family: Georgia, 'Times New Roman', serif;
+	font-size: clamp(13px, 2.4vh, 17px);
+	letter-spacing: 0.08em;
+	text-align: center;
+	color: #211c1acc;
+	margin-top: 6px;
+}
+
+#status-notice {
+	display: none;
+	background-color: #f4ecd8;
+	border: 2px solid #c23829;
+	color: #211c1a;
+	font-family: Georgia, 'Times New Roman', serif;
+	line-height: 1.4;
+	margin: 3vh 2rem 0;
+	padding: 1rem 1.4rem;
+	text-align: center;
+	z-index: 1;
+}
+		</style>
+		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+<link rel="manifest" href="index.manifest.json">
+<style>html,body,canvas{touch-action:none;overscroll-behavior:none;-webkit-user-select:none;user-select:none}</style>
+	</head>
+	<body>
+		<canvas id="canvas">
+			Your browser does not support the canvas tag.
+		</canvas>
+
+		<noscript>
+			Your browser does not support JavaScript.
+		</noscript>
+
+		<div id="status">
+			<img id="status-splash" src="index.png" alt="Jōzu 上手">
+			<div id="status-progress" class="waiting">
+				<svg viewBox="0 0 600 30" preserveAspectRatio="none" aria-hidden="true">
+					<path d="M6 16 C 70 7, 150 23, 232 13 S 392 8, 478 18 S 572 12, 594 15" stroke="#211c1a" stroke-opacity="0.13" stroke-width="7" stroke-linecap="round" fill="none"/>
+					<path id="ink" d="M6 16 C 70 7, 150 23, 232 13 S 392 8, 478 18 S 572 12, 594 15" stroke="#211c1a" stroke-width="9" stroke-linecap="round" fill="none" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+				</svg>
+				<div id="status-text">Grinding the ink…</div>
+			</div>
+			<div id="status-notice"></div>
+		</div>
+
+		<script src="index.js"></script>
+		<script>
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":5357976,"index.wasm":21778603},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
+const GODOT_THREADS_ENABLED = false;
+const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+	const statusOverlay = document.getElementById('status');
+	const statusProgress = document.getElementById('status-progress');
+	const statusNotice = document.getElementById('status-notice');
+	const statusText = document.getElementById('status-text');
+	const ink = document.getElementById('ink');
+
+	let initializing = true;
+	let statusMode = '';
+
+	function setStatusMode(mode) {
+		if (statusMode === mode || !initializing) {
+			return;
+		}
+		if (mode === 'hidden') {
+			// the page fades off the game; nothing waits on it
+			initializing = false;
+			statusOverlay.classList.add('leaving');
+			statusOverlay.style.pointerEvents = 'none';
+			setTimeout(() => statusOverlay.remove(), 600);
+			return;
+		}
+		statusOverlay.style.visibility = 'visible';
+		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+		statusMode = mode;
+	}
+
+	function setStatusNotice(text) {
+		while (statusNotice.lastChild) {
+			statusNotice.removeChild(statusNotice.lastChild);
+		}
+		const lines = text.split('\n');
+		lines.forEach((line) => {
+			statusNotice.appendChild(document.createTextNode(line));
+			statusNotice.appendChild(document.createElement('br'));
+		});
+	}
+
+	function displayFailureNotice(err) {
+		console.error(err);
+		if (err instanceof Error) {
+			setStatusNotice(err.message);
+		} else if (typeof err === 'string') {
+			setStatusNotice(err);
+		} else {
+			setStatusNotice('An unknown error occurred.');
+		}
+		setStatusMode('notice');
+		initializing = false;
+	}
+
+	const missing = Engine.getMissingFeatures({
+		threads: GODOT_THREADS_ENABLED,
+	});
+
+	if (missing.length !== 0) {
+		const missingMsg = 'This browser cannot run the game. It is missing:\n';
+		displayFailureNotice(missingMsg + missing.join('\n'));
+	} else {
+		setStatusMode('progress');
+		engine.startGame({
+			'onProgress': function (current, total) {
+				if (current > 0 && total > 0) {
+					const part = Math.min(1, current / total);
+					statusProgress.classList.remove('waiting');
+					ink.style.strokeDashoffset = String(100 - part * 100);
+					statusText.textContent = part >= 1 ? 'Taking up the brush…' : 'Grinding the ink…  ' + Math.round(part * 100) + '%';
+				} else {
+					statusProgress.classList.add('waiting');
+					statusText.textContent = 'Grinding the ink…';
+				}
+			},
+		}).then(() => {
+			setStatusMode('hidden');
+		}, displayFailureNotice);
+	}
+}());
+		</script>
+	</body>
+</html>
+
