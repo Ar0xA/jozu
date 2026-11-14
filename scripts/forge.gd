@@ -1,6 +1,7 @@
 extends "res://scripts/screen_base.gd"
-# The unmapped road in the browser: a new board is made while you wait, by the same generator and
-# solver that made the game's own stages (tools/genweb, running in a web worker).
+# The unmapped road: a new board is made while you wait, by the same generator and solver that
+# made the game's own stages. In the browser it runs in web workers (tools/genweb); on the desktop
+# it is the generator's own program (tools/gen), started beside the game and asked for one board.
 
 const Extra = preload("res://scripts/extra.gd")
 const BUDGETS = [12000, 18000, 22000, 30000]   # how long the generator may look, by bracket, in ms
@@ -18,6 +19,9 @@ var waited = 0.0
 var asked = 0.0
 var over = false
 var demo = false      # draw the screen without starting a generator (tools/shots.gd)
+var web = OS.has_feature("web")
+var procs = []        # desktop: [process id, the file its board is written to]
+var parts = []        # desktop: what each generator that has finished gave
 
 func setup():
 	if main.touch:
@@ -29,19 +33,40 @@ func setup():
 	if demo:
 		waited = 11.0
 		return
+	var cuts = Extra.RANDOM_CUTS
+	var lo = 0.0 if br == 0 else cuts[br - 1]
+	var hi = 999.0 if br == 3 else cuts[br]
+	if not web:
+		# two generators on different seeds, as in the browser: the first exact board wins
+		var exe = main.gen_path()
+		var seed0 = randi() % 2000000000
+		var order = randi() % 2000000000
+		for k in range(2 if OS.get_processor_count() >= 4 else 1):
+			var out = OS.get_user_data_dir().path_join("forge_%d_%d.txt" % [OS.get_process_id(), k])
+			DirAccess.remove_absolute(out)
+			var pid = -1 if exe == "" else OS.create_process(exe, ["make", out, str(seed0 + k * 7919), "%f" % lo, "%f" % hi, str(BUDGETS[br]), str(br), str(order)])
+			if pid > 0:
+				procs.append([pid, out])
+		if procs.is_empty():
+			over = true
+			main.show_random_banked.call_deferred(br, "The board maker could not be started, so this one is from the shelf. ")
+		return
 	if not JavaScriptBridge.eval(START, true):
 		over = true
 		main.show_random_banked.call_deferred(br)
 		return
-	var cuts = Extra.RANDOM_CUTS
-	var lo = 0.0 if br == 0 else cuts[br - 1]
-	var hi = 999.0 if br == 3 else cuts[br]
 	job = int(JavaScriptBridge.eval("window.jozuGen.n += 1; window.jozuGen.n", true))
 	JavaScriptBridge.eval("window.jozuGen.w.forEach(function(w, k) { w.postMessage({id: %d, seed: %d + k * 7919, lo: %f, hi: %f, budget: %d, bracket: %d, order: %d}); })" % [job, randi() % 2000000000, lo, hi, BUDGETS[br], br, randi() % 2000000000], true)
 
 func _stop():
 	# a generator still at work is let go, so the next request does not queue behind it
-	if not over:
+	for p in procs:
+		if OS.is_process_running(p[0]):
+			OS.kill(p[0])
+		DirAccess.remove_absolute(p[1])
+		DirAccess.remove_absolute(p[1] + ".part")
+	procs = []
+	if not over and web:
 		JavaScriptBridge.eval("if (window.jozuGen) { window.jozuGen.w.forEach(function(w) { w.terminate(); }); window.jozuGen = null; }", true)
 	over = true
 
@@ -65,7 +90,7 @@ func tick(dt):
 	if asked < 0.25:
 		return
 	asked = 0.0
-	var got = JavaScriptBridge.eval("(window.jozuGen && window.jozuGen.dead < window.jozuGen.w.length) ? (window.jozuGen.res[%d] === undefined ? null : window.jozuGen.res[%d]) : ''" % [job, job], true)
+	var got = _made() if not web else JavaScriptBridge.eval("(window.jozuGen && window.jozuGen.dead < window.jozuGen.w.length) ? (window.jozuGen.res[%d] === undefined ? null : window.jozuGen.res[%d]) : ''" % [job, job], true)
 	if got == null and waited * 1000.0 < BUDGETS[br] + GRACE:
 		return
 	var lv = main.live_board(str(got)) if got != null else {}
@@ -77,6 +102,28 @@ func tick(dt):
 	_stop()   # the other generator too, so it does not hold up the next request
 	lv["hint"] = "Painted this moment: no one has seen this board before you. Mastery asks %d stroke%s. Clear it and you can copy its code to pass on." % [int(lv.par), "" if int(lv.par) == 1 else "s"]
 	main._play_random(lv, br)
+
+# Desktop: an exact board from either generator as soon as there is one; otherwise the best of
+# what they gave once both are done. null while still at work.
+func _made():
+	for p in procs.duplicate():
+		if FileAccess.file_exists(p[1]):
+			var t = FileAccess.get_file_as_string(p[1])
+			procs.erase(p)
+			DirAccess.remove_absolute(p[1])
+			parts.append(t)
+			if t.length() > 2 and t.ends_with("1"):
+				return t
+		elif not OS.is_process_running(p[0]):
+			procs.erase(p)      # it ended without a word
+			parts.append("")
+	if not procs.is_empty():
+		return null
+	var best = ""
+	for t in parts:
+		if t.length() > best.length():
+			best = t
+	return best
 
 # Upright: the name of the road, the ink being ground, and the way back.
 func tall_parts(_h):

@@ -1177,13 +1177,110 @@ static class Gen
     }
 }
 
+// One new board of a wanted difficulty, made on the spot: what the unmapped road asks for, in the
+// browser (tools/genweb/Web.cs) and on the desktop (gen.exe make).
+public static class Maker
+{
+    // The measure tools/build_levels.py orders a chapter's ladder by (koan and garden boards, which
+    // it weighs differently, are not made here).
+    static double Difficulty(LevelOut g)
+    {
+        int ny = g.rows.Sum(l => l.Count(c => Sim.DEF.ContainsKey(c)));
+        return g.par * 10 + Math.Log2(g.states + 1) * 1.2 - Math.Log2(g.ways + 1) * 1.5 + ny * 0.5;
+    }
+
+    // Where to look for each bracket: (chapter, segment, weight). Measured from the generator's own
+    // logs: how many boards of that weight each segment yields per second of work. Rebuilt by hand
+    // when chapters are added; a stale table only makes the search slower, never wrong.
+    static readonly (int ch, int seg, double w)[][] WHERE =
+    {
+        new (int, int, double)[] { (12, 0, 2.42), (19, 0, 2.03), (31, 0, 1.27), (25, 0, 1.15), (18, 0, 0.94), (23, 0, 0.94), (17, 0, 0.90), (20, 0, 0.61), (30, 0, 0.61), (15, 0, 0.58) },
+        new (int, int, double)[] { (31, 0, 1.80), (19, 0, 1.41), (35, 0, 1.37), (18, 0, 1.27), (17, 0, 1.06), (23, 0, 0.87), (12, 1, 0.85), (25, 0, 0.82), (29, 0, 0.61), (20, 0, 0.54) },
+        new (int, int, double)[] { (31, 0, 1.46), (35, 0, 1.12), (17, 0, 0.94), (18, 0, 0.94), (19, 0, 0.94), (23, 0, 0.76), (25, 0, 0.58), (12, 1, 0.56), (29, 0, 0.55), (23, 1, 0.44) },
+        new (int, int, double)[] { (35, 0, 1.27), (35, 1, 0.92), (19, 0, 0.61), (31, 1, 0.59), (23, 0, 0.58), (17, 0, 0.56), (31, 0, 0.50), (17, 1, 0.38), (25, 0, 0.35), (23, 1, 0.35) },
+    };
+
+    // A master's board is asked of one chapter at a time, each chapter as likely as the next, so that
+    // the hard boards are not all of the two or three kinds that happen to be quickest to make.
+    // (chapter, its segments and how readily each yields a master's board.) Chapters that would
+    // need more than a slice of the time to yield one are left out.
+    static readonly (int ch, (int seg, double w)[] segs)[] MASTER =
+    {
+        (35, new[] { (0, 1.6), (1, 0.85) }),     // the knot
+        (31, new[] { (1, 0.35), (0, 0.25) }),    // the seals
+        (19, new[] { (0, 0.37), (1, 0.07) }),    // the red thread
+        (23, new[] { (0, 0.33), (1, 0.12) }),    // night
+        (17, new[] { (0, 0.31), (1, 0.15) }),    // daruma
+        (25, new[] { (0, 0.12), (1, 0.05) }),    // the shinigami
+        (36, new[] { (0, 0.10), (1, 0.06) }),    // the brush
+    };
+
+    // Tries boards until one lands between lo and hi, or the time runs out; then a near miss, if there is one.
+    // Returns "rows|waza|rules|ink|par|answer|difficulty|tries|ms|chapter|exact", or "" if nothing was found.
+    public static string Make(int seed, double lo, double hi, int budgetMs, int bracket, int order)
+    {
+        var all = Gen.Segs();
+        var picks = WHERE[Math.Clamp(bracket, 0, 3)];
+        double total = picks.Sum(x => x.w);
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        var r = new Random(seed);
+        LevelOut best = null; double bestMiss = 1e9; int tries = 0;
+        // master: the chapters in an order both generators share, a slice of the time for each
+        var turn = Enumerable.Range(0, MASTER.Length).ToArray();
+        var shuffle = new Random(order);
+        for (int i = turn.Length - 1; i > 0; i--) { int j = shuffle.Next(i + 1); (turn[i], turn[j]) = (turn[j], turn[i]); }
+        long slice = Math.Max(8000, budgetMs / 3);
+        while (clock.ElapsedMilliseconds < budgetMs)
+        {
+            Seg g;
+            if (bracket >= 3)
+            {
+                var chap = MASTER[turn[(int)Math.Min(turn.Length - 1, clock.ElapsedMilliseconds / slice)]];
+                double roll = r.NextDouble() * chap.segs.Sum(x => x.w);
+                var sp = chap.segs[chap.segs.Length - 1];
+                foreach (var x in chap.segs) { if (roll < x.w) { sp = x; break; } roll -= x.w; }
+                g = all.First(x => x.chapter == chap.ch && x.seg == sp.seg);
+            }
+            else
+            {
+                double roll = r.NextDouble() * total;
+                var pick = picks[picks.Length - 1];
+                foreach (var x in picks) { if (roll < x.w) { pick = x; break; } roll -= x.w; }
+                g = all.First(x => x.chapter == pick.ch && x.seg == pick.seg);
+            }
+            tries++;
+            var lv = Gen.TryOne(g, r.Next(), bracket <= 1 ? 1.0 : 2.0);
+            if (lv == null) continue;
+            double d = Difficulty(lv);
+            double miss = d < lo ? lo - d : d >= hi ? d - hi : 0;
+            if (miss < bestMiss) { best = lv; bestMiss = miss; }
+            if (miss == 0) break;
+        }
+        if (best == null || bestMiss > 3.0) return "";   // a near miss will do; a board of the wrong weight will not
+        var sb = new StringBuilder();
+        sb.Append(string.Join("", best.rows)).Append('|').Append(string.Join(",", best.waza)).Append('|').Append(string.Join(",", best.rules))
+          .Append('|').Append(best.ink).Append('|').Append(best.par).Append('|').Append(best.trace)
+          .Append('|').Append(Difficulty(best).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))
+          .Append('|').Append(tries).Append('|').Append(clock.ElapsedMilliseconds).Append('|').Append(best.chapter).Append('|').Append(bestMiss == 0 ? 1 : 0);
+        return sb.ToString();
+    }
+}
+
 static class Program
 {
     static void Main(string[] a)
     {
         Console.OutputEncoding = Encoding.UTF8;
         if (a.Length >= 3 && a[0] == "solve") Gen.SolveFile(a[1], a[2]);
+        else if (a.Length >= 8 && a[0] == "make")
+        {
+            // make out.txt seed lo hi budget-ms bracket order: one board, as Maker.Make gives it ("" if none)
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+            string got = Maker.Make(int.Parse(a[2]), double.Parse(a[3], inv), double.Parse(a[4], inv), int.Parse(a[5]), int.Parse(a[6]), int.Parse(a[7]));
+            File.WriteAllText(a[1] + ".part", got);
+            File.Move(a[1] + ".part", a[1], true);
+        }
         else if (a.Length >= 2 && a[0] == "gen") Gen.Generate(a[1], a.Length > 2 ? int.Parse(a[2]) : 1, a.Length > 3 && a[3] == "pool", a.Length > 4 ? int.Parse(a[4]) : -1);
-        else Console.WriteLine("usage: solve in.json out.json | gen out.json [seed [pool [chapter]]]");
+        else Console.WriteLine("usage: solve in.json out.json | gen out.json [seed [pool [chapter]]] | make out.txt seed lo hi ms bracket order");
     }
 }

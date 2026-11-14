@@ -466,7 +466,26 @@ func other_roads():
 	if lost > 0:
 		bad("%d of the shelf's boards do not survive their own share code" % lost)
 
-	# the unmapped road: one board from each bracket, and its code
+	# the unmapped road makes a board on the spot: the waiting page, then a board that plays out
+	if main.gen_path() == "":
+		bad("the board maker is not built (tools/gen)")
+	else:
+		main.show_random(1)
+		await frames(2)
+		if kind() != "forge":
+			bad("the unmapped road does not go to the board maker")
+		var until = Time.get_ticks_msec() + 45000
+		while kind() == "forge" and Time.get_ticks_msec() < until:
+			await frames(1)
+		if kind() != "battle" or main.cur.kind_of != "random":
+			bad("the board maker gave no board")
+		elif not main.cur.lv.hint.begins_with("Painted this moment"):
+			bad("the board maker fell back on the shelf")
+		elif not main.solution_holds(main.cur.lv):
+			bad("a made board's answer does not play out")
+
+	# the shelf: one board from each bracket, and its code
+	main.shelf_only = true
 	for br in range(4):
 		main.show_random(br)
 		await frames(2)

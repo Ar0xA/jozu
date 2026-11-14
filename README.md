@@ -66,9 +66,10 @@ Then every yokai answers, exactly as the red wash on the board predicted. Nothin
 - **Other roads** 別 (from the map): a **daily kōan**, the same board for everyone, easy on Monday and
   expert on Sunday (four grades by how many answers a board has: at most 10, 5, 3, and exactly 1), with a calendar of past days and a result line to copy; the **88 temples**, a pilgrimage with no undo, no hints and three staffs; and the
   **workshop**, where you lay out a board, clear it, and get a short code anyone can paste to play it.
-  The **unmapped road** makes a new board while you wait, in one of four brackets of difficulty: in the
-  browser the generator and solver themselves run beside the game (`tools/genweb`, the C# of `tools/gen`
-  compiled to WebAssembly, in a web worker), and every board they hand over is replayed through the game's
+  The **unmapped road** makes a new board while you wait, in one of four brackets of difficulty: the
+  generator and solver themselves run beside the game (in the browser `tools/genweb`, the C# of `tools/gen`
+  compiled to WebAssembly, in a web worker; on the desktop `gen.exe make`, built with
+  `dotnet build -c Release tools/gen`, which needs the .NET 8 runtime), and every board they hand over is replayed through the game's
   own rules before it is shown. If none turns up in time, or outside the browser, a board comes from a
   shelf of some 1,500 proven boards the story never used. Each has a code to pass on.
 - **Brushwork:** the title is written out stroke by stroke; an ink wash turns one screen into the next;

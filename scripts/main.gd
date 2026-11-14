@@ -1080,16 +1080,28 @@ func share_daily(day, paths, cols, rows):
 const BRACKETS = [["易", "Gentle"], ["中", "Even"], ["難", "Hard"], ["極", "Master"]]
 var last_random = -1
 
-# In the browser a new board is made on the spot (scripts/forge.gd); elsewhere, or if that fails,
-# one is drawn from the bank.
+# A new board is made on the spot (scripts/forge.gd): in the browser by the generator compiled
+# for it, on the desktop by the generator's own program. If that cannot be had, or finds nothing in
+# time, one is drawn from the shelf.
+var shelf_only = false      # tools/playtest.gd: no waiting
+
 func show_random(br):
-	if OS.has_feature("web"):
-		var scr = load("res://scripts/forge.gd").new()
-		scr.br = br
-		play_music("title")
-		go(scr)
-	else:
+	if shelf_only:
 		show_random_banked(br)
+		return
+	var scr = load("res://scripts/forge.gd").new()
+	scr.br = br
+	play_music("title")
+	go(scr)
+
+# Where the desktop's generator is: beside the game once it is exported (gen/gen.exe), and where
+# it is built in the project otherwise. "" if there is none.
+func gen_path():
+	var nm = "gen.exe" if OS.get_name() == "Windows" else "gen"
+	for p in [OS.get_executable_path().get_base_dir().path_join("gen").path_join(nm), ProjectSettings.globalize_path("res://tools/gen/bin/Release/net8.0/" + nm)]:
+		if FileAccess.file_exists(p):
+			return p
+	return ""
 
 func show_random_banked(br, why = ""):
 	var bank = Extra.RANDOM
